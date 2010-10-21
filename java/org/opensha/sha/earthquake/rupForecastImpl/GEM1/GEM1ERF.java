@@ -14,8 +14,6 @@ import org.opensha.commons.param.DoubleParameter;
 import org.opensha.commons.param.ParameterList;
 import org.opensha.commons.param.StringParameter;
 import org.opensha.commons.param.event.ParameterChangeEvent;
-import org.opensha.gem.GEM1.commons.CalculationSettings;
-import org.opensha.gem.GEM1.util.SourceType;
 import org.opensha.sha.earthquake.EqkRupForecast;
 import org.opensha.sha.earthquake.ProbEqkSource;
 import org.opensha.sha.earthquake.rupForecastImpl.FloatingPoissonFaultSource;
@@ -382,18 +380,6 @@ public class GEM1ERF extends EqkRupForecast {
     public GEM1ERF() {
     }
 
-    /**
-     * Constructor that takes lists of each source type. Set any list as null if
-     * there are no associated data types.
-     */
-    public GEM1ERF(ArrayList<GEMSourceData> areaSourceDataList,
-            ArrayList<GEMSourceData> griddedSeisSourceDataList,
-            ArrayList<GEMSourceData> faultSourceDataList,
-            ArrayList<GEMSourceData> subductionSourceDataList) {
-
-        this(areaSourceDataList, griddedSeisSourceDataList,
-                faultSourceDataList, subductionSourceDataList, null);
-    }
 
     /**
      * Constructor that takes lists of each source type and a
@@ -403,34 +389,24 @@ public class GEM1ERF extends EqkRupForecast {
     public GEM1ERF(ArrayList<GEMSourceData> areaSourceDataList,
             ArrayList<GEMSourceData> griddedSeisSourceDataList,
             ArrayList<GEMSourceData> faultSourceDataList,
-            ArrayList<GEMSourceData> subductionSourceDataList,
-            CalculationSettings calcSet) {
+            ArrayList<GEMSourceData> subductionSourceDataList) {
 
         this.areaSourceDataList = areaSourceDataList;
         this.griddedSeisSourceDataList = griddedSeisSourceDataList;
         this.faultSourceDataList = faultSourceDataList;
         this.subductionSourceDataList = subductionSourceDataList;
 
-        initialize(calcSet);
+        initialize();
 
-    }
-
-    /**
-     * This takes a allGemSourceDataList (and parses the list into separate
-     * lists for each source type).
-     */
-    public GEM1ERF(ArrayList<GEMSourceData> allGemSourceDataList) {
-        this(allGemSourceDataList, null);
     }
 
     /**
      * This takes a allGemSourceDataList (which get parsed into separate lists)
      * and a CalculationSettings object.
      */
-    public GEM1ERF(ArrayList<GEMSourceData> allGemSourceDataList,
-            CalculationSettings calcSet) {
+    public GEM1ERF(ArrayList<GEMSourceData> allGemSourceDataList) {
         parseSourceListIntoDifferentTypes(allGemSourceDataList);
-        initialize(calcSet);
+        initialize();
     }
 
     /**
@@ -488,9 +464,8 @@ public class GEM1ERF extends EqkRupForecast {
      * This initializes the ERF & sets parameters from calcSet (if calcSet !=
      * null)
      * 
-     * @param calcSet
      */
-    protected void initialize(CalculationSettings calcSet) {
+    protected void initialize() {
 
         // create the timespan object with start time and duration in years
         timeSpan = new TimeSpan(TimeSpan.NONE, TimeSpan.YEARS);
@@ -500,9 +475,6 @@ public class GEM1ERF extends EqkRupForecast {
         // create and add adj params to list
         initAdjParams();
 
-        // set params from calcSet if it's not null
-        if (calcSet != null)
-            setParamsFromCalcSettings(calcSet);
 
         // Create adjustable parameter list
         createParamList();
@@ -801,73 +773,6 @@ public class GEM1ERF extends EqkRupForecast {
         subductionScalingSigmaParam.addParameterChangeListener(this);
         // -- Other
         sourceCacheParam.addParameterChangeListener(this);
-    }
-
-    // Make the adjustable parameters & the list
-    private void setParamsFromCalcSettings(CalculationSettings calcSet) {
-
-        areaSrcRupTypeParam.setValue(calcSet.getErf()
-                .get(SourceType.AREA_SOURCE)
-                .get(GEM1ERF.AREA_SRC_RUP_TYPE_NAME).toString());
-        areaSrcMagScalingRelParam.setValue(calcSet.getErf()
-                .get(SourceType.AREA_SOURCE)
-                .get(GEM1ERF.AREA_SRC_MAG_SCALING_REL_PARAM_NAME).toString());
-        areaSrcLowerSeisDepthParam.setValue((Double) calcSet.getErf()
-                .get(SourceType.AREA_SOURCE)
-                .get(AREA_SRC_LOWER_SEIS_DEPTH_PARAM_NAME));
-        areaSrcDiscrParam.setValue((Double) calcSet.getErf()
-                .get(SourceType.AREA_SOURCE)
-                .get(GEM1ERF.AREA_SRC_DISCR_PARAM_NAME));
-
-        griddedSeisRupTypeParam.setValue(calcSet.getErf()
-                .get(SourceType.GRID_SOURCE)
-                .get(GEM1ERF.GRIDDED_SEIS_RUP_TYPE_NAME).toString());
-        griddedSeisLowerSeisDepthParam.setValue((Double) calcSet.getErf()
-                .get(SourceType.GRID_SOURCE)
-                .get(GEM1ERF.GRIDDED_SEIS_LOWER_SEIS_DEPTH_PARAM_NAME));
-        griddedSeisMagScalingRelParam.setValue(calcSet.getErf()
-                .get(SourceType.GRID_SOURCE)
-                .get(GEM1ERF.GRIDDED_SEIS_MAG_SCALING_REL_PARAM_NAME)
-                .toString());
-
-        faultRupOffsetParam.setValue((Double) calcSet.getErf()
-                .get(SourceType.FAULT_SOURCE)
-                .get(GEM1ERF.FAULT_RUP_OFFSET_PARAM_NAME));
-        faultDiscrParam.setValue((Double) calcSet.getErf()
-                .get(SourceType.FAULT_SOURCE).get(FAULT_DISCR_PARAM_NAME));
-        faultMagScalingRelParam.setValue(calcSet.getErf()
-                .get(SourceType.FAULT_SOURCE)
-                .get(GEM1ERF.FAULT_MAG_SCALING_REL_PARAM_NAME).toString());
-        faultScalingSigmaParam.setValue((Double) calcSet.getErf()
-                .get(SourceType.FAULT_SOURCE)
-                .get(FAULT_SCALING_SIGMA_PARAM_NAME));
-        faultRupAspectRatioParam.setValue((Double) calcSet.getErf()
-                .get(SourceType.FAULT_SOURCE)
-                .get(GEM1ERF.FAULT_RUP_ASPECT_RATIO_PARAM_NAME));
-        faultFloaterTypeParam.setValue(calcSet.getErf()
-                .get(SourceType.FAULT_SOURCE)
-                .get(GEM1ERF.FAULT_FLOATER_TYPE_PARAM_NAME).toString());
-
-        subductionRupOffsetParam.setValue((Double) calcSet.getErf()
-                .get(SourceType.SUBDUCTION_FAULT_SOURCE)
-                .get(GEM1ERF.SUB_RUP_OFFSET_PARAM_NAME));
-        subductionDiscrParam.setValue((Double) calcSet.getErf()
-                .get(SourceType.SUBDUCTION_FAULT_SOURCE)
-                .get(GEM1ERF.SUB_DISCR_PARAM_NAME));
-        subductionMagScalingRelParam.setValue(calcSet.getErf()
-                .get(SourceType.SUBDUCTION_FAULT_SOURCE)
-                .get(GEM1ERF.SUB_MAG_SCALING_REL_PARAM_NAME).toString());
-        subductionScalingSigmaParam.setValue((Double) calcSet.getErf()
-                .get(SourceType.SUBDUCTION_FAULT_SOURCE)
-                .get(GEM1ERF.SUB_SCALING_SIGMA_PARAM_NAME));
-        subductionRupAspectRatioParam.setValue((Double) calcSet.getErf()
-                .get(SourceType.SUBDUCTION_FAULT_SOURCE)
-                .get(GEM1ERF.SUB_RUP_ASPECT_RATIO_PARAM_NAME));
-        subductionFloaterTypeParam.setValue(calcSet.getErf()
-                .get(SourceType.SUBDUCTION_FAULT_SOURCE)
-                .get(GEM1ERF.SUB_FLOATER_TYPE_PARAM_NAME).toString());
-
-        sourceCacheParam.setValue(calcSet.isSourceCache());
     }
 
     /**
