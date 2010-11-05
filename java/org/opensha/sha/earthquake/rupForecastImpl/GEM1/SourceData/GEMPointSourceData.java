@@ -21,7 +21,7 @@ public class GEMPointSourceData extends GEMSourceData implements Serializable {
     private HypoMagFreqDistAtLoc hypoMagFreqDistAtLoc;
     // the following specifies the average depth to top of rupture as a function
     // of magnitude.
-    private ArbitrarilyDiscretizedFunc aveRupTopVsMag;
+    private double[][] aveRupTopVsMag;
     // the following is used to locate small sources (i.e., for all mags lower
     // than the minimum mag in aveRupTopVsMag)
     private double aveHypoDepth;
@@ -37,7 +37,12 @@ public class GEMPointSourceData extends GEMSourceData implements Serializable {
         this.name = name;
         this.tectReg = tectReg;
         this.hypoMagFreqDistAtLoc = hypoMagFreqDistAtLoc;
-        this.aveRupTopVsMag = aveRupTopVsMag;
+        int numPoints = aveRupTopVsMag.getNum();
+        this.aveRupTopVsMag = new double[numPoints][2];
+        for(int i=0;i<numPoints;i++){
+        	this.aveRupTopVsMag[i][0] = aveRupTopVsMag.getX(i);
+        	this.aveRupTopVsMag[i][1] = aveRupTopVsMag.getY(i);
+        }
         this.aveHypoDepth = aveHypoDepth;
     }
 
@@ -54,7 +59,14 @@ public class GEMPointSourceData extends GEMSourceData implements Serializable {
      * @return
      */
     public ArbitrarilyDiscretizedFunc getAveRupTopVsMag() {
-        return this.aveRupTopVsMag;
+    	ArbitrarilyDiscretizedFunc aveRupTopVsMag = 
+    		new ArbitrarilyDiscretizedFunc();
+        for(int i=0;i<this.aveRupTopVsMag.length;i++){
+        	aveRupTopVsMag.set(
+        	this.aveRupTopVsMag[i][0],
+        	this.aveRupTopVsMag[i][1]);
+        }
+        return aveRupTopVsMag;
     }
 
     /**
