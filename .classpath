@@ -17,17 +17,10 @@
 	<classpathentry kind="lib" path="lib/commons-configuration-1.6.jar"/>
 	<classpathentry kind="lib" path="lib/emma_ant.jar"/>
 	<classpathentry kind="lib" path="lib/emma.jar"/>
-	<classpathentry kind="lib" path="lib/gson-1.5-sources.jar"/>
 	<classpathentry kind="lib" path="lib/gson-1.5.jar"/>
-	<classpathentry kind="lib" path="lib/hamcrest-all-1.2.jar"/>
-	<classpathentry kind="lib" path="lib/lambdaj-2.1-with-dependencies.jar"/>
-	<classpathentry kind="lib" path="lib/lombok.jar"/>
 	<classpathentry kind="lib" path="lib/memcached-2.5.jar"/>
-	<classpathentry kind="lib" path="lib/mockito-all-1.8.2.jar"/>
-	<classpathentry kind="lib" path="lib/oscache-2.4.1.jar"/>
 	<classpathentry kind="lib" path="lib/commons-io-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/commons-math-2.1.jar"/>
 	<classpathentry kind="lib" path="lib/dom4j.jar"/>
-	<classpathentry kind="lib" path="lib/Jama-1.0.2.jar"/>
 	<classpathentry kind="output" path="classes/"/>
 </classpath>
