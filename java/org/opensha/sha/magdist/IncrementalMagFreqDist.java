@@ -19,13 +19,10 @@
 package org.opensha.sha.magdist;
 
 import org.opensha.commons.calc.MomentMagCalc;
-import org.opensha.commons.data.DataPoint2D;
 import org.opensha.commons.data.function.EvenlyDiscretizedFunc;
 import org.opensha.commons.exceptions.DataPoint2DException;
 import org.opensha.commons.exceptions.DiscretizedFuncException;
 import org.opensha.commons.exceptions.InvalidRangeException;
-
-import sun.reflect.ReflectionFactory.GetReflectionFactoryAction;
 
 /**
  * <p>
@@ -440,34 +437,6 @@ public class IncrementalMagFreqDist extends EvenlyDiscretizedFunc implements
                 return getX(i);
         }
         return -1;
-    }
-
-    @Override
-    public boolean equals(Object obj)
-    {
-        if (!(obj instanceof IncrementalMagFreqDist))
-        {
-            return false;
-        }
-
-        IncrementalMagFreqDist other = (IncrementalMagFreqDist) obj;
-
-        // same size
-        if (num != other.num)
-        {
-            return false;
-        }
-
-        // same points
-        for (int i = 0; i < num; i++)
-        {
-            if (getX(i) != other.getX(i) || getY(i) != other.getY(i))
-            {
-                return false;
-            }
-        }
-
-        return true;
     }
 
 }

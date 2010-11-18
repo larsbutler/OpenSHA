@@ -87,7 +87,7 @@ public class GEMFaultSourceData extends GEMSourceData implements Serializable
 
         return id.equals(other.id) && name.equals(other.name)
                 && tectReg.equals(other.tectReg)
-                && mfd.equals((Object) other.mfd) && trace.equals(other.trace)
+                && mfd.equalXAndYValues(other.mfd) && trace.equals(other.trace)
                 && dip == other.dip && rake == other.rake
                 && seismDepthLow == other.seismDepthLow
                 && seismDepthUpp == other.seismDepthUpp;
