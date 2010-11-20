@@ -75,7 +75,7 @@
 		<copy todir="${coverage.dir}/test_data/">
 		    <fileset dir="${data.dir}"/>
 	    </copy>
-        <junit haltonerror="no" haltonfailure="no" fork="yes" dir="${coverage.dir}" maxmemory="2048m">
+        <junit haltonerror="yes" haltonfailure="yes" fork="yes" dir="${coverage.dir}" maxmemory="2048m">
             <classpath>
                 <!-- Input test files -->
                 <pathelement path="${data.dir}"/>
@@ -108,6 +108,7 @@
                     <include name="org/opensha/sha/calc/*Test.java"/>
                     <include name="org/opensha/gem/*Test.java"/>
                     <include name="org/gem/*Test.java"/>
+                	<include name="org/opensha/sha/earthquake/rupForecastImpl/GEM1/SourceData/*Test.java"/>
                     <!-- <include name="org/opensha/sha/imr/attenRelImpl/test/*test.java"/> -->
                 </fileset>
             </batchtest>
