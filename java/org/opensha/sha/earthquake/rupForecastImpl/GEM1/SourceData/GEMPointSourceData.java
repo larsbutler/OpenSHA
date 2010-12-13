@@ -87,13 +87,6 @@ public class GEMPointSourceData extends GEMSourceData implements Serializable {
         }
 
         GEMPointSourceData other = (GEMPointSourceData) obj;
-        
-        System.out.println(id.equals(other.id));
-        System.out.println(name.equals(other.name));
-        System.out.println(tectReg.equals(other.tectReg));
-        System.out.println(hypoMagFreqDistAtLoc.equals(other.hypoMagFreqDistAtLoc));
-        System.out.println(Arrays.deepEquals(aveRupTopVsMag, other.aveRupTopVsMag));
-        System.out.println(aveHypoDepth == other.aveHypoDepth);
 
         return id.equals(other.id) && name.equals(other.name)
                 && tectReg.equals(other.tectReg)
