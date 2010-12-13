@@ -186,4 +186,22 @@ public class MagFreqDistsForFocalMechs implements java.io.Serializable {
     public FocalMechanism getFirstFocalMech() {
         return focalMechanism[0];
     }
+    
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (!(obj instanceof MagFreqDistsForFocalMechs))
+        {
+            return false;
+        }
+        
+        MagFreqDistsForFocalMechs other = (MagFreqDistsForFocalMechs) obj;
+        
+        for(int i=0;i<magFreqDist.length;i++){
+        	if(!magFreqDist[i].equals(other.magFreqDist[i]) || 
+        			!focalMechanism[i].equals(other.focalMechanism[i]))
+        		return false;
+        }
+		return true;
+    }
 }

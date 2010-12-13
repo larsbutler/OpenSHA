@@ -95,5 +95,18 @@ public class FocalMechanism implements Serializable {
     public FocalMechanism copy() {
         return new FocalMechanism(strike, dip, rake);
     }
+    
+    @Override
+    public boolean equals(Object obj)
+    {
+    	if(!(obj instanceof FocalMechanism))
+    			return false;
+    	
+    	FocalMechanism other = (FocalMechanism) obj;
+    	
+    	return strike == other.strike
+    	    && dip == other.dip
+    	    && rake == other.rake;
+    }
 
 }

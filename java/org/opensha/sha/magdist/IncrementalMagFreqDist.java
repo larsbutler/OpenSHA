@@ -438,5 +438,19 @@ public class IncrementalMagFreqDist extends EvenlyDiscretizedFunc implements
         }
         return -1;
     }
+    
+    @Override
+    public boolean equals(Object obj)
+    {
+    	
+    	if(!(obj instanceof IncrementalMagFreqDist))
+    		return false;
+    	
+    	IncrementalMagFreqDist other = (IncrementalMagFreqDist) obj;
+    	if(!other.equalXAndYValues(other))
+    		return false;
+    	
+    	return true;
+    }
 
 }

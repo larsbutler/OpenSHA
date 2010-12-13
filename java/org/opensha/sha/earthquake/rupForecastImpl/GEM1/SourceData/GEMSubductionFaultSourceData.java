@@ -70,5 +70,24 @@ public class GEMSubductionFaultSourceData extends GEMSourceData implements
     public boolean getFloatRuptureFlag() {
         return floatRuptureFlag;
     }
+    
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (!(obj instanceof GEMSubductionFaultSourceData))
+        {
+            return false;
+        }
+
+        GEMSubductionFaultSourceData other = (GEMSubductionFaultSourceData) obj;
+
+        return id.equals(other.id) && name.equals(other.name)
+                && tectReg.equals(other.tectReg)
+                && mfd.equalXAndYValues(other.mfd) 
+                && topTrace.equals(other.topTrace)
+                && bottomTrace.equals(other.bottomTrace)
+                && rake == other.rake
+                && floatRuptureFlag == other.floatRuptureFlag;
+    }
 
 }

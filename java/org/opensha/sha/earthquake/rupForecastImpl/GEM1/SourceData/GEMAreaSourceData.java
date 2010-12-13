@@ -2,6 +2,7 @@ package org.opensha.sha.earthquake.rupForecastImpl.GEM1.SourceData;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Iterator;
 
 import org.opensha.commons.data.DataPoint2D;
@@ -316,5 +317,24 @@ public class GEMAreaSourceData extends GEMSourceData {
 
         buf.write(String.format("</%sArea>\n", prefix));
         buf.write(String.format("</%sSource>\n", prefix));
+    }
+    
+    
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (!(obj instanceof GEMAreaSourceData))
+        {
+            return false;
+        }
+
+        GEMAreaSourceData other = (GEMAreaSourceData) obj;
+
+        return id.equals(other.id) && name.equals(other.name)
+                && tectReg.equals(other.tectReg)
+                && magfreqDistFocMech.equals(other.magfreqDistFocMech) 
+                && reg.equals(other.reg)
+                && Arrays.deepEquals(aveRupTopVsMag, other.aveRupTopVsMag)
+                && aveHypoDepth == other.aveHypoDepth;
     }
 }
