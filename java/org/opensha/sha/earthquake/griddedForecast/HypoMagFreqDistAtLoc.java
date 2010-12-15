@@ -117,21 +117,20 @@ public class HypoMagFreqDistAtLoc extends MagFreqDistsForFocalMechs implements
     @Override
     public boolean equals(Object obj)
     {
-        if (!(obj instanceof HypoMagFreqDistAtLoc))
-        {
+        if (!(obj instanceof HypoMagFreqDistAtLoc)){
             return false;
         }
         
         HypoMagFreqDistAtLoc other = (HypoMagFreqDistAtLoc) obj;
-        
         for(int i=0;i<magFreqDist.length;i++){
         	if(!magFreqDist[i].equals(other.magFreqDist[i]) || 
         			!focalMechanism[i].equals(other.focalMechanism[i]))
         		return false;
         }
         
-        if(!location.equals(other.location))
+        if(!location.equals(other.location)){
         	return false;
+        }
         
 		return true;
     }

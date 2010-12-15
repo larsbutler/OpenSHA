@@ -99,8 +99,9 @@ public class FocalMechanism implements Serializable {
     @Override
     public boolean equals(Object obj)
     {
-    	if(!(obj instanceof FocalMechanism))
-    			return false;
+    	if(!(obj instanceof FocalMechanism)){
+    	   return false;
+    	}
     	
     	FocalMechanism other = (FocalMechanism) obj;
     	
