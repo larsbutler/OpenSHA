@@ -104,16 +104,15 @@ public class PoissonAreaSource extends PointToLineSource implements
      */
     private void computeNodeWeights() {
         int numPts = gridReg.getNodeCount();
-//        nodeWeights = new double[numPts];
-//        double tot = 0;
-//        for (int i = 0; i < numPts; i++) {
-//            double latitude = gridReg.locationForIndex(i).getLatitude();
-//            nodeWeights[i] = Math.cos(latitude * Math.PI / 180);
-//            tot += nodeWeights[i];
-//        }
+        nodeWeights = new double[numPts];
+        double tot = 0;
+        for (int i = 0; i < numPts; i++) {
+            double latitude = gridReg.locationForIndex(i).getLatitude();
+            nodeWeights[i] = Math.cos(latitude * Math.PI / 180);
+            tot += nodeWeights[i];
+        }
         for (int i = 0; i < numPts; i++)
-//            nodeWeights[i] /= (tot * numPts);
-        	nodeWeights[i] = 1/numPts;
+            nodeWeights[i] = nodeWeights[i]/tot;
     }
 
     /*
