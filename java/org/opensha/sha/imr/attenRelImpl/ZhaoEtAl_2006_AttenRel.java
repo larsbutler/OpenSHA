@@ -5,6 +5,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opensha.commons.geo.Location;
 import org.opensha.commons.data.NamedObjectAPI;
 import org.opensha.commons.data.Site;
@@ -37,6 +39,8 @@ import org.opensha.sha.util.TectonicRegionType;
 
 public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements ScalarIntensityMeasureRelationshipAPI,
 NamedObjectAPI, ParameterChangeListener {
+	
+	private static Log logger = LogFactory.getLog(ZhaoEtAl_2006_AttenRel.class);
 
 	// Debugging stuff
 	private final static String C = "ZhaoEtAl_2006_AttenRel";
@@ -210,7 +214,7 @@ NamedObjectAPI, ParameterChangeListener {
 	// Hard rock description: Vs30 > 1100m/s calculated from site period ()equivalent of NEHRP Class A 
 	public final static String SITE_TYPE_HARD_ROCK = "Hard Rock";
 	// Rock description: Vs30 > 600m/s calculated from site period (T<2.0sec) and equivalent of NEHRP Class A+B
-	public final static String SITE_TYPE_ROCK = " Rock";
+	public final static String SITE_TYPE_ROCK = "Rock";
 	// Hard rock description: 300< Vs30 = 600m/s calculated from site period (0.2=T<0.4sec) and equivalent of NEHRP Class C
 	public final static String SITE_TYPE_HARD_SOIL = "Hard Soil";
 	// Hard rock description: 200< Vs30 = 300m/s calculated from site period (0.4=T<0.6sec) and equivalent of NEHRP Class D
@@ -230,7 +234,7 @@ NamedObjectAPI, ParameterChangeListener {
 	public final static String FLT_FOC_MECH_STRIKE_SLIP = "Strike-slip";
 	public final static String FLT_FOC_MECH_UNKNOWN = "Unknown";
 
-	protected final static Double MAG_WARN_MIN = new Double(5);
+	protected final static Double MAG_WARN_MIN = new Double(4.5);
 	protected final static Double MAG_WARN_MAX = new Double(8.3);
 
 	protected final static Double DISTANCE_RUP_WARN_MIN = new Double(0.0);
@@ -302,8 +306,10 @@ NamedObjectAPI, ParameterChangeListener {
 	public void setSite(Site site) throws ParameterException {	 	
     	
 //		System.out.println("Zhao et al --->"+site.getParameter(SITE_TYPE_NAME).getValue());
-		
+		logger.debug("setting site ....");
+		logger.debug("setting site type param: "+site.getParameter(SITE_TYPE_NAME).getValue());
 		siteTypeParam.setValue((String) site.getParameter(SITE_TYPE_NAME).getValue());
+		logger.debug("setted site type param");
 		this.site = site;
 		setPropagationEffectParams();
 	}
@@ -320,6 +326,7 @@ NamedObjectAPI, ParameterChangeListener {
 	 */
 
 	public void setPropagationEffectParams() {
+		logger.debug("setting propagation effect ....");
 		// Set the distance to rupture
 		if ( (this.site != null) && (this.eqkRupture != null)) {
 			distanceRupParam.setValue(eqkRupture,site);

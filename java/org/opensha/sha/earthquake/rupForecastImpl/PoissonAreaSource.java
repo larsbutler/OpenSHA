@@ -2,6 +2,8 @@ package org.opensha.sha.earthquake.rupForecastImpl;
 
 import java.util.ArrayList;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opensha.commons.calc.magScalingRelations.MagAreaRelationship;
 import org.opensha.commons.calc.magScalingRelations.MagLengthRelationship;
 import org.opensha.commons.calc.magScalingRelations.MagScalingRelationship;
@@ -22,6 +24,7 @@ import org.opensha.sha.earthquake.rupForecastImpl.PointEqkSource;
 import org.opensha.sha.faultSurface.EvenlyGriddedSurfaceAPI;
 import org.opensha.sha.faultSurface.FaultTrace;
 import org.opensha.sha.faultSurface.StirlingGriddedSurface;
+import org.opensha.sha.imr.attenRelImpl.ZhaoEtAl_2006_AttenRel;
 import org.opensha.sha.magdist.IncrementalMagFreqDist;
 
 /**
@@ -42,6 +45,8 @@ import org.opensha.sha.magdist.IncrementalMagFreqDist;
 
 public class PoissonAreaSource extends PointToLineSource implements
         java.io.Serializable {
+	
+	private static Log logger = LogFactory.getLog(ZhaoEtAl_2006_AttenRel.class);
 
     private static final long serialVersionUID = 1L;
     // for Debug purposes
@@ -111,8 +116,10 @@ public class PoissonAreaSource extends PointToLineSource implements
             nodeWeights[i] = Math.cos(latitude * Math.PI / 180);
             tot += nodeWeights[i];
         }
-        for (int i = 0; i < numPts; i++)
+        for (int i = 0; i < numPts; i++){
             nodeWeights[i] = nodeWeights[i]/tot;
+        }
+        
     }
 
     /*
