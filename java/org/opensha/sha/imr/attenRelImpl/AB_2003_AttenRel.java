@@ -221,7 +221,8 @@ NamedObjectAPI, ParameterChangeListener {
 	 *             If not valid rake angle
 	 */
 	public void setEqkRupture(EqkRupture eqkRupture) throws InvalidRangeException {
-		magParam.setValueIgnoreWarning(new Double(eqkRupture.getMag()));		
+		magParam.setValueIgnoreWarning(new Double(eqkRupture.getMag()));	
+		tectonicRegionTypeParam.setValue(eqkRupture.getTectRegType().toString());
 		this.eqkRupture = eqkRupture;
 		setPropagationEffectParams();
 	}
