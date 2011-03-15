@@ -21,6 +21,8 @@ package org.opensha.sha.imr.attenRelImpl;
 
 import java.util.HashMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opensha.commons.data.NamedObjectAPI;
 import org.opensha.commons.data.Site;
 import org.opensha.commons.exceptions.InvalidRangeException;
@@ -92,6 +94,8 @@ public class CF_2008_AttenRel
 extends AttenuationRelationship implements
 ScalarIntensityMeasureRelationshipAPI,
 NamedObjectAPI, ParameterChangeListener {
+	
+	//private static Log logger = LogFactory.getLog(CF_2008_AttenRel.class);
 
 
 
@@ -921,7 +925,8 @@ NamedObjectAPI, ParameterChangeListener {
 	 * @throws InvalidRangeException - If not valid rake angle
 	 */
 	public void setEqkRupture(EqkRupture eqkRupture) throws InvalidRangeException {
-		magParam.setValueIgnoreWarning(new Double(eqkRupture.getMag()));		
+		magParam.setValueIgnoreWarning(new Double(eqkRupture.getMag()));	
+		setFaultTypeFromRake(eqkRupture.getAveRake());
 		this.eqkRupture = eqkRupture;
 		setPropagationEffectParams();
 	}
@@ -935,6 +940,30 @@ NamedObjectAPI, ParameterChangeListener {
 			distanceHypoParam.setValue(eqkRupture, site);
 		}
 	}
+	
+    /**
+     * Determines the style of faulting from the rake angle. Their report is not
+     * explicit, so these ranges come from an email that told us to decide, but
+     * that within 30-degrees of horz for SS was how the NGA data were defined.
+     * 
+     * @param rake
+     *            in degrees
+     * @throws InvalidRangeException
+     *             If not valid rake angle
+     */
+    protected void setFaultTypeFromRake(double rake)
+            throws InvalidRangeException {
+        if (rake <= 30 && rake >= -30)
+            fltTypeParam.setValue(FLT_TYPE_STRIKE_SLIP);
+        else if (rake <= -150 || rake >= 150)
+            fltTypeParam.setValue(FLT_TYPE_STRIKE_SLIP);
+        else if (rake > 30 && rake < 150)
+            fltTypeParam.setValue(FLT_TYPE_REVERSE);
+        else if (rake > -150 && rake < -30)
+            fltTypeParam.setValue(FLT_TYPE_NORMAL);
+        else
+            throw new RuntimeException("No rake defined!");
+    }
 
 	/**
 	 * This sets the site-related parameter (siteTypeParam) based on what is in
@@ -1059,6 +1088,7 @@ NamedObjectAPI, ParameterChangeListener {
 //			System.out.println("SA case");
 			
 		}
+		
 		// return the result
 		return Math.log(mean);
 	}
