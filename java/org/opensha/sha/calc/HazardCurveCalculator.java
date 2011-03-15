@@ -432,6 +432,7 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
             for (int n = 0; n < numRuptures; n++, ++currRuptures) {
 
                 EqkRupture rupture = source.getRupture(n);
+                rupture.setTectRegType(trt);
 
                 // get the rupture probability
                 qkProb = ((ProbEqkRupture) rupture).getProbability();

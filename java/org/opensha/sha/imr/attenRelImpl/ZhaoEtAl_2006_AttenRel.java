@@ -40,7 +40,7 @@ import org.opensha.sha.util.TectonicRegionType;
 public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements ScalarIntensityMeasureRelationshipAPI,
 NamedObjectAPI, ParameterChangeListener {
 	
-	private static Log logger = LogFactory.getLog(ZhaoEtAl_2006_AttenRel.class);
+	//private static Log logger = LogFactory.getLog(ZhaoEtAl_2006_AttenRel.class);
 
 	// Debugging stuff
 	private final static String C = "ZhaoEtAl_2006_AttenRel";
@@ -265,9 +265,10 @@ NamedObjectAPI, ParameterChangeListener {
 		}
 
 		initEqkRuptureParams();
-		initSiteParams();
 		initPropagationEffectParams();
+		initSiteParams();
 		initOtherParams();
+		
 		initIndependentParamLists(); // This must be called after the above
 		initParameterEventListeners(); //add the change listeners to the parameters
 		
@@ -285,12 +286,38 @@ NamedObjectAPI, ParameterChangeListener {
 	 *             If not valid rake angle
 	 */
 	public void setEqkRupture(EqkRupture eqkRupture) throws InvalidRangeException {
-		magParam.setValueIgnoreWarning(new Double(eqkRupture.getMag()));		
+		magParam.setValueIgnoreWarning(new Double(eqkRupture.getMag()));	
+		tectonicRegionTypeParam.setValue(eqkRupture.getTectRegType().toString());
 		this.eqkRupture = eqkRupture;
 		setPropagationEffectParams();
 		// TODO
-		//	    setFaultTypeFromRake(eqkRupture.getAveRake());
+			    setFaultTypeFromRake(eqkRupture.getAveRake());
 	}
+	
+	
+    /**
+     * Determines the style of faulting from the rake angle. Their report is not
+     * explicit, so these ranges come from an email that told us to decide, but
+     * that within 30-degrees of horz for SS was how the NGA data were defined.
+     * 
+     * @param rake
+     *            in degrees
+     * @throws InvalidRangeException
+     *             If not valid rake angle
+     */
+    protected void setFaultTypeFromRake(double rake)
+            throws InvalidRangeException {
+        if (rake <= 30 && rake >= -30)
+            fltTypeParam.setValue(FLT_FOC_MECH_STRIKE_SLIP);
+        else if (rake <= -150 || rake >= 150)
+            fltTypeParam.setValue(FLT_FOC_MECH_STRIKE_SLIP);
+        else if (rake > 30 && rake < 150)
+            fltTypeParam.setValue(FLT_FOC_MECH_REVERSE);
+        else if (rake > -150 && rake < -30)
+            fltTypeParam.setValue(FLT_FOC_MECH_NORMAL);
+        else
+            fltTypeParam.setValue(FLT_FOC_MECH_UNKNOWN);
+    }
 
 	/**
 	 * This sets the site-related parameter (siteTypeParam) based on what is in
@@ -306,10 +333,7 @@ NamedObjectAPI, ParameterChangeListener {
 	public void setSite(Site site) throws ParameterException {	 	
     	
 //		System.out.println("Zhao et al --->"+site.getParameter(SITE_TYPE_NAME).getValue());
-		logger.debug("setting site ....");
-		logger.debug("setting site type param: "+site.getParameter(SITE_TYPE_NAME).getValue());
 		siteTypeParam.setValue((String) site.getParameter(SITE_TYPE_NAME).getValue());
-		logger.debug("setted site type param");
 		this.site = site;
 		setPropagationEffectParams();
 	}
@@ -326,7 +350,6 @@ NamedObjectAPI, ParameterChangeListener {
 	 */
 
 	public void setPropagationEffectParams() {
-		logger.debug("setting propagation effect ....");
 		// Set the distance to rupture
 		if ( (this.site != null) && (this.eqkRupture != null)) {
 			distanceRupParam.setValue(eqkRupture,site);
@@ -648,7 +671,7 @@ NamedObjectAPI, ParameterChangeListener {
 		double qFa = 0.0; 
 		double wFa = 0.0; 
 		double m2CorrFact = 0.0;
-
+		
 		// Site term correction
 		double soilCoeff = 0.0;
 		if (D) System.out.println("Site conditions: "+siteType);
