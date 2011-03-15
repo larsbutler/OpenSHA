@@ -4,6 +4,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opensha.commons.geo.Location;
 import org.opensha.commons.data.NamedObjectAPI;
 import org.opensha.commons.data.Site;
@@ -36,6 +38,8 @@ import org.opensha.sha.util.TectonicRegionType;
 
 public class YoungsEtAl_1997_AttenRel extends AttenuationRelationship implements ScalarIntensityMeasureRelationshipAPI,
 NamedObjectAPI, ParameterChangeListener {
+	
+	//private static Log logger = LogFactory.getLog(YoungsEtAl_1997_AttenRel.class);
 
 	// Debugging stuff
 	private final static String C = "Youngs_et_al_AttenRel";
@@ -201,6 +205,7 @@ NamedObjectAPI, ParameterChangeListener {
 	 */
 	public void setEqkRupture(EqkRupture eqkRupture) throws InvalidRangeException {
 		magParam.setValueIgnoreWarning(new Double(eqkRupture.getMag()));
+		tectonicRegionTypeParam.setValue(eqkRupture.getTectRegType().toString());
 		//	hypoDepthParam.setValueIgnoreWarning(new Double(eqkRupture.getHypocenterLocation().getDepth()));
 		this.eqkRupture = eqkRupture;
 		setPropagationEffectParams();
@@ -342,6 +347,7 @@ NamedObjectAPI, ParameterChangeListener {
 			setCoeffIndex();// intensityMeasureChanged is set to false in this method
 			//		fl	lnYref_is_not_fresh = true;
 		}
+		
 		return getStdDev(iper, stdDevType);
 	}	  
 
@@ -545,8 +551,7 @@ NamedObjectAPI, ParameterChangeListener {
 //		hypodepth = this.eqkRupture.getHypocenterLocation().getDepth();
 //		System.out.println("real hypocentral depth:"+hypodepth);
 		// ---------------------------------------------------------------------- MARCO 2010.03.15
-		
-		
+
 		double Zt, mean;
 		if (tecRegType.equals(FLT_TEC_ENV_INTERFACE)) {
 			Zt = 0;
@@ -565,6 +570,8 @@ NamedObjectAPI, ParameterChangeListener {
 			mean = a1s+ a2s * mag+ c1s[iper] + c2s[iper] * (Math.pow(a3s-mag, 3)) +
 			c3s[iper] * Math.log(rRup + a4s * Math.exp(a5s * mag)) + a6s * hypodepth + a7s*Zt;
 		}
+		
+
 		return mean;
 	}	  
 

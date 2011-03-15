@@ -156,7 +156,7 @@ NamedObjectAPI, ParameterChangeListener {
 	public final static String SITE_TYPE_NAME = "AB et al 2003 Site Type";
 
 	// Rock description: Vs30 > 760m/s NEHRP Class B
-	public final static String SITE_TYPE_ROCK = " NEHRP B";
+	public final static String SITE_TYPE_ROCK = "NEHRP B";
 	// Hard rock description: 360< Vs30 = 760m/s NEHRP Class C
 	public final static String SITE_TYPE_HARD_SOIL = "NEHRP C";
 	// Hard rock description: 180< Vs30 = 360m/s NEHRP Class D
