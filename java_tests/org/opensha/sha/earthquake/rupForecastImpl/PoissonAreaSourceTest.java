@@ -79,9 +79,11 @@ public class PoissonAreaSourceTest {
 		for(Site site : expectedResults.keySet()){
 			calc.getHazardCurve(hazCurve, site, 
 					PoissonianAreaSourceTestHelper.getPeerTestSet1Case10GMPE(), 
-					PoissonianAreaSourceTestHelper.getPeerTestSet1Case10AreaSourceErf());
+					PoissonianAreaSourceTestHelper.
+					getPeerTestSet1Case10AreaSourceErf());
 			for(int i=0;i<expectedResults.get(site).getNum();i++){
-				assertEquals(expectedResults.get(site).getY(i),hazCurve.getY(i),tolerance);
+				assertEquals(expectedResults.get(site).getY(i),
+						hazCurve.getY(i),tolerance);
 			}
 		}
 	}
@@ -95,7 +97,8 @@ public class PoissonAreaSourceTest {
 		Map<Site,ArbitrarilyDiscretizedFunc> expectedResults = 
 			new HashMap<Site,ArbitrarilyDiscretizedFunc>();
 		
-		ArbitrarilyDiscretizedFunc hazCurveSite1 = new ArbitrarilyDiscretizedFunc();
+		ArbitrarilyDiscretizedFunc hazCurveSite1 = 
+			new ArbitrarilyDiscretizedFunc();
 		hazCurveSite1.set(Math.log(0.001), 3.87E-02);
 		hazCurveSite1.set(Math.log(0.01), 2.19E-02);
 		hazCurveSite1.set(Math.log(0.05), 2.97E-03);
@@ -111,7 +114,8 @@ public class PoissonAreaSourceTest {
 		expectedResults.put(site1, hazCurveSite1);
 
 		
-		ArbitrarilyDiscretizedFunc hazCurveSite2 = new ArbitrarilyDiscretizedFunc();
+		ArbitrarilyDiscretizedFunc hazCurveSite2 = 
+			new ArbitrarilyDiscretizedFunc();
 		hazCurveSite2.set(Math.log(0.001), 3.87E-02);
 		hazCurveSite2.set(Math.log(0.01), 1.82E-02);
 		hazCurveSite2.set(Math.log(0.05), 2.96E-03);
@@ -126,7 +130,8 @@ public class PoissonAreaSourceTest {
 		site2.addParameter(sadighSiteType);
 		expectedResults.put(site2, hazCurveSite2);
 
-		ArbitrarilyDiscretizedFunc hazCurveSite3 = new ArbitrarilyDiscretizedFunc();
+		ArbitrarilyDiscretizedFunc hazCurveSite3 = 
+			new ArbitrarilyDiscretizedFunc();
 		hazCurveSite3.set(Math.log(0.001), 3.87E-02);
 		hazCurveSite3.set(Math.log(0.01), 9.32E-03);
 		hazCurveSite3.set(Math.log(0.05), 1.39E-03);
@@ -141,7 +146,8 @@ public class PoissonAreaSourceTest {
 		site3.addParameter(sadighSiteType);
 		expectedResults.put(site3, hazCurveSite3);
 
-		ArbitrarilyDiscretizedFunc hazCurveSite4 = new ArbitrarilyDiscretizedFunc();
+		ArbitrarilyDiscretizedFunc hazCurveSite4 = 
+			new ArbitrarilyDiscretizedFunc();
 		hazCurveSite4.set(Math.log(0.001), 3.83E-02);
 		hazCurveSite4.set(Math.log(0.01), 5.33E-03);
 		hazCurveSite4.set(Math.log(0.05), 1.25E-04);
