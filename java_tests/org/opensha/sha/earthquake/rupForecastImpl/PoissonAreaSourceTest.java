@@ -48,14 +48,8 @@ public class PoissonAreaSourceTest {
 	private static double tolerance = 1e-2;
 	
     /**
-     * Implements Peer Test Set 1 Case 10. (i.e. check hazard curves
+     * Implements Peer Test Set 1 Case 10. (i.e. compares hazard curves
      * generated from PoissonAreaSource with reference hazard curves)
-     * Area source with fixed depth. Use the truncated exponential (GR) model with 
-     * Mmax = 6.5 and Mmin=5.0. Lambda(M>=Mmin) = 0.0395, b value = 0.9. 
-     * Source should be uniformly distributed point sources 
-     * (or approximations to point source) across the area (1 km grid spacing) 
-     * at a fixed depth of 5 km. 
-     * The attenuation relationship is Sadigh et al. (1997), rock, sigma = 0.
      * (test taken from "Verification of Probabilistic Seismic Hazard Analysis
      *  Computer Programs", Patricia Thomas, Ivan Wong and Norman Abrahamson, 
      * PACIFIC EARTHQUAKE ENGINEERING RESEARCH CENTER, May 2010)
