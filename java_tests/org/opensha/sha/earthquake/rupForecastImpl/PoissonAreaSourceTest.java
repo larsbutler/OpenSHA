@@ -1,42 +1,17 @@
 package org.opensha.sha.earthquake.rupForecastImpl;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.rmi.RemoteException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.ListIterator;
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.opensha.commons.data.Site;
-import org.opensha.commons.data.TimeSpan;
 import org.opensha.commons.data.function.ArbitrarilyDiscretizedFunc;
-import org.opensha.commons.geo.BorderType;
 import org.opensha.commons.geo.Location;
-import org.opensha.commons.geo.LocationList;
-import org.opensha.commons.geo.Region;
-import org.opensha.commons.param.ParameterAPI;
-import org.opensha.commons.param.ParameterList;
 import org.opensha.commons.param.StringParameter;
-import org.opensha.commons.param.event.ParameterChangeWarningEvent;
-import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.calc.HazardCurveCalculator;
-import org.opensha.sha.earthquake.EqkRupForecastAPI;
-import org.opensha.sha.earthquake.EqkRupture;
-import org.opensha.sha.earthquake.FocalMechanism;
-import org.opensha.sha.earthquake.ProbEqkRupture;
-import org.opensha.sha.earthquake.ProbEqkSource;
-import org.opensha.sha.earthquake.griddedForecast.MagFreqDistsForFocalMechs;
-import org.opensha.sha.imr.ScalarIntensityMeasureRelationshipAPI;
-import org.opensha.sha.imr.attenRelImpl.SadighEtAl_1997_AttenRel;
-import org.opensha.sha.imr.param.IntensityMeasureParams.PGA_Param;
-import org.opensha.sha.imr.param.OtherParams.StdDevTypeParam;
-import org.opensha.sha.magdist.GutenbergRichterMagFreqDist;
-import org.opensha.sha.magdist.IncrementalMagFreqDist;
-import org.opensha.sha.util.TectonicRegionType;
 
 
 /**
