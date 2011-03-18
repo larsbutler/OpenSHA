@@ -13,29 +13,29 @@ import org.opensha.commons.geo.Location;
 import org.opensha.commons.param.StringParameter;
 import org.opensha.sha.calc.HazardCurveCalculator;
 
-
 /**
  * Class implementing tests for PoissonianAreaSource
  */
 public class PoissonAreaSourceTest {
-	
+
 	private static double integrationDistance = 200.0;
 	private static double tolerance = 1e-2;
-	
-    /**
-     * Implements Peer Test Set 1 Case 10. (i.e. compares hazard curves
-     * generated from PoissonAreaSource with reference hazard curves)
-     * (test taken from "Verification of Probabilistic Seismic Hazard Analysis
-     *  Computer Programs", Patricia Thomas, Ivan Wong and Norman Abrahamson, 
-     * PACIFIC EARTHQUAKE ENGINEERING RESEARCH CENTER, May 2010)
-     * @throws RemoteException
-     */
+
+	/**
+	 * Implements Peer Test Set 1 Case 10. (i.e. compares hazard curves
+	 * generated from PoissonAreaSource with reference hazard curves) (test
+	 * taken from "Verification of Probabilistic Seismic Hazard Analysis
+	 * Computer Programs", Patricia Thomas, Ivan Wong and Norman Abrahamson,
+	 * PACIFIC EARTHQUAKE ENGINEERING RESEARCH CENTER, May 2010)
+	 * 
+	 * @throws RemoteException
+	 */
 	@Test
-	public void peerTestSet1Case10() throws RemoteException{
-		
+	public void peerTestSet1Case10() throws Exception {
+
 		HazardCurveCalculator calc = new HazardCurveCalculator();
 		calc.setMaxSourceDistance(integrationDistance);
-		
+
 		ArbitrarilyDiscretizedFunc hazCurve = new ArbitrarilyDiscretizedFunc();
 		hazCurve.set(Math.log(0.001), 1.0);
 		hazCurve.set(Math.log(0.01), 1.0);
@@ -47,31 +47,31 @@ public class PoissonAreaSourceTest {
 		hazCurve.set(Math.log(0.3), 1.0);
 		hazCurve.set(Math.log(0.35), 1.0);
 		hazCurve.set(Math.log(0.4), 1.0);
-		
-		Map<Site,ArbitrarilyDiscretizedFunc> expectedResults = 
+
+		Map<Site, ArbitrarilyDiscretizedFunc> expectedResults = 
 			getExpectedResultsPeerTestSet1Case10();
-		
-		for(Site site : expectedResults.keySet()){
-			calc.getHazardCurve(hazCurve, site, 
-					PoissonianAreaSourceTestHelper.getPeerTestSet1Case10GMPE(), 
-					PoissonianAreaSourceTestHelper.
-					getPeerTestSet1Case10AreaSourceErf());
-			for(int i=0;i<expectedResults.get(site).getNum();i++){
+
+		for (Site site : expectedResults.keySet()) {
+			calc.getHazardCurve(hazCurve, site, PoissonianAreaSourceTestHelper
+					.getPeerTestSet1Case10GMPE(),
+					PoissonianAreaSourceTestHelper
+							.getPeerTestSet1Case10AreaSourceErf());
+			for (int i = 0; i < expectedResults.get(site).getNum(); i++) {
 				assertEquals(expectedResults.get(site).getY(i),
-						hazCurve.getY(i),tolerance);
+						hazCurve.getY(i), tolerance);
 			}
 		}
 	}
-	
-	private static Map<Site,ArbitrarilyDiscretizedFunc> 
-	                        getExpectedResultsPeerTestSet1Case10(){
-		
+
+	private static Map<Site, ArbitrarilyDiscretizedFunc> 
+	getExpectedResultsPeerTestSet1Case10() {
+
 		StringParameter sadighSiteType = new StringParameter("Sadigh Site Type");
 		sadighSiteType.setValue("Rock");
-		
-		Map<Site,ArbitrarilyDiscretizedFunc> expectedResults = 
-			new HashMap<Site,ArbitrarilyDiscretizedFunc>();
-		
+
+		Map<Site, ArbitrarilyDiscretizedFunc> expectedResults = 
+			new HashMap<Site, ArbitrarilyDiscretizedFunc>();
+
 		ArbitrarilyDiscretizedFunc hazCurveSite1 = 
 			new ArbitrarilyDiscretizedFunc();
 		hazCurveSite1.set(Math.log(0.001), 3.87E-02);
@@ -84,11 +84,10 @@ public class PoissonAreaSourceTest {
 		hazCurveSite1.set(Math.log(0.3), 1.72E-05);
 		hazCurveSite1.set(Math.log(0.35), 5.38E-06);
 		hazCurveSite1.set(Math.log(0.4), 1.18E-06);
-		Site site1 = new Site(new Location(38.000,-122.000));
+		Site site1 = new Site(new Location(38.000, -122.000));
 		site1.addParameter(sadighSiteType);
 		expectedResults.put(site1, hazCurveSite1);
 
-		
 		ArbitrarilyDiscretizedFunc hazCurveSite2 = 
 			new ArbitrarilyDiscretizedFunc();
 		hazCurveSite2.set(Math.log(0.001), 3.87E-02);
@@ -101,7 +100,7 @@ public class PoissonAreaSourceTest {
 		hazCurveSite2.set(Math.log(0.3), 1.72E-05);
 		hazCurveSite2.set(Math.log(0.35), 5.37E-06);
 		hazCurveSite2.set(Math.log(0.4), 1.18E-06);
-		Site site2 = new Site(new Location(37.550,-122.000));
+		Site site2 = new Site(new Location(37.550, -122.000));
 		site2.addParameter(sadighSiteType);
 		expectedResults.put(site2, hazCurveSite2);
 
@@ -117,7 +116,7 @@ public class PoissonAreaSourceTest {
 		hazCurveSite3.set(Math.log(0.3), 8.45E-06);
 		hazCurveSite3.set(Math.log(0.35), 2.66E-06);
 		hazCurveSite3.set(Math.log(0.4), 5.84E-07);
-		Site site3 = new Site(new Location(37.099,-122.000));
+		Site site3 = new Site(new Location(37.099, -122.000));
 		site3.addParameter(sadighSiteType);
 		expectedResults.put(site3, hazCurveSite3);
 
@@ -127,10 +126,10 @@ public class PoissonAreaSourceTest {
 		hazCurveSite4.set(Math.log(0.01), 5.33E-03);
 		hazCurveSite4.set(Math.log(0.05), 1.25E-04);
 		hazCurveSite4.set(Math.log(0.1), 1.63E-06);
-		Site site4 = new Site(new Location(36.874,-122.000));
+		Site site4 = new Site(new Location(36.874, -122.000));
 		site4.addParameter(sadighSiteType);
 		expectedResults.put(site4, hazCurveSite4);
-		
+
 		return expectedResults;
 	}
 
