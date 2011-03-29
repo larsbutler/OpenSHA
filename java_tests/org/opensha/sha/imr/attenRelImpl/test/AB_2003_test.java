@@ -21,19 +21,25 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 
 	private AB_2003_AttenRel ab2003AttenRel = null;
 
-	private static String pgaTableFile = "AtkinsonBoore2003Global-PGA-g.dat";
-	private static String saTableFile = "AtkinsonBoore2003Global-1Hz-g.dat";
+	private static String pgaInterfaceTableFile = "AtkinsonBoore2003Global-PGA-g.dat";
+	private static String saInterfaceTableFile = "AtkinsonBoore2003Global-1Hz-g.dat";
+	private static String pgaIntraSlabTableFile = "AtkinsonBoore2003Global-PGA-INTRASLAB-g.dat";
+	private static String saIntraSlabTableFile = "AtkinsonBoore2003Global-1Hz-INTRASLAB-g.dat";
 	private static int tableNumCol = 4;
-	private static int tableNumRows = 24;
+	private static int interfaceTableNumRows = 24;
+	private static int intraSlabTableNumRows = 21;
 
 	private static int numSiteTypes = 3;
 	private static int numMagnitude = 3;
 	private static String[] siteType = null;
 	private static double[] magnitude = null;
-	private static double[][] pgaTable = null;
-	private static double[][] saTable = null;
+	private static double[][] pgaInterfaceTable = null;
+	private static double[][] saInterfaceTable = null;
+	private static double[][] pgaIntraSlabTable = null;
+	private static double[][] saIntraSlabTable = null;
 
 	private static double interfaceHypocentralDepth = 25.0;
+	private static double intraSlabHypocentralDepth = 60.0;
 
 	// for percentage difference
 	private static double tolerance = 10;
@@ -50,15 +56,26 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 		magnitude[0] = 8.8;
 		magnitude[1] = 8.0;
 		magnitude[2] = 7.0;
-		pgaTable = new double[AB_2003_test.tableNumRows][AB_2003_test.tableNumCol];
+		pgaInterfaceTable = new double[AB_2003_test.interfaceTableNumRows][AB_2003_test.tableNumCol];
 		readTable(
 				new File(ClassLoader.getSystemResource(
-						AB_2003_test.pgaTableFile).toURI()), pgaTable);
-		saTable = new double[AB_2003_test.tableNumRows][AB_2003_test.tableNumCol];
+						AB_2003_test.pgaInterfaceTableFile).toURI()),
+				pgaInterfaceTable);
+		saInterfaceTable = new double[AB_2003_test.interfaceTableNumRows][AB_2003_test.tableNumCol];
 		readTable(
-				new File(ClassLoader
-						.getSystemResource(AB_2003_test.saTableFile).toURI()),
-				saTable);
+				new File(ClassLoader.getSystemResource(
+						AB_2003_test.saInterfaceTableFile).toURI()),
+				saInterfaceTable);
+		pgaIntraSlabTable = new double[AB_2003_test.intraSlabTableNumRows][AB_2003_test.tableNumCol];
+		readTable(
+				new File(ClassLoader.getSystemResource(
+						AB_2003_test.pgaIntraSlabTableFile).toURI()),
+				pgaIntraSlabTable);
+		saIntraSlabTable = new double[AB_2003_test.intraSlabTableNumRows][AB_2003_test.tableNumCol];
+		readTable(
+				new File(ClassLoader.getSystemResource(
+						AB_2003_test.saIntraSlabTableFile).toURI()),
+				saIntraSlabTable);
 	}
 
 	@After
@@ -66,8 +83,135 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 		ab2003AttenRel = null;
 		siteType = null;
 		magnitude = null;
-		pgaTable = null;
-		saTable = null;
+		pgaInterfaceTable = null;
+		saInterfaceTable = null;
+		pgaIntraSlabTable = null;
+		saIntraSlabTable = null;
+	}
+	
+	/**
+	 * Check median spectral acceleration (1Hz) for Mw=8.8, intraslab event,
+	 * site type NEHRP B, hypocentral depth 60 km
+	 */
+	@Test
+	public void sa1HzMw88IntraSlabNerphBHypodepth60() {
+
+		ab2003AttenRel.setIntensityMeasure(SA_Param.NAME);
+		String tectonicRegionType = TectonicRegionType.SUBDUCTION_SLAB
+				.toString();
+		double hypocentralDepth = intraSlabHypocentralDepth;
+		int periodIndex = 5;
+		int magnitudeIndex = 0;
+		int siteTypeIndex = 0;
+		int expectedResultIndex = 1;
+
+		validateAgainstTable(tectonicRegionType, hypocentralDepth, periodIndex,
+				magnitudeIndex, siteTypeIndex, expectedResultIndex,
+				saIntraSlabTable);
+	}
+
+	/**
+	 * Check median spectral acceleration (1Hz) for Mw8, intraslab event, site
+	 * type Nerph C, hypocentral depth 60 km
+	 */
+	@Test
+	public void sa1HzMw8IntraSlabNerphCHypodepth60() {
+
+		ab2003AttenRel.setIntensityMeasure(SA_Param.NAME);
+		String tectonicRegionType = TectonicRegionType.SUBDUCTION_SLAB
+				.toString();
+		double hypocentralDepth = intraSlabHypocentralDepth;
+		int periodIndex = 5;
+		int magnitudeIndex = 1;
+		int siteTypeIndex = 1;
+		int expectedResultIndex = 2;
+
+		validateAgainstTable(tectonicRegionType, hypocentralDepth, periodIndex,
+				magnitudeIndex, siteTypeIndex, expectedResultIndex,
+				saIntraSlabTable);
+	}
+
+	/**
+	 * Check median spectral acceleration (1Hz) for Mw = 7.0, intraslab event,
+	 * site type NEHRP D, hypocentral depth 60 km
+	 */
+	@Test
+	public void sa1HzMw7IntraSlabNerphDHypodepth60() {
+
+		ab2003AttenRel.setIntensityMeasure(SA_Param.NAME);
+		String tectonicRegionType = TectonicRegionType.SUBDUCTION_SLAB
+				.toString();
+		double hypocentralDepth = intraSlabHypocentralDepth;
+		int periodIndex = 5;
+		int magnitudeIndex = 2;
+		int siteTypeIndex = 2;
+		int expectedResultIndex = 3;
+
+		validateAgainstTable(tectonicRegionType, hypocentralDepth, periodIndex,
+				magnitudeIndex, siteTypeIndex, expectedResultIndex,
+				saIntraSlabTable);
+	}
+	
+	/**
+	 * Check median pga, for Mw = 8.8, intraslab event,
+	 * site type NEHRP B, hypocentral depth 60 km
+	 */
+	@Test
+	public void pgaMw88IntraSlabNerphBHypodepth60(){
+		ab2003AttenRel.setIntensityMeasure(PGA_Param.NAME);
+		String tectonicRegionType = TectonicRegionType.SUBDUCTION_SLAB
+				.toString();
+		double hypocentralDepth = intraSlabHypocentralDepth;
+		int periodIndex = 0;
+		int magnitudeIndex = 0;
+		int siteTypeIndex = 0;
+		int expectedResultIndex = 1;
+
+		validateAgainstTable(tectonicRegionType, hypocentralDepth, periodIndex,
+				magnitudeIndex, siteTypeIndex, expectedResultIndex,
+				pgaIntraSlabTable);
+	}
+	
+	/**
+	 * Check median pga for Mw8, intra slab event, site type Nerph C, 
+	 * hypocentral depth 60 km
+	 */
+	@Test
+	public void pgaMw8IntraSlabNerphCHypodepth60() {
+
+		ab2003AttenRel.setIntensityMeasure(PGA_Param.NAME);
+		String tectonicRegionType = TectonicRegionType.SUBDUCTION_SLAB
+				.toString();
+		double hypocentralDepth = intraSlabHypocentralDepth;
+		int periodIndex = 0;
+		int magnitudeIndex = 1;
+		int siteTypeIndex = 1;
+		int expectedResultIndex = 2;
+
+		validateAgainstTable(tectonicRegionType, hypocentralDepth, periodIndex,
+				magnitudeIndex, siteTypeIndex, expectedResultIndex,
+				pgaIntraSlabTable);
+	}
+	
+	/**
+	 * Check median pga for Mw = 7.0, intraslab event, site type NEHRP D,
+	 * hypocentral depth 60 km
+	 */
+	@Test
+	public void pgaMw7IntraSlabNerphDHypodepth60() {
+
+		ab2003AttenRel.setIntensityMeasure(PGA_Param.NAME);
+		String tectonicRegionType = TectonicRegionType.SUBDUCTION_SLAB
+				.toString();
+		double hypocentralDepth = intraSlabHypocentralDepth;
+		int periodIndex = 0;
+		int magnitudeIndex = 2;
+		int siteTypeIndex = 2;
+		int expectedResultIndex = 3;
+
+		validateAgainstTable(tectonicRegionType, hypocentralDepth, periodIndex,
+				magnitudeIndex, siteTypeIndex, expectedResultIndex,
+				pgaIntraSlabTable);
 	}
 
 	/**
@@ -87,7 +231,8 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 		int expectedResultIndex = 1;
 
 		validateAgainstTable(tectonicRegionType, hypocentralDepth, periodIndex,
-				magnitudeIndex, siteTypeIndex, expectedResultIndex, saTable);
+				magnitudeIndex, siteTypeIndex, expectedResultIndex,
+				saInterfaceTable);
 	}
 
 	/**
@@ -107,7 +252,8 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 		int expectedResultIndex = 2;
 
 		validateAgainstTable(tectonicRegionType, hypocentralDepth, periodIndex,
-				magnitudeIndex, siteTypeIndex, expectedResultIndex, saTable);
+				magnitudeIndex, siteTypeIndex, expectedResultIndex,
+				saInterfaceTable);
 	}
 
 	/**
@@ -127,7 +273,8 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 		int expectedResultIndex = 3;
 
 		validateAgainstTable(tectonicRegionType, hypocentralDepth, periodIndex,
-				magnitudeIndex, siteTypeIndex, expectedResultIndex, saTable);
+				magnitudeIndex, siteTypeIndex, expectedResultIndex,
+				saInterfaceTable);
 	}
 
 	/**
@@ -147,7 +294,8 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 		int expectedResultIndex = 1;
 
 		validateAgainstTable(tectonicRegionType, hypocentralDepth, periodIndex,
-				magnitudeIndex, siteTypeIndex, expectedResultIndex, pgaTable);
+				magnitudeIndex, siteTypeIndex, expectedResultIndex,
+				pgaInterfaceTable);
 	}
 
 	/**
@@ -167,7 +315,8 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 		int expectedResultIndex = 2;
 
 		validateAgainstTable(tectonicRegionType, hypocentralDepth, periodIndex,
-				magnitudeIndex, siteTypeIndex, expectedResultIndex, pgaTable);
+				magnitudeIndex, siteTypeIndex, expectedResultIndex,
+				pgaInterfaceTable);
 	}
 
 	/**
@@ -187,7 +336,8 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 		int expectedResultIndex = 3;
 
 		validateAgainstTable(tectonicRegionType, hypocentralDepth, periodIndex,
-				magnitudeIndex, siteTypeIndex, expectedResultIndex, pgaTable);
+				magnitudeIndex, siteTypeIndex, expectedResultIndex,
+				pgaInterfaceTable);
 	}
 
 	private void readTable(File file, double[][] table) throws Exception {
