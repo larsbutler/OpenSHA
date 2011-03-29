@@ -319,9 +319,33 @@ NamedObjectAPI, ParameterChangeListener {
 		if (intensityMeasureChanged) {
 			setCoeffIndex();// intensityMeasureChanged is set to false in this method
 		}
+		
+		// Computing the hypocentral depth
+//		System.out.println("AB2003 et al -->"+this.eqkRupture.getInfo());
+		EvenlyGriddedSurfaceAPI surf = this.eqkRupture.getRuptureSurface();
+		
+		// ---------------------------------------------------------------------- MARCO 2010.03.15
+		// Compute the hypocenter as the middle point of the rupture
+		double hypoLon = 0.0;
+		double hypoLat = 0.0;
+		double hypoDep = 0.0;
+		double cnt = 0.0;
+		for (int j=0; j < surf.getNumCols(); j++){
+			for (int k=0; k < surf.getNumRows(); k++){
+				hypoLon += surf.getLocation(k,j).getLongitude();
+				hypoLat += surf.getLocation(k,j).getLatitude();
+				hypoDep = hypoDep + surf.getLocation(k,j).getDepth();
+				cnt += 1;
+			}
+		}
+		double chk = surf.getNumCols() * surf.getNumRows();
+		
+		hypoLon = hypoLon / cnt;
+		hypoLat = hypoLat / cnt;
+		hypoDep = hypoDep / cnt;
 
 		// Return the computed mean 
-		return getMean(iper, mag,rRup, siteType, tecRegType );
+		return getMean(iper, mag,rRup, siteType, tecRegType, hypoDep);
 
 	}
 
@@ -559,7 +583,7 @@ NamedObjectAPI, ParameterChangeListener {
 	 * @param rRup
 	 * @return
 	 */
-	public double getMean(int iper, double mag, double rRup, String siteType, String tecRegType) {
+	public double getMean(int iper, double mag, double rRup, String siteType, String tecRegType, double hypoDep) {
 		double hypodepth;
 		double g = 0.0; // this is unity for 
 		double flag_Sc  = 0.0; // This is unity for soil NEHRP C - Otherwise 0
@@ -567,29 +591,7 @@ NamedObjectAPI, ParameterChangeListener {
 		double flag_Se  = 0.0; // This is unity for soil NEHRP E - Otherwise 0
 		// NEHRP B all soil coefficients equal zero
 		double mean =0.00;
-		// Computing the hypocentral depth
-//		System.out.println("AB2003 et al -->"+this.eqkRupture.getInfo());
-		EvenlyGriddedSurfaceAPI surf = this.eqkRupture.getRuptureSurface();
 		
-		// ---------------------------------------------------------------------- MARCO 2010.03.15
-		// Compute the hypocenter as the middle point of the rupture
-		double hypoLon = 0.0;
-		double hypoLat = 0.0;
-		double hypoDep = 0.0;
-		double cnt = 0.0;
-		for (int j=0; j < surf.getNumCols(); j++){
-			for (int k=0; k < surf.getNumRows(); k++){
-				hypoLon += surf.getLocation(k,j).getLongitude();
-				hypoLat += surf.getLocation(k,j).getLatitude();
-				hypoDep = hypoDep + surf.getLocation(k,j).getDepth();
-				cnt += 1;
-			}
-		}
-		double chk = surf.getNumCols() * surf.getNumRows();
-		
-		hypoLon = hypoLon / cnt;
-		hypoLat = hypoLat / cnt;
-		hypoDep = hypoDep / cnt;
 		// set the depth for events with hdepth > 100km
 		if (hypoDep > 100){
 			hypodepth = 100;
