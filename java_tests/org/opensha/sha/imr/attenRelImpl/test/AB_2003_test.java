@@ -19,6 +19,9 @@ import org.opensha.sha.util.TectonicRegionType;
 
 /**
  * Class providing methods for testing {@link AB_2003_AttenRel}.
+ * Tables (for the global model, without corrections for Japan/Cascadia)
+ * were provided by Celine Beauval (<celine.beauval@obs.ujf-grenoble.fr>)
+ * using matSHA.
  */
 public class AB_2003_test implements ParameterChangeWarningListener {
 
