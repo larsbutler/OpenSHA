@@ -606,8 +606,7 @@ NamedObjectAPI, ParameterChangeListener {
 //		System.out.println("real hypocentral depth:"+hypodepth);
 		// ---------------------------------------------------------------------- MARCO 2010.03.15
 
-		delta = 0.00724*Math.pow(10, 0.507*mag);
-		double R = Math.sqrt(rRup*rRup + delta*delta);
+		double R = Double.NaN;;
 		double PGArx = 0.00;
 
 		if (tecRegType.equals(FLT_TEC_ENV_INTERFACE)){
@@ -616,6 +615,8 @@ NamedObjectAPI, ParameterChangeListener {
 			} else {
 				this.mag = mag;
 			} 
+			delta = 0.00724*Math.pow(10, 0.507*mag);
+			R = Math.sqrt(rRup*rRup + delta*delta);
 			g = Math.pow(10, 1.2-0.18*mag);
 			PGArx = Math.pow(10, c1[0] + c2[0] * mag + c3[0] * hypodepth + c4[0]*R - g*Math.log10(R));
 		} else if (tecRegType.equals(FLT_TEC_ENV_INSLAB)){
@@ -624,21 +625,25 @@ NamedObjectAPI, ParameterChangeListener {
 			} else {
 				this.mag = mag;
 			}
+			delta = 0.00724*Math.pow(10, 0.507*mag);
+			R = Math.sqrt(rRup*rRup + delta*delta);
 			g = Math.pow(10, 0.301-0.01*mag);
 			PGArx = Math.pow(10,cc1[0] + cc2[0] * mag + cc3[0] * hypodepth + cc4[0]*R - g*Math.log10(R));
 		} else {
 			System.out.println("+++"+tecRegType.toString()+"--");
 			throw new RuntimeException("\n  Cannot handle this combination: \n  tectonic region");
 		}
+		
+		System.out.println("PGArx: "+PGArx);
 
-		if (im.getName().equals(PGA_Param.NAME) || freq[iper] >=2){
+		if (im.getName().equals(PGA_Param.NAME) && freq[iper] >=2){
 			if ((100 < PGArx) && (PGArx< 500)) 
 				sl = 1.00-(PGArx-100)/400;
 			else if (PGArx >= 500)
 				sl = 0.00;
 //						System.out.println("case0");
-		} else if ( freq[iper] <= 1) {
-			if (100 < PGArx)
+		} else if ( freq[iper] <= 1 || 100 < PGArx) {
+			//if (100 < PGArx)
 				sl =1.00;
 //						System.out.println("case1");
 		} else if ((1 < freq[iper]) && (freq[iper]< 2)) {	

@@ -63,11 +63,15 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 	/**
 	 * Site types for interface/intraSlab tests.
 	 */
-	private static String[] siteType = null;
+	private static final String[] SITE_TYPES = new String[] {
+			AB_2003_AttenRel.SITE_TYPE_ROCK,
+			AB_2003_AttenRel.SITE_TYPE_HARD_SOIL,
+			AB_2003_AttenRel.SITE_TYPE_MEDIUM_SOIL };
 	/**
 	 * Magnitude values for interface/intraSlab tests.
 	 */
-	private static double[] magnitude = null;
+	private static final double[] MAGNITUDE_VALUES =
+		new double[]{8.8, 8.0, 7.0};
 	/**
 	 * Peak ground acceleration table for interface test.
 	 */
@@ -100,18 +104,14 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 
 	/**
 	 * Set up attenuation relationship object,
-	 * magnitude values, site types, and table for tests.
+	 * and tables for tests.
+	 *
 	 * @throws Exception
 	 */
 	@Before
 	public final void setUp() throws Exception {
 		ab2003AttenRel = new AB_2003_AttenRel(this);
 		ab2003AttenRel.setParamDefaults();
-		siteType = new String[]{
-		AB_2003_AttenRel.SITE_TYPE_ROCK,
-		AB_2003_AttenRel.SITE_TYPE_HARD_SOIL,
-		AB_2003_AttenRel.SITE_TYPE_MEDIUM_SOIL};
-		magnitude = new double[]{8.8,8.0,7.0};
 		pgaInterfaceTable =
 			new double[AB_2003_test.INTERFACE_TABLE_NUM_ROWS]
 			           [AB_2003_test.TABLE_NUM_COL];
@@ -148,8 +148,6 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 	@After
 	public final void tearDown() {
 		ab2003AttenRel = null;
-		siteType = null;
-		magnitude = null;
 		pgaInterfaceTable = null;
 		saInterfaceTable = null;
 		pgaIntraSlabTable = null;
@@ -409,6 +407,7 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 
 	/**
 	 * Read table.
+	 * 
 	 * @param file
 	 * @param table
 	 * @throws Exception
@@ -430,6 +429,7 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 
 	/**
 	 * Compare median ground motion againts values in table.
+	 * 
 	 * @param tectonicRegionType
 	 * @param hypocentralDepth
 	 * @param periodIndex
@@ -445,8 +445,8 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 		for (int i = 0; i < table.length; i++) {
 
 			double distance = table[i][0];
-			double mag = magnitude[magnitudeIndex];
-			String sType = siteType[siteTypeIndex];
+			double mag = MAGNITUDE_VALUES[magnitudeIndex];
+			String sType = SITE_TYPES[siteTypeIndex];
 
 			double predicted = Math
 					.exp(ab2003AttenRel.getMean(periodIndex, mag, distance,
