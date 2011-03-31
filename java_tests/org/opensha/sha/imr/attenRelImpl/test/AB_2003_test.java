@@ -66,10 +66,10 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 	/**
 	 * Site types for interface/intraSlab tests.
 	 */
-	private static final String[] SITE_TYPES = new String[] {
-			AB_2003_AttenRel.SITE_TYPE_ROCK,
-			AB_2003_AttenRel.SITE_TYPE_HARD_SOIL,
-			AB_2003_AttenRel.SITE_TYPE_MEDIUM_SOIL };
+	private static final double[] VS_30 = new double[] {
+			800.0,
+			500.0,
+			200.0};
 	/**
 	 * Magnitude values for interface/intraSlab tests.
 	 */
@@ -449,17 +449,17 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 
 			double distance = table[i][0];
 			double mag = MAGNITUDE_VALUES[magnitudeIndex];
-			String sType = SITE_TYPES[siteTypeIndex];
+			double vs30 = VS_30[siteTypeIndex];
 
 			double predicted = Math
 					.exp(ab2003AttenRel.getMean(periodIndex, mag, distance,
-							sType, tectonicRegionType, hypocentralDepth));
+							vs30, tectonicRegionType, hypocentralDepth));
 			double expected = table[i][expectedResultIndex];
 			double percentageDifference = Math.abs((expected - predicted)
 					/ expected) * 100;
 
 			String msg = "distance: " + distance + ", magnitude: " + mag
-					+ ", site type: " + sType + ", tectonic region type: "
+					+ ", vs30: " + vs30 + ", tectonic region type: "
 					+ tectonicRegionType + ", hypocentral depth: "
 					+ hypocentralDepth + ", expected: " + expected
 					+ ", predicted: " + predicted + ",percentage difference: "

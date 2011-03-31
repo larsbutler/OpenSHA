@@ -38,6 +38,7 @@ import org.opensha.sha.earthquake.rupForecastImpl.PointEqkSource;
 import org.opensha.sha.imr.param.EqkRuptureParams.AftershockParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.DipParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.FaultTypeParam;
+import org.opensha.sha.imr.param.EqkRuptureParams.FocalDepthParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.MagParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.RakeParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.RupTopDepthParam;
@@ -313,6 +314,7 @@ public abstract class AttenuationRelationship extends
     protected DipParam dipParam = null;
     protected RupTopDepthParam rupTopDepthParam = null;
     protected RupWidthParam rupWidthParam;
+    protected FocalDepthParam focalDepthParam = null;
 
     /**
      * Propagation Effect Parameters (see classes for exact definitions)

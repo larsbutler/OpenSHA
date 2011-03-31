@@ -16,10 +16,12 @@ import org.opensha.commons.param.event.ParameterChangeEvent;
 import org.opensha.commons.param.event.ParameterChangeListener;
 import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.earthquake.EqkRupture;
+import org.opensha.sha.earthquake.FocalMechanism;
 import org.opensha.sha.faultSurface.EvenlyGriddedSurfaceAPI;
 import org.opensha.sha.imr.AttenuationRelationship;
 import org.opensha.sha.imr.PropagationEffect;
 import org.opensha.sha.imr.ScalarIntensityMeasureRelationshipAPI;
+import org.opensha.sha.imr.param.EqkRuptureParams.FocalDepthParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.MagParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.DampingParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PGA_Param;
@@ -29,6 +31,7 @@ import org.opensha.sha.imr.param.OtherParams.ComponentParam;
 import org.opensha.sha.imr.param.OtherParams.StdDevTypeParam;
 import org.opensha.sha.imr.param.OtherParams.TectonicRegionTypeParam;
 import org.opensha.sha.imr.param.PropagationEffectParams.DistanceRupParameter;
+import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
 import org.opensha.sha.util.TectonicRegionType;
 
 /**
@@ -52,25 +55,28 @@ import org.opensha.sha.util.TectonicRegionType;
  * <UL>
  * <LI>magParam - moment magnitude
  * <LI>distanceRupParam - closest distance to rupture surface
- * <LI>siteTypeParam - "NEHRP B", "NEHRP C", "NEHRP D", "NEHRP E"
- * <LI>fltTypeParam - style of faulting "Interface" and "InSlab"
+ * <LI>vs30Param - shear wave velocity (m/s) averaged over the top 30 m of the
+ * soil profile vs30 > 760 -> NEHRP B 360 < vs30 <=760 -> NEHRP C 180 <= vs30 <=
+ * 360 -> NEHRP D vs30 < 180 -> NEHRP E
+ * <LI>tectonicRegionTypeParam - interface or intra slab
+ * <LI>focalDepthParam - depth to the earthquake rupture hypocenter
  * <LI>componentParam - random horizontal component
- * <LI>stdDevTypeParam - total, inter-event, intra-event.
+ * <LI>stdDevTypeParam - total, inter-event, intra-event, none
  * </UL>
  * <p>
- *
+ * 
  * <p>
- *
+ * 
  * Verification - This model has been validated (see {@link AB_2003_test})
  * against tables provided by Céline Beauval
  * (<celine.beauval@obs.ujf-grenoble.fr>) using mathSHA. Tests were implemented
  * to check median PGA and SA (1Hz) for interface and intraslab events, at
  * different magnitude (7.0,8.0.8.8), for different site types (NERPH B, C, D).
- *
- *
+ * 
+ * 
  * </p>
- *
- **
+ * 
+ ** 
  * @author L. Danciu
  * @version 1.0, December 2010
  */
@@ -78,260 +84,48 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 		ScalarIntensityMeasureRelationshipAPI, NamedObjectAPI,
 		ParameterChangeListener {
 
-	/**
-	 * Class name.
-	 */
-	private static final String C = "AB_2003_AttenRel";
-	/**
-	 * Short name.
-	 */
+	/** Short name. */
 	public static final String SHORT_NAME = "AB2003";
 
-	/**
-	 * Attenuation relationship name.
-	 */
+	/** Full name. */
 	public static final String NAME = "Atkinson & Boore 2003";
 
-	/**
-	 * Version number.
-	 */
+	/** Version number. */
 	private static final long serialVersionUID = 1234567890987654353L;
 
-	/**
-	 * Supported frequency values.
-	 */
-	private static final double[] FREQ = {0.00000, 25.0000, 10.0000,
-		5.00000, 2.50000, 1.00000, 0.50000, 0.33000};
-	/**
-	 * Supported period values.
-	 */
-	private static final double[] PERIOD = {0.00000, 0.04000, 0.10000,
-		0.20000, 0.40000, 1.00000, 2.00000, 3.00000 };
-	/**
-	 * Interface c1 coefficients.
-	 */
-	private static final double[] INTER_C1 = {2.99100, 2.87530, 2.77890,
-		2.66380, 2.52490, 2.14420, 2.19070, 2.30100 };
-	/**
-	 * Interface c2 coefficients.
-	 */
-	private static final double[] INTER_C2 = {0.03525, 0.07052, 0.09841,
-		0.12386, 0.14770, 0.13450, 0.07148, 0.02237 };
-	/**
-	 * Interface c3 coefficients.
-	 */
-	private static final double[] INTER_C3 = {0.00759, 0.01004, 0.00974,
-		0.00884, 0.00728, 0.00521, 0.00224, 0.00012 };
-	/**
-	 * Interface c4 coefficients.
-	 */
-	private static final double[] INTER_C4 = {-0.00206, -0.00278, -0.00287,
-		-0.00280, -0.00235, -0.00110, 0.00000, 0.00000 };
-	/**
-	 * Interface c5 coefficients.
-	 */
-	private static final double[] INTER_C5 = {0.19000, 0.15000, 0.15000,
-		0.15000, 0.13000, 0.10000, 0.10000, 0.10000 };
-	/**
-	 * Interface c6 coefficients.
-	 */
-	private static final double[] INTER_C6 = {0.24000, 0.20000, 0.23000,
-		0.27000, 0.37000, 0.30000, 0.25000, 0.25000 };
-	/**
-	 * Interface c7 coefficients.
-	 */
-	private static final double[] INTER_C7 = {0.29000, 0.20000, 0.20000,
-		0.25000, 0.38000, 0.55000, 0.40000, 0.36000 };
-	/**
-	 * Interface total standard deviation.
-	 */
-	private static final double[] INTER_TOTAL_STD = {0.23000, 0.26000,
-		0.27000, 0.28000, 0.29000, 0.34000, 0.34000, 0.36000 };
-	/**
-	 * Interface intra-event standard deviation.
-	 */
-	private static final double[] INTER_INTRAEVENT_STD = {0.20000, 0.22000,
-		0.25000, 0.25000, 0.25000, 0.28000, 0.29000, 0.31000 };
-	/**
-	 * Interface inter-event standard deviation.
-	 */
-	private static final double[] INTER_INTEREVENT_STD = {0.11000, 0.14000,
-		0.10000, 0.13000, 0.15000, 0.19000, 0.18000, 0.18000 };
-	/**
-	 * Intraslab c1 coefficients.
-	 */
-	private static final double[] INTRA_C1 = {-0.04713, 0.50697, 0.43928,
-		0.51589, 0.00545, -1.02133, -2.39234, -3.70012 };
-	/**
-	 * Intraslab c2 coefficients.
-	 */
-	private static final double[] INTRA_C2 = {0.69090, 0.63273, 0.66675,
-		0.69186, 0.77270, 0.87890, 0.99640, 1.11690 };
-	/**
-	 * Intraslab c3 coefficients.
-	 */
-	private static final double[] INTRA_C3 = {0.01130, 0.01275, 0.01080,
-		0.00572, 0.00173, 0.00130, 0.00364, 0.00615 };
-	/**
-	 * Intraslab c4 coefficients.
-	 */
-	private static final double[] INTRA_C4 = {-0.00202, -0.00234,
-		-0.00219, -0.00192, -0.00178, -0.00173, -0.00118, -0.00045 };
-	/**
-	 * Intraslab c5 coefficients.
-	 */
-	private static final double[] INTRA_C5 = {0.19000, 0.15000, 0.15000,
-		0.15000, 0.13000, 0.10000, 0.10000, 0.10000 };
-	/**
-	 * Intraslab c6 coefficients.
-	 */
-	private static final double[] INTRA_C6 = {0.24000, 0.20000, 0.23000,
-		0.27000, 0.37000, 0.30000, 0.25000, 0.25000 };
-	/**
-	 * Intraslab c7 coefficients.
-	 */
-	private static final double[] INTRA_C7 = {0.29000, 0.20000, 0.20000,
-		0.25000, 0.38000, 0.55000, 0.40000, 0.36000 };
-	/**
-	 * Intraslab total standard deviation.
-	 */
-	private static final double[] INTRA_TOTAL_STD = {0.27000, 0.25000,
-		0.28000, 0.28000, 0.28000, 0.29000, 0.30000, 0.30000 };
-	/**
-	 * Intraslab intra event standard deviation.
-	 */
-	private static final double[] INTRA_INTRAEVENT_STD = {0.23000, 0.24000,
-		0.27000, 0.26000, 0.26000, 0.27000, 0.28000, 0.29000 };
-	/**
-	 * Intraslab inter event standard deviation.
-	 */
-	private static final double[] INTRA_INTEREVENT_STD = {0.14000, 0.07000,
-		0.07000, 0.10000, 0.10000, 0.11000, 0.11000, 0.08000 };
-
-	/**
-	 * Map period value - period index.
-	 */
-	private HashMap<Double, Integer> indexFromPerHashMap;
-	/**
-	 * Period index.
-	 */
-	private int iper;
-	/**
-	 * Moment magnitude.
-	 */
+	/** Moment magnitude. */
 	private double mag;
-	/**
-	 * Closest distance to rupture.
-	 */
-	private double rRup;
-	/**
-	 * Delta factor (for distance calculation).
-	 */
-	private double delta;
-	/**
-	 * sl factor (for soil amplification).
-	 */
-	private double sl;
-	/**
-	 * Site type.
-	 */
-	private String siteType;
-	/**
-	 * Standard deviation type.
-	 */
-	private String stdDevType;
-	/**
-	 * Tectonic region type.
-	 */
+
+	/** Tectonic region type. */
 	private String tecRegType;
-	/**
-	 * log10 to natural log conversion factor.
-	 */
-	private static final double LOG_2_LN = 2.302585;
 
-	/**
-	 * Site type.
-	 */
-	private StringParameter siteTypeParam = null;
-	/**
-	 * Site type info string.
-	 */
-	public static final String SITE_TYPE_INFO =
-		"Geological conditions at the site";
-	/**
-	 * Site type name.
-	 */
-	public static final String SITE_TYPE_NAME = "AB et al 2003 Site Type";
-	/**
-	 * Rock description: Vs30 > 760m/s NEHRP Class B.
-	 */
-	public static final String SITE_TYPE_ROCK = "NEHRP B";
-	/**
-	 *  Hard rock description: 360< Vs30 = 760m/s NEHRP Class C.
-	 */
-	public static final String SITE_TYPE_HARD_SOIL = "NEHRP C";
-	/**
-	 *  Hard rock description: 180< Vs30 = 360m/s NEHRP Class D.
-	 */
-	public static final String SITE_TYPE_MEDIUM_SOIL = "NEHRP D";
-	/**
-	 *  Hard rock description: Vs30 < 180m/s NEHRP Class E.
-	 */
-	public static final String SITE_TYPE_SOFT_SOIL = "NEHRP E";
-	/**
-	 * Default site type.
-	 */
-	public static final String SITE_TYPE_DEFAULT = SITE_TYPE_ROCK;
+	/** Focal depth. */
+	private double focalDepth;
 
-	/**
-	 * Subduction interface faulting.
-	 */
-	public static final String FLT_TEC_ENV_INTERFACE =
-		TectonicRegionType.SUBDUCTION_INTERFACE
-			.toString();
-	/**
-	 * Subduction intraslab faulting.
-	 */
-	public static final String FLT_TEC_ENV_INSLAB =
-		TectonicRegionType.SUBDUCTION_SLAB
-			.toString();
+	/** Vs 30. */
+	private double vs30;
 
-	/**
-	 * Minimum magnitude.
-	 */
-	protected static final Double MAG_WARN_MIN = new Double(5.5);
-	/**
-	 * Maximum magnitude.
-	 */
-	protected static final Double MAG_WARN_MAX = new Double(8.5);
+	/** Closest distance to rupture. */
+	private double rRup;
 
-	/**
-	 * Minimum rupture distance.
-	 */
-	protected static final Double DISTANCE_RUP_WARN_MIN = new Double(0.0);
-	/**
-	 * Maximum rupture distance.
-	 */
-	protected static final Double DISTANCE_RUP_WARN_MAX = new Double(500.0);
+	/** Standard deviation type. */
+	private String stdDevType;
 
-	/**
-	 * Minimum hypocentral depth.
-	 */
-	protected static final Double DEPTH_HYPO_WARN_MIN = new Double(0.0);
-	/**
-	 * Maximum hypocentral depth.
-	 */
-	protected static final Double DEPTH_HYPO_WARN_MAX = new Double(125.0);
+	/** Map period-value/period-index. */
+	private HashMap<Double, Integer> indexFromPerHashMap;
 
-	/**
-	 * For issuing warnings.
-	 */
+	/** Period index. */
+	private int iper;
+
+	/** For issuing warnings. */
 	private transient ParameterChangeWarningListener warningListener = null;
 
 	/**
 	 * Contruct attenuation relationship. Initialize parameter lists.
 	 */
 	public AB_2003_AttenRel(final ParameterChangeWarningListener warningListener) {
+
+		// creates exceedProbParam
 		super();
 
 		this.warningListener = warningListener;
@@ -339,8 +133,9 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 		initSupportedIntensityMeasureParams();
 
 		indexFromPerHashMap = new HashMap<Double, Integer>();
-		for (int i = 0; i < PERIOD.length; i++) {
-			indexFromPerHashMap.put(new Double(PERIOD[i]), new Integer(i));
+		for (int i = 0; i < AB2003Constants.PERIOD.length; i++) {
+			indexFromPerHashMap.put(new Double(AB2003Constants.PERIOD[i]),
+					new Integer(i));
 		}
 
 		initEqkRuptureParams();
@@ -352,266 +147,115 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 	}
 
 	/**
-	 * This sets the eqkRupture related parameters (magParam and fltTypeParam)
-	 * based on the eqkRupture passed in. The internally held eqkRupture object
-	 * is also set as that passed in. Warning constrains are ignored.
-	 *
-	 * @param eqkRupture
-	 *            The new eqkRupture value
-	 * @throws InvalidRangeException
-	 *             If not valid rake angle
+	 * Creates the two supported IM parameters (PGA and SA), as well as the
+	 * independenParameters of SA (periodParam and dampingParam) and adds them
+	 * to the supportedIMParams list. Makes the parameters non-editable.
 	 */
-	public final void setEqkRupture(final EqkRupture eqkRupture){
-		magParam.setValueIgnoreWarning(new Double(eqkRupture.getMag()));
-		this.eqkRupture = eqkRupture;
-		setPropagationEffectParams();
-	}
+	protected final void initSupportedIntensityMeasureParams() {
 
-	/**
-	 * This sets the site-related parameter (siteTypeParam) based on what is in
-	 * the Site object passed in (the Site object must have a parameter with the
-	 * same name as that in siteTypeParam). This also sets the internally held
-	 * Site object as that passed in.
-	 *
-	 * @param site
-	 *            The new site object
-	 * @throws ParameterException
-	 *             Thrown if the Site object doesn't contain a Vs30 parameter
-	 */
-	public final void setSite(final Site site) throws ParameterException {
-		siteTypeParam.setValue((String) site.getParameter(SITE_TYPE_NAME)
-				.getValue());
-		this.site = site;
-		setPropagationEffectParams();
-	}
-
-	/**
-	 * This sets the site and eqkRupture, and the related parameters, from the
-	 * propEffect object passed in. Warning constrains are ignored.
-	 *
-	 * @param propEffect
-	 * @throws ParameterException
-	 *
-	 * @throws InvalidRangeException
-	 *             If not valid distance, depth??? to check!!!
-	 */
-
-	public final void setPropagationEffectParams() {
-		if ((this.site != null) && (this.eqkRupture != null)) {
-			distanceRupParam.setValue(eqkRupture, site);
+		// set supported periods for spectral acceleration
+		DoubleDiscreteConstraint periodConstraint = new DoubleDiscreteConstraint();
+		for (int i = 1; i < AB2003Constants.PERIOD.length; i++) {
+			periodConstraint.addDouble(new Double(AB2003Constants.PERIOD[i]));
 		}
+		periodConstraint.setNonEditable();
+		// set period param (default is 1s, which is provided by AB2003 GMPE)
+		saPeriodParam = new PeriodParam(periodConstraint);
+
+		// set damping parameter. Empty constructor set damping
+		// factor to 5 % (which is the one provided by AB2003 GMPE)
+		saDampingParam = new DampingParam();
+
+		// initialize spectral acceleration parameter (units: g)
+		saParam = new SA_Param(saPeriodParam, saDampingParam);
+		saParam.setNonEditable();
+
+		// initialize peak ground acceleration parameter (units: g)
+		pgaParam = new PGA_Param();
+		pgaParam.setNonEditable();
+
+		// add the warning listeners
+		saParam.addParameterChangeWarningListener(warningListener);
+		pgaParam.addParameterChangeWarningListener(warningListener);
+
+		// put parameters in the supportedIMParams list
+		supportedIMParams.clear();
+		supportedIMParams.addParameter(saParam);
+		supportedIMParams.addParameter(pgaParam);
 	}
 
 	/**
-	 * This sets the site and eqkRupture, and the related parameters, from the
-	 * propEffect object passed in. Warning constrains are ingored.
-	 *
-	 * @param propEffect
-	 * @throws ParameterException
-	 *             Thrown if the Site object doesn't contain a Vs30 parameter
-	 * @throws InvalidRangeException
-	 *             If not valid rake angle
-	 */
-	public final void setPropagationEffect(final PropagationEffect propEffect)
-			throws ParameterException, InvalidRangeException {
-
-		this.site = propEffect.getSite();
-		this.eqkRupture = propEffect.getEqkRupture();
-		siteTypeParam.setValue((String) site.getParameter(SITE_TYPE_NAME)
-				.getValue());
-		magParam.setValueIgnoreWarning(new Double(eqkRupture.getMag()));
-
-		// set the distance param
-		propEffect.setParamValue(distanceRupParam);
-	}
-
-	/**
-	 *
-	 * @throws ParameterException
-	 */
-	protected final void setCoeffIndex() throws ParameterException {
-
-		if (im == null) {
-			throw new ParameterException(
-					C
-							+ ": updateCoefficients(): "
-							+ "The Intensity Measusre Parameter" +
-							" has not been set yet, unable to process.");
-		}
-
-		if (im.getName().equalsIgnoreCase(PGA_Param.NAME)) {
-			iper = 0;
-		} else {
-			iper = ((Integer) indexFromPerHashMap.
-					get(saPeriodParam.getValue()))
-					.intValue();
-		}
-		intensityMeasureChanged = false;
-	}
-
-	/**
-	 *
-	 */
-	public final double getMean() {
-
-		// Check if distance is beyond the user specified max
-		if (rRup > USER_MAX_DISTANCE) {
-			return VERY_SMALL_MEAN;
-		}
-
-		if (intensityMeasureChanged) {
-			setCoeffIndex();// intensityMeasureChanged is set to false in this
-							// method
-		}
-
-		// Computing the hypocentral depth
-		// System.out.println("AB2003 et al -->"+this.eqkRupture.getInfo());
-		EvenlyGriddedSurfaceAPI surf = this.eqkRupture.getRuptureSurface();
-
-		// ----------------------------------------------------------------------
-		// MARCO 2010.03.15
-		// Compute the hypocenter as the middle point of the rupture
-		double hypoLon = 0.0;
-		double hypoLat = 0.0;
-		double hypoDep = 0.0;
-		double cnt = 0.0;
-		for (int j = 0; j < surf.getNumCols(); j++) {
-			for (int k = 0; k < surf.getNumRows(); k++) {
-				hypoLon += surf.getLocation(k, j).getLongitude();
-				hypoLat += surf.getLocation(k, j).getLatitude();
-				hypoDep = hypoDep + surf.getLocation(k, j).getDepth();
-				cnt += 1;
-			}
-		}
-		double chk = surf.getNumCols() * surf.getNumRows();
-
-		hypoLon = hypoLon / cnt;
-		hypoLat = hypoLat / cnt;
-		hypoDep = hypoDep / cnt;
-
-		// Return the computed mean
-		return getMean(iper, mag, rRup, siteType, tecRegType, hypoDep);
-
-	}
-
-	/**
-	 * @return The stdDev value
-	 */
-	public final double getStdDev() {
-
-		if (intensityMeasureChanged) {
-			setCoeffIndex();
-		}
-		return getStdDev(iper, stdDevType, tecRegType);
-	}
-
-	/**
-	 * Allows the user to set the default parameter values for the selected
-	 * Attenuation Relationship.
-	 */
-	public final void setParamDefaults() {
-
-		magParam.setValueAsDefault();
-		tectonicRegionTypeParam.setValueAsDefault();
-		distanceRupParam.setValueAsDefault();
-		saParam.setValueAsDefault();
-		saPeriodParam.setValueAsDefault();
-		saDampingParam.setValueAsDefault();
-		pgaParam.setValueAsDefault();
-		stdDevTypeParam.setValueAsDefault();
-		siteTypeParam.setValue(SITE_TYPE_DEFAULT);
-
-		mag = ((Double) magParam.getValue()).doubleValue();
-		rRup = ((Double) distanceRupParam.getValue()).doubleValue();
-		tecRegType = tectonicRegionTypeParam.getValue().toString();
-		siteType = siteTypeParam.getValue().toString();
-	}
-
-	/**
-	 * This is a simple aproach to set the hypodepth value. This has to be
-	 * further investigated, to be consistent with the approach applied in Zhao
-	 * et al 2006. We are not allowed to use the common OpenSHA ParameterAPI
-	 * approach;
-	 */
-	// public void setHypodepth(double value){
-	// hypodepth = value;
-	// }
-
-	/**
-	 * Creates the two Potential Earthquake parameters (magParam and
-	 * fltTypeParam) and adds them to the eqkRuptureParams list. Makes the
+	 * Initialize earthquake rupture parameter (moment magnitude, tectonic
+	 * region type, focal depth) and add to eqkRuptureParams list. Makes the
 	 * parameters non-editable.
 	 */
 	protected final void initEqkRuptureParams() {
 
-		if (D) {
-			System.out.println("--- initEqkRuptureParams");
-		}
+		// moment magnitude (default 5.5)
+		magParam = new MagParam(AB2003Constants.MAG_WARN_MIN,
+				AB2003Constants.MAG_WARN_MAX);
 
-		// Magnitude parameter
-		magParam = new MagParam(MAG_WARN_MIN, MAG_WARN_MAX);
-		// Add parameters
+		// tectonic region type
+		StringConstraint options = new StringConstraint();
+		options.addString(TectonicRegionType.SUBDUCTION_INTERFACE.toString());
+		options.addString(TectonicRegionType.SUBDUCTION_SLAB.toString());
+		tectonicRegionTypeParam = new TectonicRegionTypeParam(options,
+				TectonicRegionType.SUBDUCTION_INTERFACE.toString());
+
+		// focal depth (default zero km)
+		focalDepthParam = new FocalDepthParam();
+
 		eqkRuptureParams.clear();
 		eqkRuptureParams.addParameter(magParam);
-		// eqkRuptureParams.addParameter(tectonicRegionTypeParam);
-
-		if (D) {
-			System.out.println("--- initEqkRuptureParams end");
-		}
+		eqkRuptureParams.addParameter(tectonicRegionTypeParam);
+		eqkRuptureParams.addParameter(focalDepthParam);
 	}
 
 	/**
-	 * Creates the Site-Type parameter and adds it to the siteParams list.
-	 *  Makes the parameters non-edit-able.
+	 * Initialize site parameters (vs30) and adds it to the siteParams list.
+	 * Makes the parameters non-editable.
 	 */
 	protected final void initSiteParams() {
-		//
-		StringConstraint siteConstraint = new StringConstraint();
 
-		siteConstraint.addString(SITE_TYPE_ROCK);
-		siteConstraint.addString(SITE_TYPE_HARD_SOIL);
-		siteConstraint.addString(SITE_TYPE_MEDIUM_SOIL);
-		siteConstraint.addString(SITE_TYPE_SOFT_SOIL);
-		siteConstraint.setNonEditable();
-		//
-		siteTypeParam = new StringParameter(SITE_TYPE_NAME, siteConstraint,
-				null);
-		siteTypeParam.setInfo(SITE_TYPE_INFO);
-		siteTypeParam.setNonEditable();
+		// vs30 parameters (constrains are not set, default value to 760 m/s)
+		vs30Param = new Vs30_Param();
+
 		siteParams.clear();
-		siteParams.addParameter(siteTypeParam);
+		siteParams.addParameter(vs30Param);
 	}
 
 	/**
-	 * Creates the Propagation Effect parameters and adds them to the
-	 * propagationEffectParams list. Makes the parameters non-editable.
+	 * Initialize Propagation Effect parameters (closest distance to rupture)
+	 * and adds them to the propagationEffectParams list. Makes the parameters
+	 * non-editable.
 	 */
 	protected final void initPropagationEffectParams() {
-		distanceRupParam = new DistanceRupParameter(0.0);
+
+		distanceRupParam = new DistanceRupParameter(
+				AB2003Constants.DISTANCE_RUP_WARN_MIN);
 		distanceRupParam.addParameterChangeWarningListener(warningListener);
-		DoubleConstraint warn = new DoubleConstraint(DISTANCE_RUP_WARN_MIN,
-				DISTANCE_RUP_WARN_MAX);
+		DoubleConstraint warn = new DoubleConstraint(
+				AB2003Constants.DISTANCE_RUP_WARN_MIN,
+				AB2003Constants.DISTANCE_RUP_WARN_MAX);
 		warn.setNonEditable();
 		distanceRupParam.setWarningConstraint(warn);
-
 		distanceRupParam.setNonEditable();
+
 		propagationEffectParams.addParameter(distanceRupParam);
 	}
 
 	/**
-	 * Creates other Parameters that the mean or stdDev depends upon, such as
-	 * the Component or StdDevType parameters.
+	 * Initialize other Parameters (standard deviation type, component, sigma
+	 * truncation type, sigma truncation level).
 	 */
 	protected final void initOtherParams() {
 
-		if (D) {
-			System.out.println("--- initOtherParams");
-		}
-
 		// init other params defined in parent class
+		// (sigma truncation type, sigma truncation level,
+		// tectonic region type)
 		super.initOtherParams();
 
-		// The stdDevType Parameter
+		// stdDevType Parameter
 		StringConstraint stdDevTypeConstraint = new StringConstraint();
 		stdDevTypeConstraint.addString(StdDevTypeParam.STD_DEV_TYPE_TOTAL);
 		stdDevTypeConstraint.addString(StdDevTypeParam.STD_DEV_TYPE_NONE);
@@ -620,32 +264,20 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 		stdDevTypeConstraint.setNonEditable();
 		stdDevTypeParam = new StdDevTypeParam(stdDevTypeConstraint);
 
-		// The Component Parameter
+		// component Parameter
 		StringConstraint constraint = new StringConstraint();
 		constraint.addString(ComponentParam.COMPONENT_RANDOM_HORZ);
-		constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
 		constraint.setNonEditable();
 		componentParam = new ComponentParam(constraint,
 				ComponentParam.COMPONENT_RANDOM_HORZ);
-		componentParam = new ComponentParam(constraint,
-				ComponentParam.COMPONENT_AVE_HORZ);
-		// tecRegType
-		StringConstraint tecRegConstr = new StringConstraint();
-		tecRegConstr.addString(FLT_TEC_ENV_INTERFACE);
-		tecRegConstr.addString(FLT_TEC_ENV_INSLAB);
-		tectonicRegionTypeParam = new TectonicRegionTypeParam(tecRegConstr,
-				FLT_TEC_ENV_INTERFACE);
-		// tectonicRegionTypeParam = new
-		// TectonicRegionTypeParam(tecRegConstr,FLT_TEC_ENV_INSLAB);
 
 		// add these to the list
 		otherParams.addParameter(stdDevTypeParam);
 		otherParams.addParameter(componentParam);
-		// otherParams.addParameter(tectonicRegionTypeParam);
-
-		otherParams.replaceParameter(tectonicRegionTypeParam.NAME,
-				tectonicRegionTypeParam);
-
+		// remove tectonic region type params from other parameter list
+		// because is set from earthquake rupture (and therefore
+		// is defined in earthquake parameter list)
+		otherParams.removeParameter(TectonicRegionTypeParam.NAME);
 	}
 
 	/**
@@ -661,12 +293,12 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 		meanIndependentParams.clear();
 		meanIndependentParams.addParameter(magParam);
 		meanIndependentParams.addParameter(tectonicRegionTypeParam);
+		meanIndependentParams.addParameter(focalDepthParam);
+		meanIndependentParams.addParameter(vs30Param);
 		meanIndependentParams.addParameter(distanceRupParam);
-		meanIndependentParams.addParameter(siteTypeParam);
 
 		// params that the stdDev depends upon
 		stdDevIndependentParams.clear();
-		stdDevIndependentParams.addParameter(saPeriodParam);
 		stdDevIndependentParams.addParameter(tectonicRegionTypeParam);
 		stdDevIndependentParams.addParameter(stdDevTypeParam);
 
@@ -684,35 +316,154 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 	}
 
 	/**
-	 * Creates the two supported IM parameters (PGA and SA), as well as the
-	 * independenParameters of SA (periodParam and dampingParam) and adds them
-	 * to the supportedIMParams list. Makes the parameters non-editable.
+	 * Adds the parameter change listeners. This allows to listen to when-ever
+	 * the parameter is changed.
 	 */
-	protected final void initSupportedIntensityMeasureParams() {
-		// Create saParam:
-		DoubleDiscreteConstraint periodConstraint = 
-			new DoubleDiscreteConstraint();
-		for (int i = 1; i < PERIOD.length; i++) {
-			periodConstraint.addDouble(new Double(PERIOD[i]));
+	protected final void initParameterEventListeners() {
+
+		// earthquake rupture params
+		magParam.addParameterChangeListener(this);
+		tectonicRegionTypeParam.addParameterChangeListener(this);
+		focalDepthParam.addParameterChangeListener(this);
+
+		// site params
+		vs30Param.addParameterChangeListener(this);
+
+		// propagation effect param
+		distanceRupParam.addParameterChangeListener(this);
+	}
+
+	/**
+	 * This listens for parameter changes and updates the primitive parameters
+	 * accordingly
+	 */
+	public final void parameterChange(final ParameterChangeEvent e) {
+
+		String pName = e.getParameterName();
+		Object val = e.getNewValue();
+
+		if (pName.equals(MagParam.NAME)) {
+			mag = ((Double) val).doubleValue();
+		} else if (pName.equals(TectonicRegionTypeParam.NAME)) {
+			tecRegType = (String) val;
+		} else if (pName.equals(FocalDepthParam.NAME)) {
+			focalDepth = ((Double) val).doubleValue();
+		} else if (pName.equals(Vs30_Param.NAME)) {
+			vs30 = ((Double) val).doubleValue();
+		} else if (pName.equals(DistanceRupParameter.NAME)) {
+			rRup = ((Double) val).doubleValue();
 		}
-		periodConstraint.setNonEditable();
-		saPeriodParam = new PeriodParam(periodConstraint);
-		saDampingParam = new DampingParam();
-		saParam = new SA_Param(saPeriodParam, saDampingParam);
-		saParam.setNonEditable();
+	}
 
-		// Create PGA Parameter (pgaParam):
-		pgaParam = new PGA_Param();
-		pgaParam.setNonEditable();
+	/**
+	 * Allows to reset the change listeners on the parameters.
+	 */
+	public final void resetParameterEventListeners() {
+		magParam.removeParameterChangeListener(this);
+		tectonicRegionTypeParam.removeParameterChangeListener(this);
+		focalDepthParam.removeParameterChangeListener(this);
+		vs30Param.removeParameterChangeListener(this);
+		distanceRupParam.removeParameterChangeListener(this);
+		this.initParameterEventListeners();
+	}
 
-		// Add the warning listeners:
-		saParam.addParameterChangeWarningListener(warningListener);
-		pgaParam.addParameterChangeWarningListener(warningListener);
+	/**
+	 * This sets the eqkRupture related parameters (moment magnitude, tectonic
+	 * region type, focal depth) based on the eqkRupture passed in. The
+	 * internally held eqkRupture object is also set as that passed in. Warning
+	 * constrains are ignored.
+	 */
+	public final void setEqkRupture(final EqkRupture eqkRupture) {
 
-		// Put parameters in the supportedIMParams list:
-		supportedIMParams.clear();
-		supportedIMParams.addParameter(saParam);
-		supportedIMParams.addParameter(pgaParam);
+		magParam.setValueIgnoreWarning(new Double(eqkRupture.getMag()));
+
+		tectonicRegionTypeParam
+				.setValue(eqkRupture.getTectRegType().toString());
+
+		focalDepthParam.setValueIgnoreWarning(new Double(eqkRupture
+				.getHypocenterLocation().getDepth()));
+
+		this.eqkRupture = eqkRupture;
+
+		setPropagationEffectParams();
+	}
+
+	/**
+	 * This sets the site-related parameter (vs30) based on what is in the Site
+	 * object passed in. This also sets the internally held Site object as that
+	 * passed in.
+	 */
+	public final void setSite(final Site site) {
+		vs30Param.setValueIgnoreWarning((Double) site.getParameter(
+				Vs30_Param.NAME).getValue());
+		this.site = site;
+		setPropagationEffectParams();
+	}
+
+	/**
+	 * This sets the site and eqkRupture, and the related parameters, from the
+	 * propEffect object passed in.
+	 */
+
+	public final void setPropagationEffectParams() {
+		if ((this.site != null) && (this.eqkRupture != null)) {
+			distanceRupParam.setValue(eqkRupture, site);
+		}
+	}
+
+	/**
+	 * Set period index.
+	 */
+	protected final void setCoeffIndex() {
+		if (im.getName().equalsIgnoreCase(PGA_Param.NAME)) {
+			iper = 0;
+		} else {
+			iper = ((Integer) indexFromPerHashMap.get(saPeriodParam.getValue()))
+					.intValue();
+		}
+	}
+
+	/**
+	 * Compute mean.
+	 */
+	public final double getMean() {
+
+		if (rRup > USER_MAX_DISTANCE) {
+			return VERY_SMALL_MEAN;
+		}
+
+		setCoeffIndex();
+
+		return getMean(iper, mag, rRup, vs30, tecRegType, focalDepth);
+
+	}
+
+	/**
+	 * Compute standard deviation.
+	 */
+	public final double getStdDev() {
+
+		setCoeffIndex();
+
+		return getStdDev(iper, stdDevType, tecRegType);
+	}
+
+	/**
+	 * Allows the user to set the default parameter values for the selected
+	 * Attenuation Relationship.
+	 */
+	public final void setParamDefaults() {
+
+		magParam.setValueAsDefault();
+		tectonicRegionTypeParam.setValueAsDefault();
+		focalDepthParam.setValueAsDefault();
+		vs30Param.setValueAsDefault();
+		distanceRupParam.setValueAsDefault();
+		saPeriodParam.setValueAsDefault();
+		saDampingParam.setValueAsDefault();
+		saParam.setValueAsDefault();
+		pgaParam.setValueAsDefault();
+		stdDevTypeParam.setValueAsDefault();
 	}
 
 	/**
@@ -724,7 +475,7 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 
 	/**
 	 * Returns the Short Name of each AttenuationRelationship
-	 *
+	 * 
 	 */
 	public final String getShortName() {
 		return SHORT_NAME;
@@ -733,151 +484,154 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 	/**
 	 * Compute mean.
 	 */
-	public final double getMean(final int iper, double mag, final double rRup, final String siteType,
-			final String tecRegType, final double hypoDep) {
-		double hypodepth;
-		double g = 0.0; // this is unity for
-		double flag_Sc = 0.0; // This is unity for soil NEHRP C - Otherwise 0
-		double flag_Sd = 0.0; // This is unity for soil NEHRP D - Otherwise 0
-		double flag_Se = 0.0; // This is unity for soil NEHRP E - Otherwise 0
-		// NEHRP B all soil coefficients equal zero
-		double mean = 0.00;
+	public final double getMean(final int iper, double mag, final double rRup,
+			final double vs30, final String tecRegType, double hypoDep) {
 
-		// set the depth for events with hdepth > 100km
-		if (hypoDep > 100) {
-			hypodepth = 100;
-		} else {
-			hypodepth = hypoDep;
+		hypoDep = capHypocentralDepth(hypoDep);
+
+		mag = capMagnitude(mag, tecRegType);
+
+		double logY = computeRockResponse(tecRegType, iper, mag, hypoDep, rRup)
+				+ computeSoilResponse(tecRegType, iper, mag, hypoDep, rRup,
+						vs30);
+		logY *= AB2003Constants.LOG_2_LN;
+		
+		return Math.log(Math.exp(logY) / 981);
+	}
+
+	private double capHypocentralDepth(double hypoDep) {
+		if (hypoDep > AB2003Constants.THRESHOLD_HYPO_DEPTH) {
+			hypoDep = AB2003Constants.THRESHOLD_HYPO_DEPTH;
 		}
+		return hypoDep;
+	}
 
-		double R = Double.NaN;
-		double PGArx = 0.00;
-
-		if (tecRegType.equals(FLT_TEC_ENV_INTERFACE)) {
-			if (mag >= 8.5) {
-				mag = 8.5;
-			} else {
-				this.mag = mag;
-			}
-			delta = 0.00724 * Math.pow(10, 0.507 * mag);
-			R = Math.sqrt(rRup * rRup + delta * delta);
-			g = Math.pow(10, 1.2 - 0.18 * mag);
-			PGArx = Math.pow(10, INTER_C1[0] + INTER_C2[0] * mag + INTER_C3[0] * hypodepth
-					+ INTER_C4[0] * R - g * Math.log10(R));
-		} else if (tecRegType.equals(FLT_TEC_ENV_INSLAB)) {
-			if (mag >= 8.0) {
-				mag = 8.0;
-			} else {
-				this.mag = mag;
-			}
-			delta = 0.00724 * Math.pow(10, 0.507 * mag);
-			R = Math.sqrt(rRup * rRup + delta * delta);
-			g = Math.pow(10, 0.301 - 0.01 * mag);
-			PGArx = Math.pow(10, INTRA_C1[0] + INTRA_C2[0] * mag + INTRA_C3[0] * hypodepth
-					+ INTRA_C4[0] * R - g * Math.log10(R));
-		} else {
-			System.out.println("+++" + tecRegType.toString() + "--");
-			throw new RuntimeException(
-					"\n  Cannot handle this combination: \n  tectonic region");
+	private double capMagnitude(double mag, final String tecRegType) {
+		double thresholdMag = Double.NaN;
+		if (tecRegType.equals(TectonicRegionType.SUBDUCTION_INTERFACE
+				.toString())) {
+			thresholdMag = AB2003Constants.THRESHOLD_MAG_INTERFACE;
+		} else if (tecRegType.equals(TectonicRegionType.SUBDUCTION_SLAB
+				.toString())) {
+			thresholdMag = AB2003Constants.THRESHOLD_MAG_INTRASLAB;
 		}
+		if (mag >= thresholdMag) {
+			mag = thresholdMag;
+		}
+		return mag;
+	}
 
-		System.out.println("PGArx: " + PGArx);
+	private double computeRockResponse(String tecRegType, int periodIndex,
+			double mag, double hypoDep, double rRup) {
+		double delta = AB2003Constants.NEAR_SOURCE_SATURATION_FACTOR1
+				* Math.pow(10, AB2003Constants.NEAR_SOURCE_SATURATION_FACTOR2
+						* mag);
+		double R = Math.sqrt(rRup * rRup + delta * delta);
+		double g = computedGeometricSpreadingFactor(tecRegType, mag);
+		double rockResponse = Double.NaN;
+		if (tecRegType.equalsIgnoreCase(TectonicRegionType.SUBDUCTION_INTERFACE
+				.toString())) {
+			rockResponse = AB2003Constants.INTER_C1[periodIndex]
+					+ AB2003Constants.INTER_C2[periodIndex] * mag
+					+ AB2003Constants.INTER_C3[periodIndex] * hypoDep
+					+ AB2003Constants.INTER_C4[periodIndex] * R - g
+					* Math.log10(R);
+		} else if (tecRegType
+				.equalsIgnoreCase(TectonicRegionType.SUBDUCTION_SLAB.toString())) {
+			rockResponse = AB2003Constants.INTRA_C1[periodIndex]
+					+ AB2003Constants.INTRA_C2[periodIndex] * mag
+					+ AB2003Constants.INTRA_C3[periodIndex] * hypoDep
+					+ AB2003Constants.INTRA_C4[periodIndex] * R - g
+					* Math.log10(R);
+		}
+		return rockResponse;
+	}
 
-		if (im.getName().equals(PGA_Param.NAME) && FREQ[iper] >= 2) {
+	/**
+	 * Compute geometric spreading factor (i.e. 10^(f1-f2*mag))
+	 */
+	private double computedGeometricSpreadingFactor(String tecRegType,
+			double mag) {
+		double f1 = Double.NaN;
+		double f2 = Double.NaN;
+		if (tecRegType.equalsIgnoreCase(TectonicRegionType.SUBDUCTION_INTERFACE
+				.toString())) {
+			f1 = AB2003Constants.INTERFACE_GEOM_SPREAD_FACTOR1;
+			f2 = AB2003Constants.INTERFACE_GEOM_SPREAD_FACTOR2;
+		} else if (tecRegType
+				.equalsIgnoreCase(TectonicRegionType.SUBDUCTION_SLAB.toString())) {
+			f1 = AB2003Constants.INTRASLAB_GEOM_SPREAD_FACTOR1;
+			f2 = AB2003Constants.INTRASLAB_GEOM_SPREAD_FACTOR2;
+		}
+		return Math.pow(10, f1 - f2 * mag);
+	}
+
+	private double computeSoilResponse(String tecRegType, int periodIndex,
+			double mag, double hypoDep, double rRup, double vs30) {
+		double pgaOnRock = Math.pow(10,
+				computeRockResponse(tecRegType, 0, mag, hypoDep, rRup));
+		double sl = computeSoilLinearityTerm(iper, pgaOnRock);
+		double[] s = computeSiteTermCorrection(vs30);
+		double soilResponse = Double.NaN;
+		if (tecRegType.equalsIgnoreCase(TectonicRegionType.SUBDUCTION_INTERFACE
+				.toString())) {
+			soilResponse = s[0] * AB2003Constants.INTER_C5[periodIndex] * sl
+					+ s[1] * AB2003Constants.INTER_C6[periodIndex] * sl + s[2]
+					* AB2003Constants.INTER_C7[periodIndex] * sl;
+		} else if (tecRegType
+				.equalsIgnoreCase(TectonicRegionType.SUBDUCTION_SLAB.toString())) {
+			soilResponse = s[0] * AB2003Constants.INTRA_C5[periodIndex] * sl
+					+ s[1] * AB2003Constants.INTRA_C6[periodIndex] * sl + s[2]
+					* AB2003Constants.INTRA_C7[periodIndex] * sl;
+		}
+		return soilResponse;
+	}
+
+	private double computeSoilLinearityTerm(final int iper, double PGArx) {
+		double sl = Double.NaN;
+		if (im.getName().equals(PGA_Param.NAME)
+				&& AB2003Constants.FREQ[iper] >= 2) {
 			if ((100 < PGArx) && (PGArx < 500)) {
 				sl = 1.00 - (PGArx - 100) / 400;
-			} else if (PGArx >= 500)
-			 {
+			} else if (PGArx >= 500) {
 				sl = 0.00;
-			// System.out.println("case0");
 			}
-		} else if (FREQ[iper] <= 1 || 100 < PGArx) {
-			// if (100 < PGArx)
+		} else if (AB2003Constants.FREQ[iper] <= 1 || 100 < PGArx) {
 			sl = 1.00;
-			// System.out.println("case1");
-		} else if ((1 < FREQ[iper]) && (FREQ[iper] < 2)) {
+		} else if ((1 < AB2003Constants.FREQ[iper])
+				&& (AB2003Constants.FREQ[iper] < 2)) {
 			if ((100 < PGArx) && (PGArx < 500)) {
-				sl = 1.00 - (FREQ[iper] - 1) * (PGArx - 100) / 400;
-			} else if (PGArx >= 500)
-			 {
-				sl = 1.00 - (FREQ[iper] - 1);
-			// System.out.println("case2");
+				sl = 1.00 - (AB2003Constants.FREQ[iper] - 1) * (PGArx - 100)
+						/ 400;
+			} else if (PGArx >= 500) {
+				sl = 1.00 - (AB2003Constants.FREQ[iper] - 1);
 			}
-		} else {
-			throw new RuntimeException(
-					"\n  Unrecognized nonlinear soil effect \n");
 		}
+		return sl;
+	}
 
-		// Site term correction
-		if (D) {
-			System.out.println("Site conditions: " + siteType);
+	private double[] computeSiteTermCorrection(final double vs30) {
+		double[] s = new double[3];
+		if (vs30 > AB2003Constants.NEHRP_C_UPPER_BOUND) {
+			s[0] = 0.0;
+			s[1] = 0.0;
+			s[2] = 0.0;
+		} else if (vs30 > AB2003Constants.NEHRP_D_UPPER_BOUND
+				&& vs30 <= AB2003Constants.NEHRP_C_UPPER_BOUND) {
+			s[0] = 1.0;
+			s[1] = 0.0;
+			s[2] = 0.0;
+		} else if (vs30 >= AB2003Constants.NEHRP_E_UPPER_BOUND
+				&& vs30 <= AB2003Constants.NEHRP_D_UPPER_BOUND) {
+			s[0] = 0.0;
+			s[1] = 1.0;
+			s[2] = 0.0;
+		} else if (vs30 < AB2003Constants.NEHRP_E_UPPER_BOUND) {
+			s[0] = 0.0;
+			s[1] = 0.0;
+			s[2] = 1.0;
 		}
-		if (siteType.equals(SITE_TYPE_ROCK)) {
-			// Vs30 > 760
-			if (D) {
-				System.out.println("NEHRP B");
-			}
-			flag_Sc = 0.0;
-			flag_Sd = 0.0;
-			flag_Se = 0.0;
-		} else if (siteType.equals(SITE_TYPE_HARD_SOIL)) {
-			// 360 < Vs30 < 760
-			if (D) {
-				System.out.println("NEHRP C");
-			}
-			flag_Sc = 1.0;
-			flag_Sd = 0.0;
-			flag_Se = 0.0;
-		} else if (siteType.equals(SITE_TYPE_MEDIUM_SOIL)) {
-			// 180 < Vs30 < 360
-			if (D) {
-				System.out.println("NEHRP D");
-			}
-			flag_Sc = 0.0;
-			flag_Sd = 1.0;
-			flag_Se = 0.0;
-		} else if (siteType.equals(SITE_TYPE_SOFT_SOIL)) {
-			// Vs30 < 180
-			if (D) {
-				System.out.println("NEHRP E");
-			}
-			flag_Sc = 0.0;
-			flag_Sd = 0.0;
-			flag_Se = 1.0;
-		} else {
-			throw new RuntimeException("\n  Unrecognized site type \n");
-		}
-
-		double logY = 0.00;
-		// compute the mean
-		if (tecRegType.equals(FLT_TEC_ENV_INTERFACE)) {
-			// add soil nonlinearity effect
-
-			logY = INTER_C1[iper] + INTER_C2[iper] * mag + INTER_C3[iper] * hypodepth + INTER_C4[iper]
-					* R - g * Math.log10(R) + flag_Sc * INTER_C5[iper] * sl + flag_Sd
-					* INTER_C6[iper] * sl + flag_Se * INTER_C7[iper] * sl;
-			// correction from erratum AB2008
-			double logY02 = INTER_C1[3] + INTER_C2[3] * mag + INTER_C3[3] * hypodepth + INTER_C4[3] * R
-					- g * Math.log10(R) + flag_Sc * INTER_C5[3] * sl + flag_Sd
-					* INTER_C6[3] * sl + flag_Se * INTER_C7[3] * sl;
-			double logY04 = INTER_C1[4] + INTER_C2[4] * mag + INTER_C3[4] * hypodepth + INTER_C4[4] * R
-					- g * Math.log10(R) + flag_Sc * INTER_C5[4] * sl + flag_Sd
-					* INTER_C6[4] * sl + flag_Se * INTER_C7[4] * sl;
-			if (PERIOD[iper] == 0.2) {
-				// add correction
-				logY = 0.333 * logY02 + 0.667 * logY04;
-			} else if (PERIOD[iper] == 0.4) {
-				// add correction
-				logY = 0.333 * logY04 + 0.667 * logY02;
-			}
-			logY *= LOG_2_LN;
-		} else if (tecRegType.equals(FLT_TEC_ENV_INSLAB)) {
-			logY = INTRA_C1[iper] + INTRA_C2[iper] * mag + INTRA_C3[iper] * hypodepth
-					+ INTRA_C4[iper] * R - g * Math.log10(R) + flag_Sc * INTRA_C5[iper]
-					* sl + flag_Sd * INTRA_C6[iper] * sl + flag_Se * INTRA_C7[iper] * sl;
-			logY *= LOG_2_LN;
-		}
-		return Math.log(Math.exp(logY) / 981);
+		return s;
 	}
 
 	/**
@@ -891,29 +645,37 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 	 * @param stdDevType
 	 * @return
 	 */
-	public final double getStdDev(final int iper, final String stdDevType, final String tecRegType) {
+	public final double getStdDev(final int iper, final String stdDevType,
+			final String tecRegType) {
 
-		if (tecRegType.equals(FLT_TEC_ENV_INTERFACE)) {
+		if (tecRegType.equals(TectonicRegionType.SUBDUCTION_INTERFACE
+				.toString())) {
 			if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL)) {
-				return LOG_2_LN * INTER_TOTAL_STD[iper];
+				return AB2003Constants.LOG_2_LN
+						* AB2003Constants.INTER_TOTAL_STD[iper];
 			} else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE)) {
 				return 0;
 			} else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTER)) {
-				return LOG_2_LN * INTER_INTEREVENT_STD[iper];
+				return AB2003Constants.LOG_2_LN
+						* AB2003Constants.INTER_INTEREVENT_STD[iper];
 			} else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTRA)) {
-				return LOG_2_LN * INTER_INTRAEVENT_STD[iper];
+				return AB2003Constants.LOG_2_LN
+						* AB2003Constants.INTER_INTRAEVENT_STD[iper];
 			} else {
 				return Double.NaN;
 			}
 		} else {
 			if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL)) {
-				return LOG_2_LN * INTRA_TOTAL_STD[iper];
+				return AB2003Constants.LOG_2_LN
+						* AB2003Constants.INTRA_TOTAL_STD[iper];
 			} else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE)) {
 				return 0;
 			} else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTER)) {
-				return LOG_2_LN * INTRA_INTRAEVENT_STD[iper];
+				return AB2003Constants.LOG_2_LN
+						* AB2003Constants.INTRA_INTEREVENT_STD[iper];
 			} else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTRA)) {
-				return LOG_2_LN * INTRA_INTEREVENT_STD[iper];
+				return AB2003Constants.LOG_2_LN
+						* AB2003Constants.INTRA_INTRAEVENT_STD[iper];
 			} else {
 				return Double.NaN;
 			}
@@ -921,84 +683,10 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 	}
 
 	/**
-	 * This listens for parameter changes and updates the primitive parameters
-	 * accordingly
-	 * 
-	 * @param e
-	 *            ParameterChangeEvent
-	 */
-	public final void parameterChange(final ParameterChangeEvent e) {
-
-		String pName = e.getParameterName();
-		Object val = e.getNewValue();
-
-		if (D) {
-			System.out.println("Changed param: " + pName);
-		}
-
-		if (pName.equals(DistanceRupParameter.NAME)) {
-			rRup = ((Double) val).doubleValue();
-		} else if (pName.equals(MagParam.NAME)) {
-			mag = ((Double) val).doubleValue();
-		} else if (pName.equals(StdDevTypeParam.NAME)) {
-			stdDevType = (String) val;
-		} else if (pName.equals(TectonicRegionTypeParam.NAME)) {
-			tecRegType = tectonicRegionTypeParam.getValue().toString();
-			if (D) {
-				System.out.println("tecRegType new value:" + tecRegType);
-			}
-		} else if (pName.equals(SITE_TYPE_NAME)) {
-			siteType = this.getParameter(this.SITE_TYPE_NAME).getValue()
-					.toString();
-		} else if (pName.equals(PeriodParam.NAME)) {
-			intensityMeasureChanged = true;
-		}
-	}
-
-	/**
-	 * Allows to reset the change listeners on the parameters
-	 */
-	public final void resetParameterEventListeners() {
-		magParam.removeParameterChangeListener(this);
-		tectonicRegionTypeParam.removeParameterChangeListener(this);
-		siteTypeParam.removeParameterChangeListener(this);
-		distanceRupParam.removeParameterChangeListener(this);
-		stdDevTypeParam.removeParameterChangeListener(this);
-		saPeriodParam.removeParameterChangeListener(this);
-		this.initParameterEventListeners();
-	}
-
-	/**
-	 * Adds the parameter change listeners. This allows to listen to when-ever
-	 * the parameter is changed.
-	 */
-	protected final void initParameterEventListeners() {
-		if (D) {
-			System.out.println("--- initParameterEventListeners begin");
-		}
-
-		magParam.addParameterChangeListener(this);
-		tectonicRegionTypeParam.addParameterChangeListener(this);
-		siteTypeParam.addParameterChangeListener(this);
-		distanceRupParam.addParameterChangeListener(this);
-		stdDevTypeParam.addParameterChangeListener(this);
-		saPeriodParam.addParameterChangeListener(this);
-
-		if (D) {
-			System.out.println("--- initParameterEventListeners end");
-		}
-	}
-
-	/**
-	 * This provides a URL where more info on this model can be obtained
-	 * 
-	 * @throws MalformedURLException
-	 *             if returned URL is not a valid URL.
-	 * @returns the URL to the AttenuationRelationship document on the Web.
+	 * This provides a URL where more info on this model can be obtained.
 	 */
 	public final URL getInfoURL() throws MalformedURLException {
-		return new URL(
-				"http://www.opensha.org/documentation/modelsImplemented/attenRel/AB_2003.html");
+		return null;
 	}
 
 }
