@@ -20,7 +20,6 @@ package org.opensha.sha.imr.attenRelImpl.test;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
-import org.opensha.sha.imr.attenRelImpl.BW_1997_AttenRelTest;
 
 ;
 

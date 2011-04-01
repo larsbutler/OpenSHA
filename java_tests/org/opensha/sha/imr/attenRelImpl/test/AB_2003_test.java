@@ -95,28 +95,28 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 		pgaInterfaceTable = 
 			new double[AB_2003_test.INTERFACE_TABLE_NUM_ROWS]
 			           [AB_2003_test.TABLE_NUM_COL];
-		readTable(
+		AttenRelTestHelper.readTable(
 				new File(ClassLoader.getSystemResource(
 						AB_2003_test.PGA_INTERFACE_TABLE_FILE).toURI()),
 				pgaInterfaceTable);
 		saInterfaceTable = 
 			new double[AB_2003_test.INTERFACE_TABLE_NUM_ROWS]
 			           [AB_2003_test.TABLE_NUM_COL];
-		readTable(
+		AttenRelTestHelper.readTable(
 				new File(ClassLoader.getSystemResource(
 						AB_2003_test.SA_INTERFACE_TABLE_FILE).toURI()),
 				saInterfaceTable);
 		pgaIntraSlabTable =
 			new double[AB_2003_test.INTRA_SLAB_TABLE_NUM_ROWS]
 			           [AB_2003_test.TABLE_NUM_COL];
-		readTable(
+		AttenRelTestHelper.readTable(
 				new File(ClassLoader.getSystemResource(
 						AB_2003_test.PGA_INTRASLAB_TABLE_FILE).toURI()),
 				pgaIntraSlabTable);
 		saIntraSlabTable =
 			new double[AB_2003_test.INTRA_SLAB_TABLE_NUM_ROWS]
 			           [AB_2003_test.TABLE_NUM_COL];
-		readTable(
+		AttenRelTestHelper.readTable(
 				new File(ClassLoader.getSystemResource(
 						AB_2003_test.SA_INTRASLAB_TABLE_FILE).toURI()),
 				saIntraSlabTable);
@@ -383,28 +383,6 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 		validateAgainstTable(tectonicRegionType, hypocentralDepth, periodIndex,
 				magnitudeIndex, siteTypeIndex, expectedResultIndex,
 				pgaInterfaceTable);
-	}
-
-	/**
-	 * Read table.
-	 * 
-	 * @param file
-	 * @param table
-	 * @throws Exception
-	 */
-	private void readTable(final File file, final double[][] table)
-			throws Exception {
-		BufferedReader br = new BufferedReader(new FileReader(file));
-		String line = null;
-		StringTokenizer st = null;
-		int rowIndex = 0;
-		while ((line = br.readLine()) != null) {
-			st = new StringTokenizer(line);
-			for (int i = 0; i < table[0].length; i++) {
-				table[rowIndex][i] = Double.valueOf(st.nextToken());
-			}
-			rowIndex = rowIndex + 1;
-		}
 	}
 
 	/**

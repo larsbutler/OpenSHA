@@ -1,4 +1,9 @@
-package org.opensha.sha.imr.attenRelImpl;
+package org.opensha.sha.imr.attenRelImpl.test;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.util.StringTokenizer;
 
 import org.opensha.commons.data.Site;
 import org.opensha.commons.geo.Location;
@@ -10,7 +15,7 @@ import org.opensha.sha.faultSurface.PointSurface;
 import org.opensha.sha.faultSurface.StirlingGriddedSurface;
 import org.opensha.sha.imr.param.PropagationEffectParams.DistanceEpicentralParameter;
 
-public class PredictionEquationTestHelper {
+public class AttenRelTestHelper {
 
     /**
      * Creates an EqkRupture object for a point source.
@@ -52,5 +57,23 @@ public class PredictionEquationTestHelper {
                                 2));
         return hypoDist;
     }
+    
+	/**
+	 * Read table from file and store in a bidimensional array.
+	 */
+	public static void readTable(final File file, final double[][] table)
+			throws Exception {
+		BufferedReader br = new BufferedReader(new FileReader(file));
+		String line = null;
+		StringTokenizer st = null;
+		int rowIndex = 0;
+		while ((line = br.readLine()) != null) {
+			st = new StringTokenizer(line);
+			for (int i = 0; i < table[0].length; i++) {
+				table[rowIndex][i] = Double.valueOf(st.nextToken());
+			}
+			rowIndex = rowIndex + 1;
+		}
+	}
 
 }

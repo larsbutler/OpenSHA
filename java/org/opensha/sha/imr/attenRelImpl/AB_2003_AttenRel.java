@@ -585,11 +585,10 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 			double mag, double hypoDep, double rRup, double vs30) {
 		// as it should be
 		double pgaOnRock = Math.pow(10,
-				computeRockResponse(tecRegType, periodIndex, mag, hypoDep, rRup));
+				computeRockResponse(tecRegType, 0, mag, hypoDep, rRup));
 //		// as in mathSHA
 //		double pgaOnRock = 
 //				computeRockResponse(tecRegType, 0, mag, hypoDep, rRup);
-		System.out.println("pgaOnRock: "+pgaOnRock);
 		double sl = computeSoilLinearityTerm(periodIndex, pgaOnRock);
 		double[] s = computeSiteTermCorrection(vs30);
 		double soilResponse = Double.NaN;
@@ -604,11 +603,6 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 					+ s[1] * AB2003Constants.INTRA_C6[periodIndex] * sl + s[2]
 					* AB2003Constants.INTRA_C7[periodIndex] * sl;
 		}
-//		System.out.println("mag: "+mag);
-//		System.out.println("period index: "+periodIndex);
-//		System.out.println("site term correction: "+s[0]+" "+s[1]+" "+s[2]);
-//		System.out.println("soil linearity term: "+sl);
-//		System.out.println("soilResponce: "+soilResponse);
 		return soilResponse;
 	}
 
@@ -637,25 +631,6 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 				sl = 0.0;
 			}
 		}
-		
-//		if (im.getName().equals(PGA_Param.NAME)
-//				|| AB2003Constants.FREQ[iper] >= 2) {
-//			if ((PGArx > 100) && (PGArx < 500)) {
-//				sl = 1.00 - (PGArx - 100) / 400;
-//			} else if (PGArx >= 500) {
-//				sl = 0.00;
-//			}
-//		} else if (AB2003Constants.FREQ[iper] <= 1 || PGArx > 100) {
-//			sl = 1.00;
-//		} else if ((1 < AB2003Constants.FREQ[iper])
-//				&& (AB2003Constants.FREQ[iper] < 2)) {
-//			if ((100 < PGArx) && (PGArx < 500)) {
-//				sl = 1.00 - (AB2003Constants.FREQ[iper] - 1) * (PGArx - 100)
-//						/ 400;
-//			} else if (PGArx >= 500) {
-//				sl = 1.00 - (AB2003Constants.FREQ[iper] - 1);
-//			}
-//		}
 		return sl;
 	}
 
