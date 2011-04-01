@@ -56,8 +56,8 @@ import org.opensha.sha.util.TectonicRegionType;
  * <LI>magParam - moment magnitude
  * <LI>distanceRupParam - closest distance to rupture surface
  * <LI>vs30Param - shear wave velocity (m/s) averaged over the top 30 m of the
- * soil profile vs30 > 760 -> NEHRP B 360 < vs30 <=760 -> NEHRP C 180 <= vs30 <=
- * 360 -> NEHRP D vs30 < 180 -> NEHRP E
+ * soil profile vs30 > 760 -> NEHRP B; 360 < vs30 <=760 -> NEHRP C; 180 <= vs30
+ * <= 360 -> NEHRP D; vs30 < 180 -> NEHRP E;
  * <LI>tectonicRegionTypeParam - interface or intra slab
  * <LI>focalDepthParam - depth to the earthquake rupture hypocenter
  * <LI>componentParam - random horizontal component
@@ -77,7 +77,7 @@ import org.opensha.sha.util.TectonicRegionType;
  * </p>
  * 
  ** 
- * @author L. Danciu
+ * @author L. Danciu, D. Monelli
  * @version 1.0, December 2010
  */
 public class AB_2003_AttenRel extends AttenuationRelationship implements
@@ -121,7 +121,8 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 	private transient ParameterChangeWarningListener warningListener = null;
 
 	/**
-	 * Contruct attenuation relationship. Initialize parameter lists.
+	 * Contruct attenuation relationship. Initialize parameters and parameter
+	 * lists.
 	 */
 	public AB_2003_AttenRel(final ParameterChangeWarningListener warningListener) {
 
@@ -331,6 +332,9 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 
 		// propagation effect param
 		distanceRupParam.addParameterChangeListener(this);
+
+		// standard deviation type param
+		stdDevTypeParam.addParameterChangeListener(this);
 	}
 
 	/**
@@ -352,6 +356,8 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 			vs30 = ((Double) val).doubleValue();
 		} else if (pName.equals(DistanceRupParameter.NAME)) {
 			rRup = ((Double) val).doubleValue();
+		} else if (pName.equals(StdDevTypeParam.NAME)) {
+			stdDevType = (String) val;
 		}
 	}
 
@@ -364,6 +370,7 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 		focalDepthParam.removeParameterChangeListener(this);
 		vs30Param.removeParameterChangeListener(this);
 		distanceRupParam.removeParameterChangeListener(this);
+		stdDevTypeParam.removeParameterChangeListener(this);
 		this.initParameterEventListeners();
 	}
 
@@ -371,7 +378,7 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 	 * This sets the eqkRupture related parameters (moment magnitude, tectonic
 	 * region type, focal depth) based on the eqkRupture passed in. The
 	 * internally held eqkRupture object is also set as that passed in. Warning
-	 * constrains are ignored.
+	 * constrains on magnitude and focal depth are ignored.
 	 */
 	public final void setEqkRupture(final EqkRupture eqkRupture) {
 
@@ -414,7 +421,7 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 	/**
 	 * Set period index.
 	 */
-	protected final void setCoeffIndex() {
+	protected final void setPeriodIndex() {
 		if (im.getName().equalsIgnoreCase(PGA_Param.NAME)) {
 			iper = 0;
 		} else {
@@ -432,7 +439,7 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 			return VERY_SMALL_MEAN;
 		}
 
-		setCoeffIndex();
+		setPeriodIndex();
 
 		return getMean(iper, mag, rRup, vs30, tecRegType, focalDepth);
 
@@ -443,7 +450,7 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 	 */
 	public final double getStdDev() {
 
-		setCoeffIndex();
+		setPeriodIndex();
 
 		return getStdDev(iper, stdDevType, tecRegType);
 	}
@@ -464,6 +471,9 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 		saParam.setValueAsDefault();
 		pgaParam.setValueAsDefault();
 		stdDevTypeParam.setValueAsDefault();
+		sigmaTruncTypeParam.setValueAsDefault();
+		sigmaTruncLevelParam.setValueAsDefault();
+		componentParam.setValueAsDefault();
 	}
 
 	/**
@@ -490,13 +500,18 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 		hypoDep = capHypocentralDepth(hypoDep);
 
 		mag = capMagnitude(mag, tecRegType);
-
-		double logY = computeRockResponse(tecRegType, iper, mag, hypoDep, rRup)
-				+ computeSoilResponse(tecRegType, iper, mag, hypoDep, rRup,
-						vs30);
-		logY *= AB2003Constants.LOG_2_LN;
 		
-		return Math.log(Math.exp(logY) / 981);
+		double rockResponse = 
+			computeRockResponse(tecRegType, iper, mag, hypoDep, rRup);
+		
+		double soilResponse = computeSoilResponse(tecRegType, iper, mag,
+				hypoDep, rRup, vs30);
+
+		double logY = rockResponse + soilResponse;
+		logY *= AB2003Constants.LOG_2_LN;
+
+		return Math.log(Math.exp(logY)
+				* AB2003Constants.CMS_TO_G_CONVERSION_FACTOR);
 	}
 
 	private double capHypocentralDepth(double hypoDep) {
@@ -568,9 +583,14 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 
 	private double computeSoilResponse(String tecRegType, int periodIndex,
 			double mag, double hypoDep, double rRup, double vs30) {
+		// as it should be
 		double pgaOnRock = Math.pow(10,
-				computeRockResponse(tecRegType, 0, mag, hypoDep, rRup));
-		double sl = computeSoilLinearityTerm(iper, pgaOnRock);
+				computeRockResponse(tecRegType, periodIndex, mag, hypoDep, rRup));
+//		// as in mathSHA
+//		double pgaOnRock = 
+//				computeRockResponse(tecRegType, 0, mag, hypoDep, rRup);
+		System.out.println("pgaOnRock: "+pgaOnRock);
+		double sl = computeSoilLinearityTerm(periodIndex, pgaOnRock);
 		double[] s = computeSiteTermCorrection(vs30);
 		double soilResponse = Double.NaN;
 		if (tecRegType.equalsIgnoreCase(TectonicRegionType.SUBDUCTION_INTERFACE
@@ -584,29 +604,58 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 					+ s[1] * AB2003Constants.INTRA_C6[periodIndex] * sl + s[2]
 					* AB2003Constants.INTRA_C7[periodIndex] * sl;
 		}
+//		System.out.println("mag: "+mag);
+//		System.out.println("period index: "+periodIndex);
+//		System.out.println("site term correction: "+s[0]+" "+s[1]+" "+s[2]);
+//		System.out.println("soil linearity term: "+sl);
+//		System.out.println("soilResponce: "+soilResponse);
 		return soilResponse;
 	}
 
 	private double computeSoilLinearityTerm(final int iper, double PGArx) {
 		double sl = Double.NaN;
-		if (im.getName().equals(PGA_Param.NAME)
-				&& AB2003Constants.FREQ[iper] >= 2) {
-			if ((100 < PGArx) && (PGArx < 500)) {
-				sl = 1.00 - (PGArx - 100) / 400;
-			} else if (PGArx >= 500) {
-				sl = 0.00;
+		if(PGArx <= 100.0 || AB2003Constants.FREQ[iper] <= 1.0){
+			sl = 1.0;
+		}
+		else if(PGArx > 100.0 && PGArx < 500.0){
+			if(AB2003Constants.FREQ[iper] > 1.0 &&
+					AB2003Constants.FREQ[iper] < 2.0){
+				sl = 1.0 - (AB2003Constants.FREQ[iper] - 1.0) * (PGArx - 100.0)
+				/ 400.0;
 			}
-		} else if (AB2003Constants.FREQ[iper] <= 1 || 100 < PGArx) {
-			sl = 1.00;
-		} else if ((1 < AB2003Constants.FREQ[iper])
-				&& (AB2003Constants.FREQ[iper] < 2)) {
-			if ((100 < PGArx) && (PGArx < 500)) {
-				sl = 1.00 - (AB2003Constants.FREQ[iper] - 1) * (PGArx - 100)
-						/ 400;
-			} else if (PGArx >= 500) {
-				sl = 1.00 - (AB2003Constants.FREQ[iper] - 1);
+			else if(AB2003Constants.FREQ[iper] > 2.0){
+				sl = 1.0 - (PGArx - 100.0) / 400.0;
+				System.out.println("sl: "+sl);
 			}
 		}
+		else if(PGArx >= 500.0){
+			if(AB2003Constants.FREQ[iper] > 1.0 &&
+					AB2003Constants.FREQ[iper] < 2.0){
+				sl = 1.0 - (AB2003Constants.FREQ[iper] - 1.0);
+			}
+			else if(AB2003Constants.FREQ[iper] > 2.0){
+				sl = 0.0;
+			}
+		}
+		
+//		if (im.getName().equals(PGA_Param.NAME)
+//				|| AB2003Constants.FREQ[iper] >= 2) {
+//			if ((PGArx > 100) && (PGArx < 500)) {
+//				sl = 1.00 - (PGArx - 100) / 400;
+//			} else if (PGArx >= 500) {
+//				sl = 0.00;
+//			}
+//		} else if (AB2003Constants.FREQ[iper] <= 1 || PGArx > 100) {
+//			sl = 1.00;
+//		} else if ((1 < AB2003Constants.FREQ[iper])
+//				&& (AB2003Constants.FREQ[iper] < 2)) {
+//			if ((100 < PGArx) && (PGArx < 500)) {
+//				sl = 1.00 - (AB2003Constants.FREQ[iper] - 1) * (PGArx - 100)
+//						/ 400;
+//			} else if (PGArx >= 500) {
+//				sl = 1.00 - (AB2003Constants.FREQ[iper] - 1);
+//			}
+//		}
 		return sl;
 	}
 
@@ -684,6 +733,7 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 
 	/**
 	 * This provides a URL where more info on this model can be obtained.
+	 * It currently returns null because no URL has been set up.
 	 */
 	public final URL getInfoURL() throws MalformedURLException {
 		return null;

@@ -5,7 +5,7 @@ public class AB2003Constants {
 	/**
 	 * Supported frequency values.
 	 */
-	public static final double[] FREQ = {0.00000, 25.0000, 10.0000,
+	public static final double[] FREQ = {Double.POSITIVE_INFINITY, 25.0000, 10.0000,
 		5.00000, 2.50000, 1.00000, 0.50000, 0.33000};
 	/**
 	 * Supported period values.
@@ -190,5 +190,9 @@ public class AB2003Constants {
 	 * Near source saturation term factor 2
 	 */
 	public static final double NEAR_SOURCE_SATURATION_FACTOR2 = 0.507;
+	/**
+	 * cm/s to g conversion factor.
+	 */
+	public static final double CMS_TO_G_CONVERSION_FACTOR = 1.0/981.0;
 	
 }
