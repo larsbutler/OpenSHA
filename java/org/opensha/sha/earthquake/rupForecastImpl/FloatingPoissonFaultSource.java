@@ -382,6 +382,8 @@ public class FloatingPoissonFaultSource extends ProbEqkSource {
                                 (1.0 - Math.exp(-duration * weight * rate
                                         / numRup));
                         probEqkRupture.setProbability(prob);
+                        probEqkRupture.setTectRegType(
+                        		this.getTectonicRegionType());
                         ruptureList.add(probEqkRupture);
                     }
                     /*

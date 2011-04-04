@@ -295,7 +295,11 @@ public class PointToLineSource extends ProbEqkSource implements
                 rupture.setMag(mag);
                 rupture.setAveRake(focalMech.getRake());
                 rupture.setRuptureSurface(surf);
-                rupture.setHypocenterLocation(new Location(location.getLatitude(),location.getLongitude(),defaultHypoDepth));
+                rupture.setHypocenterLocation(
+                		new Location(location.getLatitude(),
+                				location.getLongitude(),
+                				defaultHypoDepth));
+                rupture.setTectRegType(this.getTectonicRegionType());
                 rupture.setProbability(prob);
 
                 if (D)

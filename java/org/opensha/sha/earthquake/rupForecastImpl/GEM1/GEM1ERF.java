@@ -877,7 +877,6 @@ public class GEM1ERF extends EqkRupForecast {
         FloatingPoissonFaultSource src = null;
 
         if (gemFaultSourceData.getFloatRuptureFlag()) {
-
             src = new FloatingPoissonFaultSource(gemFaultSourceData.getMfd(), // IncrementalMagFreqDist
                     faultSurface, // EvenlyGriddedSurface
                     faultMagScalingRel, // MagScalingRelationship

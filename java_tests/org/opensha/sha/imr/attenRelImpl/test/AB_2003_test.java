@@ -5,16 +5,27 @@ import static org.junit.Assert.assertTrue;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.opensha.commons.data.Site;
+import org.opensha.commons.data.function.ArbitrarilyDiscretizedFunc;
+import org.opensha.commons.geo.Location;
+import org.opensha.commons.param.DoubleParameter;
+import org.opensha.commons.param.StringParameter;
 import org.opensha.commons.param.event.ParameterChangeWarningEvent;
 import org.opensha.commons.param.event.ParameterChangeWarningListener;
+import org.opensha.sha.calc.HazardCurveCalculator;
+import org.opensha.sha.earthquake.rupForecastImpl.GEM1.GEM1ERF;
+import org.opensha.sha.earthquake.rupForecastImpl.GEM1.SourceData.GEMSourceData;
 import org.opensha.sha.imr.attenRelImpl.AB_2003_AttenRel;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PGA_Param;
 import org.opensha.sha.imr.param.IntensityMeasureParams.SA_Param;
+import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
 import org.opensha.sha.util.TectonicRegionType;
 
 /**
@@ -428,10 +439,93 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 				magnitude, vs30, expectedResultIndex,
 				pgaInterfaceTable);
 	}
-
+	
 	/**
-	 * Compare median ground motion againts values in table.
-	 * 
+	 * Check AB2003 usage for computing hazard curves using GEM1ERF constructed
+	 * from area source data for intraslab events. Ruptures are treated as
+	 * points.
+	 * @throws Exception 
+	 */
+	@Test
+	public final void ab2003WithGEM1ERFPointRuptures() throws Exception{
+		ab2003AttenRel.setIntensityMeasure(PGA_Param.NAME);
+		ArrayList<GEMSourceData> srcDataList = new ArrayList<GEMSourceData>();
+		srcDataList.
+		add(AttenRelTestHelper.getSubductionIntraSlabAreaSourceData());
+		double timeSpan = 50.0;
+		GEM1ERF erf = GEM1ERF.getGEM1ERF(srcDataList, timeSpan);
+		erf.setParameter(GEM1ERF.AREA_SRC_RUP_TYPE_NAME,
+				GEM1ERF.AREA_SRC_RUP_TYPE_POINT);
+		erf.updateForecast();
+		HazardCurveCalculator hazCurveCalculator = new HazardCurveCalculator();
+		ArbitrarilyDiscretizedFunc hazCurve = setUpHazardCurve();
+		Site site = new Site(new Location(-0.171,-75.555));
+		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
+		hazCurveCalculator.getHazardCurve(hazCurve, site, ab2003AttenRel,
+				erf);
+	}
+	
+	/**
+	 * Check AB2003 usage for computing hazard curves using GEM1ERF constructed
+	 * from area source data for intraslab events. Ruptures are treated as
+	 * extended.
+	 * @throws Exception 
+	 */
+	@Test
+	public final void ab2003WithGEM1ERFLineRuptures() throws Exception{
+		ab2003AttenRel.setIntensityMeasure(PGA_Param.NAME);
+		ArrayList<GEMSourceData> srcDataList = new ArrayList<GEMSourceData>();
+		srcDataList.
+		add(AttenRelTestHelper.getSubductionIntraSlabAreaSourceData());
+		double timeSpan = 50.0;
+		GEM1ERF erf = GEM1ERF.getGEM1ERF(srcDataList, timeSpan);
+		erf.setParameter(GEM1ERF.AREA_SRC_RUP_TYPE_NAME,
+				GEM1ERF.AREA_SRC_RUP_TYPE_LINE);
+		erf.updateForecast();
+		HazardCurveCalculator hazCurveCalculator = new HazardCurveCalculator();
+		ArbitrarilyDiscretizedFunc hazCurve = setUpHazardCurve();
+		Site site = new Site(new Location(-0.171,-75.555));
+		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
+		hazCurveCalculator.getHazardCurve(hazCurve, site, ab2003AttenRel,
+				erf);
+	}
+	
+	/**
+	 * Check AB2003 usage for computing hazard curves using GEM1ERF constructed
+	 * from simple fault source data for interface events.
+	 * @throws Exception 
+	 */
+	@Test
+	public final void ab2003WithGEM1ERFInterfaceSimpleFault() throws Exception{
+		ab2003AttenRel.setIntensityMeasure(PGA_Param.NAME);
+		ArrayList<GEMSourceData> srcDataList = new ArrayList<GEMSourceData>();
+		srcDataList.
+		add(AttenRelTestHelper.getSubductionInterfaceSimpleFaultData());
+		double timeSpan = 50.0;
+		GEM1ERF erf = GEM1ERF.getGEM1ERF(srcDataList, timeSpan);
+		HazardCurveCalculator hazCurveCalculator = new HazardCurveCalculator();
+		ArbitrarilyDiscretizedFunc hazCurve = setUpHazardCurve();
+		Site site = new Site(new Location(-1.515,-81.456));
+		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
+		hazCurveCalculator.getHazardCurve(hazCurve, site, ab2003AttenRel,
+				erf);
+	}
+
+	private ArbitrarilyDiscretizedFunc setUpHazardCurve() {
+		ArbitrarilyDiscretizedFunc hazCurve = new ArbitrarilyDiscretizedFunc();
+		hazCurve.set(0.005, 0.0);
+		hazCurve.set(0.007, 0.0);
+		hazCurve.set(0.0098, 0.0);
+		hazCurve.set(0.0137, 0.0);
+		hazCurve.set(0.0192, 0.0);
+		hazCurve.set(0.0269, 0.0);
+		hazCurve.set(0.0376, 0.0);
+		return hazCurve;
+	}
+	
+	/**
+	 * Compare median ground motion againt values in table.
+	 *
 	 * @param tectonicRegionType
 	 * @param hypocentralDepth
 	 * @param periodIndex

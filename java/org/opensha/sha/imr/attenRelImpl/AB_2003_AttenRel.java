@@ -28,6 +28,8 @@ import org.opensha.sha.imr.param.IntensityMeasureParams.PGA_Param;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PeriodParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.SA_Param;
 import org.opensha.sha.imr.param.OtherParams.ComponentParam;
+import org.opensha.sha.imr.param.OtherParams.SigmaTruncLevelParam;
+import org.opensha.sha.imr.param.OtherParams.SigmaTruncTypeParam;
 import org.opensha.sha.imr.param.OtherParams.StdDevTypeParam;
 import org.opensha.sha.imr.param.OtherParams.TectonicRegionTypeParam;
 import org.opensha.sha.imr.param.PropagationEffectParams.DistanceRupParameter;
@@ -257,10 +259,8 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 	 */
 	protected final void initOtherParams() {
 
-		// init other params defined in parent class
-		// (sigma truncation type, sigma truncation level,
-		// tectonic region type)
-		super.initOtherParams();
+        sigmaTruncTypeParam = new SigmaTruncTypeParam();
+        sigmaTruncLevelParam = new SigmaTruncLevelParam();
 
 		// stdDevType Parameter
 		StringConstraint stdDevTypeConstraint = new StringConstraint();
@@ -279,12 +279,11 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 				ComponentParam.COMPONENT_RANDOM_HORZ);
 
 		// add these to the list
+		otherParams.clear();
+        otherParams.addParameter(sigmaTruncTypeParam);
+        otherParams.addParameter(sigmaTruncLevelParam);
 		otherParams.addParameter(stdDevTypeParam);
 		otherParams.addParameter(componentParam);
-		// remove tectonic region type params from other parameter list
-		// because is set from earthquake rupture (and therefore
-		// is defined in earthquake parameter list)
-		otherParams.removeParameter(TectonicRegionTypeParam.NAME);
 	}
 
 	/**
