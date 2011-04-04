@@ -583,12 +583,9 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 
 	private double computeSoilResponse(String tecRegType, int periodIndex,
 			double mag, double hypoDep, double rRup, double vs30) {
-		// as it should be
+		int indexPga = 0;
 		double pgaOnRock = Math.pow(10,
-				computeRockResponse(tecRegType, 0, mag, hypoDep, rRup));
-//		// as in mathSHA
-//		double pgaOnRock = 
-//				computeRockResponse(tecRegType, 0, mag, hypoDep, rRup);
+				computeRockResponse(tecRegType, indexPga, mag, hypoDep, rRup));
 		double sl = computeSoilLinearityTerm(periodIndex, pgaOnRock);
 		double[] s = computeSiteTermCorrection(vs30);
 		double soilResponse = Double.NaN;
@@ -619,7 +616,6 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 			}
 			else if(AB2003Constants.FREQ[iper] > 2.0){
 				sl = 1.0 - (PGArx - 100.0) / 400.0;
-				System.out.println("sl: "+sl);
 			}
 		}
 		else if(PGArx >= 500.0){
