@@ -202,6 +202,7 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 		double magnitude = INTRASLAB_MAGNITUDE_VALUES[magnitudeIndex];
 		double vs30 = VS_30[siteTypeIndex];
 		int expectedResultIndex = 2;
+		
 
 		validateAgainstTable(tectonicRegionType, hypocentralDepth, periodIndex,
 				magnitude, vs30, expectedResultIndex,
@@ -459,8 +460,6 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 					+ hypocentralDepth + ", expected: " + expected
 					+ ", predicted: " + predicted + ",percentage difference: "
 					+ percentageDifference;
-			System.out.println("expected: " + expected + ", predicted: "
-					+ predicted + "percentage diff: " + percentageDifference);
 			assertTrue(msg, percentageDifference < TOLERANCE);
 		}
 	}

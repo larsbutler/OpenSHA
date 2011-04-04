@@ -39,9 +39,14 @@ import org.opensha.sha.util.TectonicRegionType;
  * <p>
  * <b>Description:</b> Class implementing attenuation relationship described in:
  * "Empirical Ground Motion Relations for Subduction-Zone Earthquakes and their
- * application to Cascadia and other regions" Bulletin of the Seismological
- * Society of America, Vol. 93, No. 4, pp 1703-1729, 2003. The class implements
- * the global model but not the corrections for Japan/Cascadia.
+ * application to Cascadia and other regions", Gail M.Atkinson and 
+ * David M. Boore, Bulletin of the Seismological Society of America,
+ * Vol. 93, No. 4, pp 1703-1729, 2003.
+ * "Erratum to 'Empirical Ground Motion Relations for Subduction-Zone 
+ * Earthquakes and their application to Cascadia and other regions'", 
+ * Gail M. Atkinson and David M. Boore, Vol. 98, No. 5, pp.2567-2569, 2008.
+ * The class implements the global model but not the corrections
+ * for Japan/Cascadia.
  * <p>
  * Supported Intensity-Measure Parameters:
  * <p>
@@ -56,7 +61,8 @@ import org.opensha.sha.util.TectonicRegionType;
  * <LI>magParam - moment magnitude
  * <LI>distanceRupParam - closest distance to rupture surface
  * <LI>vs30Param - shear wave velocity (m/s) averaged over the top 30 m of the
- * soil profile vs30 > 760 -> NEHRP B; 360 < vs30 <=760 -> NEHRP C; 180 <= vs30
+ * soil profile; The model assumes the following classification:
+ * vs30 > 760 -> NEHRP B; 360 < vs30 <=760 -> NEHRP C; 180 <= vs30
  * <= 360 -> NEHRP D; vs30 < 180 -> NEHRP E;
  * <LI>tectonicRegionTypeParam - interface or intra slab
  * <LI>focalDepthParam - depth to the earthquake rupture hypocenter
@@ -431,18 +437,48 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 	}
 
 	/**
-	 * Compute mean.
+	 * Compute mean. Applies correction for periods = 2.5 and 5 Hz 
+	 * (for interface) as for Atkinson and Boore 2008 Erratum.
 	 */
 	public final double getMean() {
 
 		if (rRup > USER_MAX_DISTANCE) {
 			return VERY_SMALL_MEAN;
 		}
-
-		setPeriodIndex();
-
-		return getMean(iper, mag, rRup, vs30, tecRegType, focalDepth);
-
+		
+		double mean = Double.NaN;
+		
+		// if period corresponds to 5 Hz (PERIOD[3]) or 2.5 (PERIOD[4]) Hz
+		// and tectonic region type is interface applies correction.
+		if((saPeriodParam.getValue()==AB2003Constants.PERIOD[3] ||
+				saPeriodParam.getValue()==AB2003Constants.PERIOD[4]) &&
+				tecRegType.equalsIgnoreCase(
+						TectonicRegionType.SUBDUCTION_INTERFACE.toString())){
+			// compute log SA for 2.5 and 5 Hz and return a weighted sum
+			int indexPeriod5Hz = ((Integer) indexFromPerHashMap.
+					get(AB2003Constants.PERIOD[3])).intValue();
+			int indexPeriod25Hz = ((Integer) indexFromPerHashMap.
+					get(AB2003Constants.PERIOD[4])).intValue();
+			double logSA5Hz = getMean(indexPeriod5Hz, mag, rRup, vs30,
+					tecRegType, focalDepth);
+			double logSA25Hz = getMean(indexPeriod25Hz, mag,
+					rRup, vs30, tecRegType, focalDepth);
+			if(saPeriodParam.getValue()==AB2003Constants.PERIOD[3]){
+				mean = AB2003Constants.CORRECTION_WEIGHTS[0] * logSA5Hz
+				+ AB2003Constants.CORRECTION_WEIGHTS[1] * logSA25Hz;
+				return mean;
+			}
+			else if (saPeriodParam.getValue()==AB2003Constants.PERIOD[4]){
+				mean = AB2003Constants.CORRECTION_WEIGHTS[0] * logSA25Hz
+				+ AB2003Constants.CORRECTION_WEIGHTS[1] * logSA5Hz;
+				return mean;
+			}
+		}
+		else{
+			setPeriodIndex();
+			return getMean(iper, mag, rRup, vs30, tecRegType, focalDepth);	
+		}
+		return mean;
 	}
 
 	/**
@@ -492,7 +528,7 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 	}
 
 	/**
-	 * Compute mean.
+	 * Compute mean (natural logarithm of median ground motion).
 	 */
 	public final double getMean(final int iper, double mag, final double rRup,
 			final double vs30, final String tecRegType, double hypoDep) {
@@ -508,7 +544,7 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 				hypoDep, rRup, vs30);
 
 		double logY = rockResponse + soilResponse;
-		logY *= AB2003Constants.LOG_2_LN;
+		logY *= AB2003Constants.LOG10_2_LN;
 
 		return Math.log(Math.exp(logY)
 				* AB2003Constants.CMS_TO_G_CONVERSION_FACTOR);
@@ -671,30 +707,30 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 		if (tecRegType.equals(TectonicRegionType.SUBDUCTION_INTERFACE
 				.toString())) {
 			if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL)) {
-				return AB2003Constants.LOG_2_LN
+				return AB2003Constants.LOG10_2_LN
 						* AB2003Constants.INTER_TOTAL_STD[iper];
 			} else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE)) {
 				return 0;
 			} else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTER)) {
-				return AB2003Constants.LOG_2_LN
+				return AB2003Constants.LOG10_2_LN
 						* AB2003Constants.INTER_INTEREVENT_STD[iper];
 			} else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTRA)) {
-				return AB2003Constants.LOG_2_LN
+				return AB2003Constants.LOG10_2_LN
 						* AB2003Constants.INTER_INTRAEVENT_STD[iper];
 			} else {
 				return Double.NaN;
 			}
 		} else {
 			if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL)) {
-				return AB2003Constants.LOG_2_LN
+				return AB2003Constants.LOG10_2_LN
 						* AB2003Constants.INTRA_TOTAL_STD[iper];
 			} else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE)) {
 				return 0;
 			} else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTER)) {
-				return AB2003Constants.LOG_2_LN
+				return AB2003Constants.LOG10_2_LN
 						* AB2003Constants.INTRA_INTEREVENT_STD[iper];
 			} else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTRA)) {
-				return AB2003Constants.LOG_2_LN
+				return AB2003Constants.LOG10_2_LN
 						* AB2003Constants.INTRA_INTRAEVENT_STD[iper];
 			} else {
 				return Double.NaN;

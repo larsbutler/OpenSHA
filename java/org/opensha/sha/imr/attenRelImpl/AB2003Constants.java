@@ -3,12 +3,12 @@ package org.opensha.sha.imr.attenRelImpl;
 public class AB2003Constants {
 
 	/**
-	 * Supported frequency values.
+	 * Supported frequency values (Hz).
 	 */
-	public static final double[] FREQ = {Double.POSITIVE_INFINITY, 25.0000, 10.0000,
-		5.00000, 2.50000, 1.00000, 0.50000, 0.33000};
+	public static final double[] FREQ = {Double.POSITIVE_INFINITY,
+		25.0000, 10.0000, 5.00000, 2.50000, 1.00000, 0.50000, 0.33000};
 	/**
-	 * Supported period values.
+	 * Supported period values (s).
 	 */
 	public static final double[] PERIOD = {0.00000, 0.04000, 0.10000,
 		0.20000, 0.40000, 1.00000, 2.00000, 3.00000 };
@@ -115,7 +115,7 @@ public class AB2003Constants {
 	/**
 	 * log10 to natural log conversion factor.
 	 */
-	public static final double LOG_2_LN = 2.302585;
+	public static final double LOG10_2_LN = Math.log(10.0);
 	/**
 	 * Minimum magnitude.
 	 */
@@ -194,5 +194,9 @@ public class AB2003Constants {
 	 * cm/s to g conversion factor.
 	 */
 	public static final double CMS_TO_G_CONVERSION_FACTOR = 1.0/981.0;
-	
+	/**
+	 * weights for correction
+	 */
+	public static final double[] CORRECTION_WEIGHTS =
+		new double[]{ 0.333, 0.667};
 }
