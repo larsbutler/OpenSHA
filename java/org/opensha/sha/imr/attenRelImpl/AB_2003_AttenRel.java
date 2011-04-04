@@ -390,11 +390,23 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 
 		magParam.setValueIgnoreWarning(new Double(eqkRupture.getMag()));
 
-		tectonicRegionTypeParam
-				.setValue(eqkRupture.getTectRegType().toString());
+		if(eqkRupture.getTectRegType()!=null){
+			tectonicRegionTypeParam
+			.setValue(eqkRupture.getTectRegType().toString());
+		}
+		else{
+			throw new RuntimeException("Tectonic region type not set in " +
+					"earthquake rupture");
+		}
 
-		focalDepthParam.setValueIgnoreWarning(new Double(eqkRupture
-				.getHypocenterLocation().getDepth()));
+		if(eqkRupture.getHypocenterLocation()!=null){
+			focalDepthParam.setValueIgnoreWarning(new Double(eqkRupture
+					.getHypocenterLocation().getDepth()));	
+		}
+		else{
+			throw new RuntimeException("Hypocenter location not set in"+
+					"earthquake rupture");
+		}
 
 		this.eqkRupture = eqkRupture;
 
