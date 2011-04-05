@@ -50,6 +50,7 @@ public class FloatingPoissonFaultSourceTest {
 		hazCurve.set(Math.log(0.55), 1.0);
 		hazCurve.set(Math.log(0.6), 1.0);
 		hazCurve.set(Math.log(0.7), 1.0);
+		hazCurve.set(Math.log(0.8), 1.0);
 		
 		Map<Site, ArbitrarilyDiscretizedFunc> expectedResults = 
 			getExpectedResultsPeerTestSet1Case5();
@@ -57,9 +58,12 @@ public class FloatingPoissonFaultSourceTest {
 		for (Site site : expectedResults.keySet()) {
 			calc.getHazardCurve(hazCurve, site, PoissonianAreaSourceTestHelper
 					.getPeerTestSet1Case10GMPE(),
-					PoissonianAreaSourceTestHelper
-							.getPeerTestSet1Case10AreaSourceErf());
+					FloatingPoissonFaultSourceTestHelper
+							.getPeerTestSet1Case5FaultSourceErf());
+			System.out.println("Site: "+site);
 			for (int i = 0; i < expectedResults.get(site).getNum(); i++) {
+				System.out.println("Expected: "+expectedResults.get(site).getY(i)+
+						", predicted: "+hazCurve.getY(i));
 				assertEquals(expectedResults.get(site).getY(i),
 						hazCurve.getY(i), TOLERANCE);
 			}
@@ -69,55 +73,6 @@ public class FloatingPoissonFaultSourceTest {
 	
 	private static Map<Site, ArbitrarilyDiscretizedFunc> 
 	getExpectedResultsPeerTestSet1Case5() {
-		
-//		Site Latitude Longitude Comment
-//		1 38.113 -122.000 On Fault Midpoint along Strike
-//		2 38.113 -122.114 10km West of fault, at midpoint
-//		3 38.111 -122.570 50km West of fault, at midpoint
-//		4 38.000 -122.000 South end of fault
-//		5 37.910 -122.000 10km south of fault along strike
-//		6 38.225 -122.000 North end of fault
-//		7 38.113 -121.886 10km East of fault, at midpoint
-		
-//		Acceleration (g)
-//		Site 1 Site 2 Site 3 Site 7
-//		0.001 4.00E-02 4.00E-02 4.00E-02 4.00E-02
-//		0.01 4.00E-02 4.00E-02 4.00E-02 4.00E-02
-//		0.05 4.00E-02 4.00E-02 4.00E-02
-//		0.1 3.99E-02 3.31E-02 3.31E-02
-//		0.15 3.46E-02 1.22E-02 1.22E-02
-//		0.2 2.57E-02 4.85E-03 4.85E-03
-//		0.25 1.89E-02 1.76E-03 1.76E-03
-//		0.3 1.37E-02 2.40E-04 2.40E-04
-//		0.35 9.88E-03
-//		0.4 6.93E-03
-//		0.45 4.84E-03
-//		0.5 3.36E-03
-//		0.55 2.34E-03
-//		0.6 1.52E-03
-//		0.7 5.12E-04
-
-		
-//		Hand Solutions for Set 1, Test Case 5
-//		Peak Ground
-//		Acceleration (g)
-//		Site 4 Site 5 Site 6
-//		0.001 3.99E-02 3.99E-02 3.99E-02
-//		0.01 3.99E-02 3.99E-02 3.99E-02
-//		0.05 3.98E-02 3.14E-02 3.98E-02
-//		0.1 2.99E-02 1.21E-02 2.99E-02
-//		0.15 2.00E-02 4.41E-03 2.00E-02
-//		0.2 1.30E-02 1.89E-03 1.30E-02
-//		0.25 8.58E-03 7.53E-04 8.58E-03
-//		0.3 5.72E-03 1.25E-04 5.72E-03
-//		0.35 3.88E-03 0.00E+00 3.88E-03
-//		0.4 2.69E-03 0.00E+00 2.69E-03
-//		0.45 1.91E-03 0.00E+00 1.91E-03
-//		0.5 1.37E-03 0.00E+00 1.37E-03
-//		0.55 9.74E-04 0.00E+00 9.74E-04
-//		0.6 6.75E-04 0.00E+00 6.75E-04
-//		0.7 2.52E-04 0.00E+00 2.52E-04
-//		0.8 0.00E+00 0.00E+00 0.00E+00
 
 		StringParameter sadighSiteType = new StringParameter("Sadigh Site Type");
 		sadighSiteType.setValue("Rock");
@@ -125,21 +80,135 @@ public class FloatingPoissonFaultSourceTest {
 		Map<Site, ArbitrarilyDiscretizedFunc> expectedResults = 
 			new HashMap<Site, ArbitrarilyDiscretizedFunc>();
 
+		// site 1
 		ArbitrarilyDiscretizedFunc hazCurveSite1 = 
 			new ArbitrarilyDiscretizedFunc();
-		hazCurveSite1.set(Math.log(0.001), 3.87E-02);
-		hazCurveSite1.set(Math.log(0.01), 2.19E-02);
-		hazCurveSite1.set(Math.log(0.05), 2.97E-03);
-		hazCurveSite1.set(Math.log(0.1), 9.22E-04);
-		hazCurveSite1.set(Math.log(0.15), 3.59E-04);
-		hazCurveSite1.set(Math.log(0.2), 1.31E-04);
-		hazCurveSite1.set(Math.log(0.25), 4.76E-05);
-		hazCurveSite1.set(Math.log(0.3), 1.72E-05);
-		hazCurveSite1.set(Math.log(0.35), 5.38E-06);
-		hazCurveSite1.set(Math.log(0.4), 1.18E-06);
-		Site site1 = new Site(new Location(38.000, -122.000));
+		hazCurveSite1.set(Math.log(0.001), 4.00E-02);
+		hazCurveSite1.set(Math.log(0.01), 4.00E-02);
+		hazCurveSite1.set(Math.log(0.05), 4.00E-02);
+		hazCurveSite1.set(Math.log(0.1), 3.99E-02);
+		hazCurveSite1.set(Math.log(0.15), 3.46E-02);
+		hazCurveSite1.set(Math.log(0.2), 2.57E-02);
+		hazCurveSite1.set(Math.log(0.25), 1.89E-02);
+		hazCurveSite1.set(Math.log(0.3), 1.37E-02);
+		hazCurveSite1.set(Math.log(0.35), 9.88E-03);
+		hazCurveSite1.set(Math.log(0.4), 6.93E-03);
+		hazCurveSite1.set(Math.log(0.45), 4.84E-03);
+		hazCurveSite1.set(Math.log(0.5), 3.36E-03);
+		hazCurveSite1.set(Math.log(0.55), 2.34E-03);
+		hazCurveSite1.set(Math.log(0.6), 1.52E-03);
+		hazCurveSite1.set(Math.log(0.7), 5.12E-04);
+		Site site1 = new Site(new Location(38.113,-122.000));
 		site1.addParameter(sadighSiteType);
 		expectedResults.put(site1, hazCurveSite1);
+
+		// site 2
+		ArbitrarilyDiscretizedFunc hazCurveSite2 = 
+			new ArbitrarilyDiscretizedFunc();
+		hazCurveSite2.set(Math.log(0.001), 4.00E-02);
+		hazCurveSite2.set(Math.log(0.01), 4.00E-02);
+		hazCurveSite2.set(Math.log(0.05), 4.00E-02);
+		hazCurveSite2.set(Math.log(0.1), 3.31E-02);
+		hazCurveSite2.set(Math.log(0.15), 1.22E-02);
+		hazCurveSite2.set(Math.log(0.2), 4.85E-03);
+		hazCurveSite2.set(Math.log(0.25), 1.76E-03);
+		hazCurveSite2.set(Math.log(0.3), 2.40E-04);
+		Site site2 = new Site(new Location(38.113,-122.114));
+		site2.addParameter(sadighSiteType);
+		expectedResults.put(site2, hazCurveSite2);
+
+		// site 3
+		ArbitrarilyDiscretizedFunc hazCurveSite3 = 
+			new ArbitrarilyDiscretizedFunc();
+		hazCurveSite3.set(Math.log(0.001), 4.00E-02);
+		hazCurveSite3.set(Math.log(0.01), 4.00E-02);
+		Site site3 = new Site(new Location(38.111,-122.570));
+		site3.addParameter(sadighSiteType);
+		expectedResults.put(site3, hazCurveSite3);
+		
+		// site 4
+		ArbitrarilyDiscretizedFunc hazCurveSite4 = 
+			new ArbitrarilyDiscretizedFunc();
+		hazCurveSite4.set(Math.log(0.001), 3.99E-02);
+		hazCurveSite4.set(Math.log(0.01), 3.99E-02);
+		hazCurveSite4.set(Math.log(0.05), 3.98E-02);
+		hazCurveSite4.set(Math.log(0.1), 2.99E-02);
+		hazCurveSite4.set(Math.log(0.15), 2.00E-02);
+		hazCurveSite4.set(Math.log(0.2), 1.30E-02);
+		hazCurveSite4.set(Math.log(0.25), 8.58E-03);
+		hazCurveSite4.set(Math.log(0.3), 5.72E-03);
+		hazCurveSite4.set(Math.log(0.35), 3.88E-03);
+		hazCurveSite4.set(Math.log(0.4), 2.69E-03);
+		hazCurveSite4.set(Math.log(0.45), 1.91E-03);
+		hazCurveSite4.set(Math.log(0.5), 1.37E-03);
+		hazCurveSite4.set(Math.log(0.55), 9.74E-04);
+		hazCurveSite4.set(Math.log(0.6), 6.75E-04);
+		hazCurveSite4.set(Math.log(0.7), 2.52E-04);
+		hazCurveSite4.set(Math.log(0.8), 0.00E+00);
+		Site site4 = new Site(new Location(38.000,-122.000));
+		site4.addParameter(sadighSiteType);
+		expectedResults.put(site4, hazCurveSite4);
+
+		// site 5
+		ArbitrarilyDiscretizedFunc hazCurveSite5 = 
+			new ArbitrarilyDiscretizedFunc();
+		hazCurveSite5.set(Math.log(0.001), 3.99E-02);
+		hazCurveSite5.set(Math.log(0.01), 3.99E-02);
+		hazCurveSite5.set(Math.log(0.05), 3.14E-02);
+		hazCurveSite5.set(Math.log(0.1), 1.21E-02);
+		hazCurveSite5.set(Math.log(0.15), 4.41E-03);
+		hazCurveSite5.set(Math.log(0.2), 1.89E-03);
+		hazCurveSite5.set(Math.log(0.25), 7.53E-04);
+		hazCurveSite5.set(Math.log(0.3), 1.25E-04);
+		hazCurveSite5.set(Math.log(0.35), 0.00E+00);
+		hazCurveSite5.set(Math.log(0.4), 0.00E+00);
+		hazCurveSite5.set(Math.log(0.45), 0.00E+00);
+		hazCurveSite5.set(Math.log(0.5), 0.00E+00);
+		hazCurveSite5.set(Math.log(0.55), 0.00E+00);
+		hazCurveSite5.set(Math.log(0.6), 0.00E+00);
+		hazCurveSite5.set(Math.log(0.7), 0.00E+00);
+		hazCurveSite5.set(Math.log(0.8), 0.00E+00);
+		Site site5 = new Site(new Location(37.910,-122.000));
+		site5.addParameter(sadighSiteType);
+		expectedResults.put(site5, hazCurveSite5);
+
+		// site 6
+		ArbitrarilyDiscretizedFunc hazCurveSite6 = 
+			new ArbitrarilyDiscretizedFunc();
+		hazCurveSite6.set(Math.log(0.001), 3.99E-02);
+		hazCurveSite6.set(Math.log(0.01), 3.99E-02);
+		hazCurveSite6.set(Math.log(0.05), 3.98E-02);
+		hazCurveSite6.set(Math.log(0.1), 2.99E-02);
+		hazCurveSite6.set(Math.log(0.15), 2.00E-02);
+		hazCurveSite6.set(Math.log(0.2), 1.30E-02);
+		hazCurveSite6.set(Math.log(0.25), 8.58E-03);
+		hazCurveSite6.set(Math.log(0.3), 5.72E-03);
+		hazCurveSite6.set(Math.log(0.35), 3.88E-03);
+		hazCurveSite6.set(Math.log(0.4), 2.69E-03);
+		hazCurveSite6.set(Math.log(0.45), 1.91E-03);
+		hazCurveSite6.set(Math.log(0.5), 1.37E-03);
+		hazCurveSite6.set(Math.log(0.55), 9.74E-04);
+		hazCurveSite6.set(Math.log(0.6), 6.75E-04);
+		hazCurveSite6.set(Math.log(0.7), 2.52E-04);
+		hazCurveSite6.set(Math.log(0.8), 0.00E+00);
+		Site site6 = new Site(new Location(38.225,-122.000));
+		site6.addParameter(sadighSiteType);
+		expectedResults.put(site6, hazCurveSite6);
+
+		// site 7
+		ArbitrarilyDiscretizedFunc hazCurveSite7 = 
+			new ArbitrarilyDiscretizedFunc();
+		hazCurveSite6.set(Math.log(0.001), 4.00E-02);
+		hazCurveSite6.set(Math.log(0.01), 4.00E-02);
+		hazCurveSite6.set(Math.log(0.05), 4.00E-02);
+		hazCurveSite6.set(Math.log(0.1), 3.31E-02);
+		hazCurveSite6.set(Math.log(0.15), 1.22E-02);
+		hazCurveSite6.set(Math.log(0.2), 4.85E-03);
+		hazCurveSite6.set(Math.log(0.25), 1.76E-03);
+		hazCurveSite6.set(Math.log(0.3), 2.40E-04);
+		Site site7 = new Site(new Location(38.113,-121.886));
+		site7.addParameter(sadighSiteType);
+		expectedResults.put(site7, hazCurveSite7);
 
 		return expectedResults;
 	}
