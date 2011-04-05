@@ -1,16 +1,21 @@
 package org.opensha.sha.earthquake.rupForecastImpl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.opensha.commons.data.Site;
 import org.opensha.commons.data.function.ArbitrarilyDiscretizedFunc;
 import org.opensha.commons.geo.Location;
 import org.opensha.commons.param.StringParameter;
 import org.opensha.sha.calc.HazardCurveCalculator;
+import org.opensha.sha.earthquake.ProbEqkRupture;
+import org.opensha.sha.util.TectonicRegionType;
 
 /**
  * Class providing methods for testing {@link FloatingPoissonFaultSource}.
@@ -18,6 +23,28 @@ import org.opensha.sha.calc.HazardCurveCalculator;
 public class FloatingPoissonFaultSourceTest {
 
 	private static final double TOLERANCE = 1e-2;
+	
+	@Test
+	public void checkSetTectonicRegionTypeWithGetRupture(){
+		FloatingPoissonFaultSource src =
+			FloatingPoissonFaultSourceTestHelper
+			.getPeerTestSet1Case5FaultSource();
+		src.setTectonicRegionType(TectonicRegionType.VOLCANIC);
+		for(int i=0;i<src.getRuptureList().size();i++){
+			assertTrue(src.getRupture(i).getTectRegType().equals(TectonicRegionType.VOLCANIC));
+		}
+	}
+	
+	@Test
+	public void checkSetTectonicRegionTypeWithGetRuptureList(){
+		FloatingPoissonFaultSource src =
+			FloatingPoissonFaultSourceTestHelper
+			.getPeerTestSet1Case5FaultSource();
+		src.setTectonicRegionType(TectonicRegionType.VOLCANIC);
+		for(ProbEqkRupture rup: (ArrayList<ProbEqkRupture>)src.getRuptureList()){
+			assertTrue(rup.getTectRegType().equals(TectonicRegionType.VOLCANIC));
+		}
+	}
 
 	/**
 	 * Implements Peer Test Set 1 Case 5. (i.e. compares hazard curves

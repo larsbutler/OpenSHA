@@ -395,7 +395,7 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 		}
 		else{
 			throw new RuntimeException("Tectonic region type not set in " +
-					"earthquake rupture");
+					" earthquake rupture");
 		}
 
 		if(eqkRupture.getHypocenterLocation()!=null){
@@ -404,7 +404,7 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 		}
 		else{
 			throw new RuntimeException("Hypocenter location not set in"+
-					"earthquake rupture");
+					" earthquake rupture");
 		}
 
 		this.eqkRupture = eqkRupture;

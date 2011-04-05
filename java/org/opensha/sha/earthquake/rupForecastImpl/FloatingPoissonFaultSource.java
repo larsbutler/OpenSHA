@@ -268,6 +268,17 @@ public class FloatingPoissonFaultSource extends ProbEqkSource {
         }
         lastDuration = newDuration;
     }
+    
+    /**
+     * Allows to set tectonic region type.
+     * (overrides org.opensha.sha.earthquake.ProbEqkSource.
+     * setTectonicRegionType)
+     */
+    public void setTectonicRegionType(TectonicRegionType tectRegType){
+    	for (int r = 0; r < ruptureList.size(); r++) {
+    		ruptureList.get(r).setTectRegType(tectRegType);
+    	}
+    }
 
     /**
      * This computes the rupture length from the information supplied
