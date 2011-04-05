@@ -623,4 +623,65 @@ public abstract class EvenlyGriddedSurface extends Container2D<Location>
     public void setLocation(int row, int column, Location loc) {
         set(row, column, loc);
     }
+    
+    /**
+     * Returns location corresponding to surface centre.
+     * If number of grid points along lenght and width is odd,
+     * returns location corresponding to middle index.
+     * If number of grid points along length and width is even,
+     * compute surface centre as location in the middle of 
+     * the central patch.
+     * If number of grid points along length is even and alon
+     * width is odd (or viceversa), compute surface centre as
+     * location in the middle of the central segment.
+     */
+    public Location getSurfaceCentre(){
+    	Location surfaceCentre = null;
+    	if(isOdd(this.numCols) && isOdd(this.numRows)){
+    		int alongLengthCentreIndex = (this.numCols-1)/2;
+    		int alongWidthCentreIndex = (this.numRows-1)/2;
+    		surfaceCentre = get(alongWidthCentreIndex, alongLengthCentreIndex);
+    	}
+    	else if (isOdd(this.numCols) && !isOdd(this.numRows)){
+    		int alongLengthCentreIndex = (this.numCols-1)/2;
+    		int alongWidthIndex1 = (this.numRows-1)/2;
+    		int alongWidthIndex2 = alongWidthIndex1 + 1;
+    		Location loc1 = get(alongWidthIndex1,alongLengthCentreIndex);
+    		Location loc2 = get(alongWidthIndex2,alongLengthCentreIndex);
+    		double azimuth = LocationUtils.azimuthRad(loc1, loc2);
+    		double distance = this.gridSpacingDown/2;
+    		surfaceCentre = LocationUtils.location(loc1, azimuth, distance);
+    	}
+    	else if (!isOdd(this.numCols) && isOdd(this.numRows)){
+    		int alongLengthIndex1 = (this.numCols-1)/2;
+    		int alongLengthIndex2 = alongLengthIndex1 + 1;
+    		int alongWidthCentreIndex = (this.numRows-1)/2;
+    		Location loc1 = get(alongWidthCentreIndex,alongLengthIndex1);
+    		Location loc2 = get(alongWidthCentreIndex,alongLengthIndex2);
+    		double azimuth = LocationUtils.azimuthRad(loc1, loc2);
+    		double distance = this.gridSpacingAlong/2;
+    		surfaceCentre = LocationUtils.location(loc1, azimuth, distance);
+    	}
+    	else if(!isOdd(this.numCols) && !isOdd(this.numRows)){
+    		int alongLengthIndex1 = (this.numCols-1)/2;
+    		int alongLengthIndex2 = alongLengthIndex1 + 1;
+    		int alongWidthIndex1 = (this.numRows-1)/2;
+    		int alongWidthIndex2 = alongWidthIndex1 + 1;
+    		Location loc1 = get(alongWidthIndex1,alongLengthIndex1);
+    		Location loc2 = get(alongWidthIndex2,alongLengthIndex2);
+    		double azimuth = LocationUtils.azimuthRad(loc1, loc2);
+    		double distance = LocationUtils.linearDistance(loc1, loc2)/2;
+    		surfaceCentre = LocationUtils.location(loc1, azimuth, distance);
+    	}
+    	return surfaceCentre;
+    }
+    
+    private boolean isOdd(int num){
+    	if(num % 2 == 0){
+    		return false;
+    	}
+    	else{
+    		return true;
+    	}
+    }
 }
