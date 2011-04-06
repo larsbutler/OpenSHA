@@ -38,60 +38,60 @@ public class YoungsEtAl_1997_AttenRel extends AttenuationRelationship implements
 		ScalarIntensityMeasureRelationshipAPI, NamedObjectAPI,
 		ParameterChangeListener {
 
-	// Debugging stuff
-	private final static String C = "Youngs_et_al_AttenRel";
-	private final static boolean D = false;
-	public final static String SHORT_NAME = "Youngs1997";
+	/** Short name. **/
+	public static final String SHORT_NAME = "YoungsEtAl1997";
+	
+	/** Full name. **/
+	public static final String NAME = "Youngs et. al. 1997";
+	
+	/** Version number. **/
 	private static final long serialVersionUID = 1234567890987654353L;
 
-	// Name of IMR
-	public final static String NAME = "Youngs_et_al (1997)";
-
 	// Coefficients : these are for soil type = rock
-	double[] periods = { 0.00, 0.075, 0.10, 0.20, 0.30, 0.40, 0.500, 0.75,
+	private static final double[] PERIOD_SOIL = { 0.00, 0.075, 0.10, 0.20, 0.30, 0.40, 0.500, 0.75,
 			1.00, 1.50, 2.00, 3.00 };
-	double[] c1s = { 0.000, 2.400, 2.516, 1.549, 0.793, 0.144, -0.438, -1.704,
+	private static final double[] C1_SOIL = { 0.000, 2.400, 2.516, 1.549, 0.793, 0.144, -0.438, -1.704,
 			-2.870, -5.101, -6.433, -6.672, -7.618 };
-	double[] c2s = { 0.0000, -0.0019, -0.0019, -0.0019, -0.0020, -0.0020,
+	private static final double[] C2_SOIL = { 0.0000, -0.0019, -0.0019, -0.0019, -0.0020, -0.0020,
 			-0.0035, -0.0048, -0.0066, -0.0114, -0.0164, -0.0221, -0.0235 };
-	double[] c3s = { -2.329, -2.697, -2.697, -2.464, -2.327, -2.230, -2.140,
+	private static final double[] C3_SOIL = { -2.329, -2.697, -2.697, -2.464, -2.327, -2.230, -2.140,
 			-1.952, -1.785, -1.470, -1.290, -1.347, -1.272 };
-	double[] c4s = { 1.45, 1.45, 1.45, 1.45, 1.45, 1.45, 1.45, 1.45, 1.45,
+	private static final double[] C4_SOIL = { 1.45, 1.45, 1.45, 1.45, 1.45, 1.45, 1.45, 1.45, 1.45,
 			1.50, 1.55, 1.65, 1.65 };
-	double[] c5s = { -0.10, -0.10, -0.10, -0.10, -0.10, -0.10, -0.10, -0.10,
+	private static final double[] C5_SOIL = { -0.10, -0.10, -0.10, -0.10, -0.10, -0.10, -0.10, -0.10,
 			-0.10, -0.10, -0.10, -0.10, -0.10 };
 
 	// coefficients for rock
-	double[] periodr = { 0.00, 0.075, 0.10, 0.20, 0.30, 0.40, 0.500, 0.75,
+	private static final double[] PERIOD_ROCK = { 0.00, 0.075, 0.10, 0.20, 0.30, 0.40, 0.500, 0.75,
 			1.00, 1.50, 2.00, 3.00 };
-	double[] c1r = { 0.000, 1.275, 1.188, 0.722, 0.246, -0.115, -0.400, -1.149,
+	private static final double[] C1_ROCK = { 0.000, 1.275, 1.188, 0.722, 0.246, -0.115, -0.400, -1.149,
 			-1.736, -2.634, -3.328, -4.511 };
-	double[] c2r = { 0.0000, 0.0000, -0.0011, -0.0027, -0.0036, -0.0043,
+	private static final double[] C2_ROCK = { 0.0000, 0.0000, -0.0011, -0.0027, -0.0036, -0.0043,
 			-0.0048, -0.0057, -0.0064, -0.0073, -0.0080, -0.0089 };
-	double[] c3r = { -2.552, -2.707, -2.655, -2.528, -2.454, -2.401, -2.360,
+	private static final double[] C3_ROCK = { -2.552, -2.707, -2.655, -2.528, -2.454, -2.401, -2.360,
 			-2.286, -2.234, -2.160, -2.107, -2.033 };
-	double[] c4r = { 1.45, 1.45, 1.45, 1.45, 1.45, 1.45, 1.45, 1.45, 1.45,
+	private static final double[] C4_ROCK = { 1.45, 1.45, 1.45, 1.45, 1.45, 1.45, 1.45, 1.45, 1.45,
 			1.50, 1.55, 1.65 };
-	double[] c5r = { -0.10, -0.10, -0.10, -0.10, -0.10, -0.10, -0.10, -0.10,
+	private static final double[] C5_ROCK = { -0.10, -0.10, -0.10, -0.10, -0.10, -0.10, -0.10, -0.10,
 			-0.10, -0.10, -0.10, -0.10 };
 
 	// independent coefficients for rock
-	private static final double a1r = 0.2418;
-	private static final double a2r = 1.4140;
-	private static final double a3r = 10.000;
-	private static final double a4r = 1.7818;
-	private static final double a5r = 0.554;
-	private static final double a6r = 0.00607;
-	private static final double a7r = 0.3846;
+	private static final double A1_ROCK = 0.2418;
+	private static final double A2_ROCK = 1.4140;
+	private static final double A3_ROCK = 10.000;
+	private static final double A4_ROCK = 1.7818;
+	private static final double A5_ROCK = 0.554;
+	private static final double A6_ROCK = 0.00607;
+	private static final double A7_ROCK = 0.3846;
 
 	// independent coefficients for soil
-	private static final double a1s = -0.6687;
-	private static final double a2s = 1.438;
-	private static final double a3s = 10.000;
-	private static final double a4s = 1.097;
-	private static final double a5s = 0.617;
-	private static final double a6s = 0.00648;
-	private static final double a7s = 0.3643;
+	private static final double A1_SOIL = -0.6687;
+	private static final double A2_SOIL = 1.438;
+	private static final double A3_SOIL = 10.000;
+	private static final double A4_SOIL = 1.097;
+	private static final double A5_SOIL = 0.617;
+	private static final double A6_SOIL = 0.00648;
+	private static final double A7_SOIL = 0.3643;
 
 	// Hashmap
 	private HashMap<Double, Integer> indexFromPerHashMapRock;
@@ -153,13 +153,13 @@ public class YoungsEtAl_1997_AttenRel extends AttenuationRelationship implements
 
 		// Init the hashmap for rock
 		indexFromPerHashMapRock = new HashMap<Double, Integer>();
-		for (int i = 1; i < periodr.length; i++) {
-			indexFromPerHashMapRock.put(new Double(periodr[i]), new Integer(i));
+		for (int i = 1; i < PERIOD_ROCK.length; i++) {
+			indexFromPerHashMapRock.put(new Double(PERIOD_ROCK[i]), new Integer(i));
 		}
 		// Init the hashmap for soil
 		indexFromPerHashMapSoil = new HashMap<Double, Integer>();
-		for (int i = 1; i < periods.length; i++) {
-			indexFromPerHashMapSoil.put(new Double(periods[i]), new Integer(i));
+		for (int i = 1; i < PERIOD_SOIL.length; i++) {
+			indexFromPerHashMapSoil.put(new Double(PERIOD_SOIL[i]), new Integer(i));
 		}
 
 		//
@@ -491,8 +491,8 @@ public class YoungsEtAl_1997_AttenRel extends AttenuationRelationship implements
 		// Create saParam:
 		DoubleDiscreteConstraint periodConstraint = new DoubleDiscreteConstraint();
 		// if (siteType.equals(SITE_TYPE_ROCK)){
-		for (int i = 2; i < periodr.length; i++) {
-			periodConstraint.addDouble(new Double(periods[i]));
+		for (int i = 2; i < PERIOD_ROCK.length; i++) {
+			periodConstraint.addDouble(new Double(PERIOD_SOIL[i]));
 		}
 		// } else {
 		// for (int i = 2; i < periods.length; i++) {
@@ -565,16 +565,16 @@ public class YoungsEtAl_1997_AttenRel extends AttenuationRelationship implements
 		//
 		if (siteType.equals(SITE_TYPE_ROCK)) {
 			// computation for rock iper=1 is for PGA
-			mean = a1r + a2r * mag + c1r[iper] + c2r[iper]
-					* (Math.pow(a3r - mag, 3)) + c3r[iper]
-					* Math.log(rRup + a4r * Math.exp(a5r * mag)) + a6r
-					* hypodepth + a7r * Zt;
+			mean = A1_ROCK + A2_ROCK * mag + C1_ROCK[iper] + C2_ROCK[iper]
+					* (Math.pow(A3_ROCK - mag, 3)) + C3_ROCK[iper]
+					* Math.log(rRup + A4_ROCK * Math.exp(A5_ROCK * mag)) + A6_ROCK
+					* hypodepth + A7_ROCK * Zt;
 		} else {
 			// soil
-			mean = a1s + a2s * mag + c1s[iper] + c2s[iper]
-					* (Math.pow(a3s - mag, 3)) + c3s[iper]
-					* Math.log(rRup + a4s * Math.exp(a5s * mag)) + a6s
-					* hypodepth + a7s * Zt;
+			mean = A1_SOIL + A2_SOIL * mag + C1_SOIL[iper] + C2_SOIL[iper]
+					* (Math.pow(A3_SOIL - mag, 3)) + C3_SOIL[iper]
+					* Math.log(rRup + A4_SOIL * Math.exp(A5_SOIL * mag)) + A6_SOIL
+					* hypodepth + A7_SOIL * Zt;
 		}
 		return mean;
 	}
@@ -586,7 +586,7 @@ public class YoungsEtAl_1997_AttenRel extends AttenuationRelationship implements
 		if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE)) {
 			return 0;
 		} else {
-			double sigmaTotal = c4s[iper] + c5s[iper] * mag;
+			double sigmaTotal = C4_SOIL[iper] + C5_SOIL[iper] * mag;
 			return (sigmaTotal);
 		}
 	}
