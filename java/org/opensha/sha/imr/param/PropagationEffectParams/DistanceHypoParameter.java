@@ -117,12 +117,8 @@ public class DistanceHypoParameter extends
 
             // site location
             Location loc1 = site.getLocation();
-
-            // extract hypocenter location as middle of the rupture
-            EvenlyGriddedSurfaceAPI rupSurf = eqkRupture.getRuptureSurface();
-            int numRows = rupSurf.getNumRows();
-            int numCol = rupSurf.getNumCols();
-            Location hypo = rupSurf.get((numRows - 1) / 2, (numCol - 1) / 2);
+            //hypocenter
+            Location hypo = this.eqkRupture.getHypocenterLocation();
 
             // calculate hypocentral distance
             horzDist = LocationUtils.horzDistance(loc1, hypo);
