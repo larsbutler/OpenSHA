@@ -380,14 +380,18 @@ public class FloatingPoissonFaultSource extends ProbEqkSource {
                     for (int r = 0; r < numRup; ++r) {
                         probEqkRupture = new ProbEqkRupture();
                         probEqkRupture.setAveRake(rake);
-                        if (floatTypeFlag != 2)
-                            probEqkRupture.setRuptureSurface(faultSurface
-                                    .getNthSubsetSurface(rupLen, rupWidth,
-                                            rupOffset, r));
-                        else
-                            probEqkRupture.setRuptureSurface(faultSurface
-                                    .getNthSubsetSurfaceCenteredDownDip(rupLen,
-                                            rupWidth, rupOffset, r));
+                        EvenlyGriddedSurfaceAPI rupSurf = null;
+                        if (floatTypeFlag != 2){
+                        	rupSurf = faultSurface
+                            .getNthSubsetSurface(rupLen, rupWidth,
+                                    rupOffset, r);
+                        }
+                        else{
+                        	rupSurf = faultSurface
+                            .getNthSubsetSurfaceCenteredDownDip(rupLen,
+                                    rupWidth, rupOffset, r);
+                        }
+                        probEqkRupture.setRuptureSurface(rupSurf);
                         probEqkRupture.setMag(mag);
                         prob =
                                 (1.0 - Math.exp(-duration * weight * rate
@@ -395,6 +399,8 @@ public class FloatingPoissonFaultSource extends ProbEqkSource {
                         probEqkRupture.setProbability(prob);
                         probEqkRupture.setTectRegType(
                         		this.getTectonicRegionType());
+                        probEqkRupture.setHypocenterLocation(
+                        		rupSurf.getSurfaceCentre());
                         ruptureList.add(probEqkRupture);
                     }
                     /*
@@ -412,6 +418,8 @@ public class FloatingPoissonFaultSource extends ProbEqkSource {
                     probEqkRupture = new ProbEqkRupture();
                     probEqkRupture.setAveRake(rake);
                     probEqkRupture.setRuptureSurface(faultSurface);
+                    probEqkRupture.setHypocenterLocation(
+                    		faultSurface.getSurfaceCentre());
                     probEqkRupture.setMag(mag);
                     prob = (1.0 - Math.exp(-duration * weight * rate));
                     probEqkRupture.setProbability(prob);
