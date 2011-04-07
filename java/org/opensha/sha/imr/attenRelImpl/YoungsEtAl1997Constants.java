@@ -1,7 +1,5 @@
 package org.opensha.sha.imr.attenRelImpl;
 
-import org.opensha.sha.util.TectonicRegionType;
-
 public class YoungsEtAl1997Constants {
 
 	public static final double[] PERIOD_SOIL = { 0.00, 0.075, 0.10, 0.20, 0.30,
@@ -49,26 +47,9 @@ public class YoungsEtAl1997Constants {
 	public static final double A6_SOIL = 0.00648;
 	public static final double A7_SOIL = 0.3643;
 
-	public static final String FLT_TEC_ENV_INTERFACE = TectonicRegionType.SUBDUCTION_INTERFACE
-			.toString();
-	public static final String FLT_TEC_ENV_SLAB = TectonicRegionType.SUBDUCTION_SLAB
-			.toString();
-
 	public static final Double MAG_WARN_MIN = new Double(5);
 	public static final Double MAG_WARN_MAX = new Double(8);
 
 	public static final Double DISTANCE_RUP_WARN_MIN = new Double(0.0);
 	public static final Double DISTANCE_RUP_WARN_MAX = new Double(500.0);
-
-	// depth hypocentre
-	public static final Double DEPTH_HYPO_WARN_MIN = new Double(10.0);
-	public static final Double DEPTH_HYPO_WARN_MAX = new Double(229.0);
-
-	// Soil Types Parameters
-	public static final String SITE_TYPE_INFO = "Geological conditions at the site";
-	public static final String SITE_TYPE_NAME = "Youngs et al. 1997 site type";
-	public static final String SITE_TYPE_ROCK = "Rock";
-	public static final String SITE_TYPE_SOIL = "Soil";
-	public static final String SITE_TYPE_DEFAULT = SITE_TYPE_ROCK;
-
 }

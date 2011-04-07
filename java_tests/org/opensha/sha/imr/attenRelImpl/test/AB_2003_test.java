@@ -134,32 +134,32 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 		ab2003AttenRel = new AB_2003_AttenRel(this);
 		ab2003AttenRel.setParamDefaults();
 		pgaInterfaceTable = 
-			new double[AB_2003_test.INTERFACE_TABLE_NUM_ROWS]
-			           [AB_2003_test.TABLE_NUM_COL];
+			new double[INTERFACE_TABLE_NUM_ROWS]
+			           [TABLE_NUM_COL];
 		AttenRelTestHelper.readTable(
 				new File(ClassLoader.getSystemResource(
-						AB_2003_test.PGA_INTERFACE_TABLE_FILE).toURI()),
+						PGA_INTERFACE_TABLE_FILE).toURI()),
 				pgaInterfaceTable);
 		saInterfaceTable = 
-			new double[AB_2003_test.INTERFACE_TABLE_NUM_ROWS]
-			           [AB_2003_test.TABLE_NUM_COL];
+			new double[INTERFACE_TABLE_NUM_ROWS]
+			           [TABLE_NUM_COL];
 		AttenRelTestHelper.readTable(
 				new File(ClassLoader.getSystemResource(
-						AB_2003_test.SA_INTERFACE_TABLE_FILE).toURI()),
+						SA_INTERFACE_TABLE_FILE).toURI()),
 				saInterfaceTable);
 		pgaIntraSlabTable =
-			new double[AB_2003_test.INTRA_SLAB_TABLE_NUM_ROWS]
-			           [AB_2003_test.TABLE_NUM_COL];
+			new double[INTRA_SLAB_TABLE_NUM_ROWS]
+			           [TABLE_NUM_COL];
 		AttenRelTestHelper.readTable(
 				new File(ClassLoader.getSystemResource(
-						AB_2003_test.PGA_INTRASLAB_TABLE_FILE).toURI()),
+						PGA_INTRASLAB_TABLE_FILE).toURI()),
 				pgaIntraSlabTable);
 		saIntraSlabTable =
-			new double[AB_2003_test.INTRA_SLAB_TABLE_NUM_ROWS]
-			           [AB_2003_test.TABLE_NUM_COL];
+			new double[INTRA_SLAB_TABLE_NUM_ROWS]
+			           [TABLE_NUM_COL];
 		AttenRelTestHelper.readTable(
 				new File(ClassLoader.getSystemResource(
-						AB_2003_test.SA_INTRASLAB_TABLE_FILE).toURI()),
+						SA_INTRASLAB_TABLE_FILE).toURI()),
 				saIntraSlabTable);
 	}
 
