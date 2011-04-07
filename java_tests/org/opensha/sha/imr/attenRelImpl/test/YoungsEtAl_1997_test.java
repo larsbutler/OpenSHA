@@ -90,6 +90,9 @@ public class YoungsEtAl_1997_test implements ParameterChangeWarningListener {
 	private static final double[] INTRASLAB_MAGNITUDE_VALUES =
 		new double[] { 8.0, 7.5, 7.0 };
 	
+	/** Vs30 corresponding to rock **/
+	private static final double VS_30 = 800.0;
+	
 	/** Peak ground acceleration table for interface test. */
 	private static double[][] pgaInterfaceTable = null;
 	
@@ -109,7 +112,7 @@ public class YoungsEtAl_1997_test implements ParameterChangeWarningListener {
 	private static final double INTRA_SLAB_HYPO_DEPTH = 60.0;
 	
 	/** Tolerance level (expressed in percentage). */
-	private static final double TOLERANCE = 1;
+	private static final double TOLERANCE = 0.5;
 	
 	/**
 	 * Set up attenuation relationship object, and tables for tests.
@@ -422,7 +425,7 @@ public class YoungsEtAl_1997_test implements ParameterChangeWarningListener {
 		HazardCurveCalculator hazCurveCalculator = new HazardCurveCalculator();
 		ArbitrarilyDiscretizedFunc hazCurve = setUpHazardCurve();
 		Site site = new Site(new Location(-0.171,-75.555));
-		site.addParameter(new StringParameter("Youngs et al. 1997 site type", "Rock"));
+		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
 		hazCurveCalculator.getHazardCurve(hazCurve, site, youngsEtAl1997AttenRel,
 				erf);
 	}
@@ -443,7 +446,7 @@ public class YoungsEtAl_1997_test implements ParameterChangeWarningListener {
 		HazardCurveCalculator hazCurveCalculator = new HazardCurveCalculator();
 		ArbitrarilyDiscretizedFunc hazCurve = setUpHazardCurve();
 		Site site = new Site(new Location(-1.515,-81.456));
-		site.addParameter(new StringParameter("Youngs et al. 1997 site type", "Rock"));
+		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
 		hazCurveCalculator.getHazardCurve(hazCurve, site, youngsEtAl1997AttenRel,
 				erf);
 	}
@@ -455,10 +458,9 @@ public class YoungsEtAl_1997_test implements ParameterChangeWarningListener {
 		for (int i = 0; i < table.length; i++) {
 
 			double distance = table[i][0];
-
 			double predicted = Math.exp(youngsEtAl1997AttenRel.
 					getMean(periodIndex, mag, distance, tectonicRegionType,
-							siteTypeParam, hypocentralDepth));
+							VS_30, hypocentralDepth));
 			double expected = table[i][expectedResultIndex];
 			double percentageDifference = Math.abs((expected - predicted)
 					/ expected) * 100;

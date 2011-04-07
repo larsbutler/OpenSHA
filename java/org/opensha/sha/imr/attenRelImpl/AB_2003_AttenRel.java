@@ -129,7 +129,7 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 	private transient ParameterChangeWarningListener warningListener = null;
 
 	/**
-	 * Contruct attenuation relationship. Initialize parameters and parameter
+	 * Construct attenuation relationship. Initialize parameters and parameter
 	 * lists.
 	 */
 	public AB_2003_AttenRel(final ParameterChangeWarningListener warningListener) {
