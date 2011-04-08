@@ -66,7 +66,6 @@ public class EqkRupture implements java.io.Serializable {
     /* ********************* */
 
     public EqkRupture() {
-
     }
 
     public EqkRupture(double mag, double aveRake,

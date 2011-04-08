@@ -61,18 +61,20 @@ import org.opensha.sha.magdist.IncrementalMagFreqDist;
 public class PointToLineSource extends ProbEqkSource implements
         java.io.Serializable {
 
-    // for Debug purposes
+    // Set class names  
     protected static String C = new String("PointToLineEqkSource");
     protected static String NAME = "Point-to-Line Source";
+    // For Debug purposes
     protected boolean D = false;
-
+    // 
     protected ArrayList<ProbEqkRupture> probEqkRuptureList;
     protected ArrayList<Double> rates;
-
     protected Location location;
     protected double maxLength = 0;
+    
     int numRuptures;
-
+   
+    // Set instance variables
     IncrementalMagFreqDist[] magFreqDists;
     FocalMechanism[] focalMechanisms;
     ArbitrarilyDiscretizedFunc aveRupTopVersusMag;
@@ -106,8 +108,8 @@ public class PointToLineSource extends ProbEqkSource implements
             double lowerSeisDepth, double duration, double minMag) {
         // invoke other constructor with numStrikes=-1
         this(hypoMagFreqDistAtLoc, aveRupTopVersusMag, defaultHypoDepth,
-                magScalingRel, lowerSeisDepth, duration, minMag, -1, Double.NaN);
-
+                magScalingRel, lowerSeisDepth, duration, minMag, -1, 
+                Double.NaN);
     }
 
     /**
@@ -251,8 +253,7 @@ public class PointToLineSource extends ProbEqkSource implements
             double rate = magFreqDist.getY(m);
             double prob = 1 - Math.exp(-rate * weight * duration);
             if (prob > 0 && mag >= minMag) {
-                // set depth of rupture
-                // Location loc = location.copy();
+                // Set the depth of the rupture
                 double depth;
                 if (mag < aveRupTopVersusMag.getMinX())
                     depth = defaultHypoDepth;

@@ -73,7 +73,7 @@ public class PoissonAreaSource extends PointToLineSource implements
 
         this.magFreqDists = magFreqDistsForFocalMechs.getMagFreqDistList();
         this.focalMechanisms =
-                magFreqDistsForFocalMechs.getFocalMechanismList();
+        	magFreqDistsForFocalMechs.getFocalMechanismList();
         this.aveRupTopVersusMag = aveRupTopVersusMag;
         this.defaultHypoDepth = defaultHypoDepth;
         this.duration = duration;

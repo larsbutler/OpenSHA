@@ -34,18 +34,21 @@ import org.opensha.sha.util.TectonicRegionType;
  * Title: GEM1ERF
  * </p>
  * 
- * @TODO 1) test and verify all the options contained herein 2) fix problem that
- *       lowerSeisDepth for point sources can be inconsistent with given
- *       aveRupTomDepthVersusMag. For example, if both shallow and very deep
- *       sources exist, then rupture-length estimates are bogus if computed from
- *       a mag-area relationship (e.g., if lowerSeisDepth = 14km and
- *       aveRuptTopDepthVersusMag = 115 km, as happens for the S. American ERF)
- *       3) mk calcSettings contain only GEM1ERF values (not all GEM1 calc
- *       values) 4) move all dependencies (parsers and data files) into subdirs
- *       here (and streamline thing if possible) 5) move each adjustable
- *       parameter to a separate class (as is done for IMRs); this will clean
- *       things a lot 6) Add spinning, dipping faults for point-sources option.
- *       7) Review all documentation and add more (including to glossary?)
+ * @TODO 
+ * 1) Test and verify all the options contained herein 
+ * 2) Fix problem that lowerSeisDepth for point sources can be inconsistent 
+ * with given aveRupTopDepthVersusMag. For example, if both shallow and very 
+ * deep sources exist, then rupture-length estimates are bogus if computed from
+ * a mag-area relationship (e.g., if lowerSeisDepth = 14km and
+ * aveRuptTopDepthVersusMag = 115 km, as happens for the S. American ERF)
+ * 3) mk calcSettings contain only GEM1ERF values (not all GEM1 calc
+ * values) 
+ * 4) move all dependencies (parsers and data files) into subdirs
+ * here (and streamline thing if possible) 
+ * 5) move each adjustable parameter to a separate class (as is done for IMRs); 
+ * this will clean things a lot 
+ * 6) Add spinning, dipping faults for point-sources option.
+ * 7) Review all documentation and add more (including to glossary?)
  * 
  * @author : Edward Field
  * @Date :
@@ -474,7 +477,6 @@ public class GEM1ERF extends EqkRupForecast {
 
         // create and add adj params to list
         initAdjParams();
-
 
         // Create adjustable parameter list
         createParamList();
