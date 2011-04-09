@@ -173,7 +173,7 @@ public class MDAreaSource extends ProbEqkSource implements
             MagScalingRelationship magScalRel,
             int numStrikes,
             double firstStrike){
-    	
+    	// 
     	double[][] tmpdmm;
     	// Set MultiDepthAreaSource instance variables
     	// -- Frequency-Magnitude Distribution
@@ -266,7 +266,7 @@ public class MDAreaSource extends ProbEqkSource implements
         }
         // Check that the focalMechanismWeight sum to one
         double sum = 0.0;
-        for (int i = 0; i < focalMechanismWeight.length; i++){
+        for (int i = 0; i < focalMechanismWeight.length; i++){  	
         	sum += focalMechanismWeight[i];
         }
         if (Math.abs(1.0-sum) > 1e-4){
