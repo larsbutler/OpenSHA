@@ -294,17 +294,16 @@ public class MDAreaSource extends ProbEqkSource implements
         	if (depthMagMatrix[i].length != depthVector.length)
         		throw new IllegalArgumentException(
                     	"The size of the magnitude-depth matrix is not " +
-                    	"consistent with the depth vector" +
-                    	depthMagMatrix[i].length + " vs "+
-                    	depthVector.length);
+                    	"consistent with the size of the depth vector" +
+                    	depthMagMatrix[i].length + " vs "+ depthVector.length);
         }
         // Check that the number of magnitudes in the magVector is consistent
         // with the size of the depthMagMatrix
         if (depthMagMatrix.length != magVector.length)
         	throw new IllegalArgumentException(
                 "The size of the magnitude-depth matrix is not " +
-            	"consistent with the magnitude vector "+ depthMagMatrix.length +
-            	" vs " + magVector.length); 
+            	"consistent with with the size of the  magnitude vector "+ 
+            	depthMagMatrix.length +" vs " + magVector.length); 
     	return true;
     }
     

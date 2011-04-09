@@ -100,7 +100,7 @@ public class MDAreaSourceTest {
         numStrikes = 2;
         firstStrike = Double.NaN;
         // Instantiate a MDAreaSource source 
-		MDAreaSource mdas = new MDAreaSource (
+		new MDAreaSource (
         	reg, 
         	gridResolution,
         	mfd03,
@@ -116,8 +116,6 @@ public class MDAreaSourceTest {
             numStrikes,
             firstStrike
     	);	
-		// Get the list of ruptures created 
-		ArrayList<ProbEqkRupture> rupLis = mdas.getRuptureList();
     }
     
     /*
@@ -185,7 +183,7 @@ public class MDAreaSourceTest {
         numStrikes = 2;
         firstStrike = Double.NaN;
         // Instantiate a MDAreaSource source 
-		MDAreaSource mdas = new MDAreaSource (
+		new MDAreaSource (
         	reg, 
         	gridResolution,
         	mfd03,
@@ -201,10 +199,89 @@ public class MDAreaSourceTest {
             numStrikes,
             firstStrike
     	);
-		// Get the list of ruptures created 
-		ArrayList<ProbEqkRupture> rupLis = mdas.getRuptureList();
     }
-     
+    
+    /**
+     * This is to test the FMD created with a MDAreaSource
+     */
+	@Test(expected = IllegalArgumentException.class)
+	public void Test_MagWeights_Sum_To_Unity(){
+		System.out.println("TEST : Test_MagWeights_Sum_To_Unity");
+        // Initalize default parameters
+        initParameters();
+        // Change the depth magnitude matrix so as to generate the exception
+        depthMagMatrix[0][0] = 0.9;
+        // Instantiate a MDAreaSource 
+        new MDAreaSource(
+        	reg, 
+        	gridResolution,
+        	mfd,
+        	focalMechanismArr,
+        	focalMechanismWeight,
+        	depthVector,
+        	magVector,
+        	depthMagMatrix,
+        	duration,
+        	minMag
+    	); 
+	}
+    
+    /**
+     * This is to test the FMD created with a MDAreaSource
+     */
+	@Test(expected = IllegalArgumentException.class)
+	public void Test_DepMtx_MagDepMtx_Consistency(){
+		System.out.println("TEST : Test_DepMtx_MagDepMtx_Consistency");
+        // Initalize default parameters
+        initParameters();
+		// Change the depth matrix
+        depthVector    = new double[3];
+        depthVector[0] =  5.0;
+        depthVector[1] = 10.0;
+        depthVector[2] = 15.0;
+        // Instantiate a MDAreaSource 
+        new MDAreaSource(
+        	reg, 
+        	gridResolution,
+        	mfd,
+        	focalMechanismArr,
+        	focalMechanismWeight,
+        	depthVector,
+        	magVector,
+        	depthMagMatrix,
+        	duration,
+        	minMag
+    	); 
+	}	
+	
+    /**
+     * This is to test the FMD created with a MDAreaSource
+     */
+	@Test(expected = IllegalArgumentException.class)
+	public void Test_MagMtx_MagDepMtx_Consistency(){
+		System.out.println("TEST : Test_MagMtx_MagDepMtx_Consistency");
+        // Initalize default parameters
+        initParameters();
+        // Define the magnitude vector
+        magVector = new double[3];
+        magVector[0] = 4.25;
+        magVector[1] = 5.25;
+        magVector[2] = 5.60;
+        // Instantiate a MDAreaSource 
+        new MDAreaSource(
+        	reg, 
+        	gridResolution,
+        	mfd,
+        	focalMechanismArr,
+        	focalMechanismWeight,
+        	depthVector,
+        	magVector,
+        	depthMagMatrix,
+        	duration,
+        	minMag
+    	); 
+	}
+	
     /**
      * This is to test the number of ruptures created with a 
      * MDAreaSource
@@ -252,14 +329,14 @@ public class MDAreaSourceTest {
 		// Create a region (2 points)
 		reg = new Region(new Location(45.0,10.0), new Location(45.105,10.005));
         // Define some of the MDAreaSource Parameters
-		double aGR  = 5.0;
-        double bGR  = 1.0;
         double minM = 5.05;
         double maxM = 6.05;
-        double mmid;
         double tolerance = 1.0e-2;
         // Initalize default parameters
         initParameters();
+        // Calculate number of rows and columns in the depthMagMatrix
+        int nrow = depthMagMatrix.length;
+        int ncol = depthMagMatrix[0].length;
         // Instantiate a MDAreaSource 
         MDAreaSource mdas = new MDAreaSource(
         	reg, 
@@ -288,7 +365,6 @@ public class MDAreaSourceTest {
 		assertEquals(nrup,mdas.getNumRuptures(),tolerance);
 		// Create a fmd to store the annual rates of occurrence
 		fmdCheck = new IncrementalMagFreqDist(minM,maxM,11);
-		
 		// Create an evenly discretized function to check seismicity 
 		// distribution with depth
 		depthCheck = new IncrementalMagFreqDist(
@@ -296,6 +372,7 @@ public class MDAreaSourceTest {
 				depthVector[depthVector.length-1],
 				depthVector.length);		
 		// Counter
+		
 		Double[][] deCk = new Double[nrow][ncol];
 		// Initialise deCk matrix
 		for (int i=0; i<deCk.length; i++){
