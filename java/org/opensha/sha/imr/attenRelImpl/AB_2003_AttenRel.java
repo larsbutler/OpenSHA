@@ -428,7 +428,6 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 	 * This sets the site and eqkRupture, and the related parameters, from the
 	 * propEffect object passed in.
 	 */
-
 	public final void setPropagationEffectParams() {
 		if ((this.site != null) && (this.eqkRupture != null)) {
 			distanceRupParam.setValue(eqkRupture, site);
