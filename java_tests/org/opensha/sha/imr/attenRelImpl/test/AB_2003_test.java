@@ -458,7 +458,7 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 				GEM1ERF.AREA_SRC_RUP_TYPE_POINT);
 		erf.updateForecast();
 		HazardCurveCalculator hazCurveCalculator = new HazardCurveCalculator();
-		ArbitrarilyDiscretizedFunc hazCurve = setUpHazardCurve();
+		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper.setUpHazardCurve();
 		Site site = new Site(new Location(-0.171,-75.555));
 		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
 		hazCurveCalculator.getHazardCurve(hazCurve, site, ab2003AttenRel,
@@ -483,7 +483,7 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 				GEM1ERF.AREA_SRC_RUP_TYPE_LINE);
 		erf.updateForecast();
 		HazardCurveCalculator hazCurveCalculator = new HazardCurveCalculator();
-		ArbitrarilyDiscretizedFunc hazCurve = setUpHazardCurve();
+		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper.setUpHazardCurve();
 		Site site = new Site(new Location(-0.171,-75.555));
 		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
 		hazCurveCalculator.getHazardCurve(hazCurve, site, ab2003AttenRel,
@@ -504,23 +504,11 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 		double timeSpan = 50.0;
 		GEM1ERF erf = GEM1ERF.getGEM1ERF(srcDataList, timeSpan);
 		HazardCurveCalculator hazCurveCalculator = new HazardCurveCalculator();
-		ArbitrarilyDiscretizedFunc hazCurve = setUpHazardCurve();
+		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper.setUpHazardCurve();
 		Site site = new Site(new Location(-1.515,-81.456));
 		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
 		hazCurveCalculator.getHazardCurve(hazCurve, site, ab2003AttenRel,
 				erf);
-	}
-
-	private ArbitrarilyDiscretizedFunc setUpHazardCurve() {
-		ArbitrarilyDiscretizedFunc hazCurve = new ArbitrarilyDiscretizedFunc();
-		hazCurve.set(0.005, 0.0);
-		hazCurve.set(0.007, 0.0);
-		hazCurve.set(0.0098, 0.0);
-		hazCurve.set(0.0137, 0.0);
-		hazCurve.set(0.0192, 0.0);
-		hazCurve.set(0.0269, 0.0);
-		hazCurve.set(0.0376, 0.0);
-		return hazCurve;
 	}
 	
 	/**

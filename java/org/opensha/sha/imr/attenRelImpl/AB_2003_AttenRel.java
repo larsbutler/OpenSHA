@@ -701,15 +701,7 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 	}
 
 	/**
-	 * This gets the standard deviation for specific parameter settings. We
-	 * might want another version that takes the actual SA period rather than
-	 * the period index.
-	 * 
-	 * @param iper
-	 * @param rRup
-	 * @param mag
-	 * @param stdDevType
-	 * @return
+	 * This gets the standard deviation for specific parameter settings.
 	 */
 	public final double getStdDev(final int iper, final String stdDevType,
 			final String tecRegType) {

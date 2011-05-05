@@ -215,4 +215,16 @@ public class AttenRelTestHelper {
 		srcData = new GEMFaultSourceData(id, name, tectReg, mfd, trc, dip, rake, seismDepthLow, seismDepthUpp, floatRuptureFlag);		
 		return srcData;
 	}
+	
+	public static ArbitrarilyDiscretizedFunc setUpHazardCurve() {
+		ArbitrarilyDiscretizedFunc hazCurve = new ArbitrarilyDiscretizedFunc();
+		hazCurve.set(0.005, 0.0);
+		hazCurve.set(0.007, 0.0);
+		hazCurve.set(0.0098, 0.0);
+		hazCurve.set(0.0137, 0.0);
+		hazCurve.set(0.0192, 0.0);
+		hazCurve.set(0.0269, 0.0);
+		hazCurve.set(0.0376, 0.0);
+		return hazCurve;
+	}
 }

@@ -17,6 +17,7 @@ import org.opensha.commons.param.event.ParameterChangeEvent;
 import org.opensha.commons.param.event.ParameterChangeListener;
 import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.earthquake.EqkRupture;
+import org.opensha.sha.earthquake.griddedForecast.HypoMagFreqDistAtLoc;
 import org.opensha.sha.faultSurface.EvenlyGriddedSurface;
 import org.opensha.sha.faultSurface.EvenlyGriddedSurfaceAPI;
 import org.opensha.sha.imr.AttenuationRelationship;
@@ -62,9 +63,9 @@ import org.opensha.sha.util.TectonicRegionType;
  * <LI>distanceRupParam - closest distance to rupture surface
  * <LI>vs30Param - shear wave velocity (m/s) averaged over the top 30 m of the
  * soil profile; The model assumes the following classification: vs30 > 1100 ->
- * Hard Rock, NEHRP A; vs30 > 600 -> Rock, NEHRP A+B; 300 < vs30 <= 600 -> Hard
- * Soil, NEHRP C; 200 < vs30 <= 300 -> Medium Soil, NEHRP D, vs30 <=200 -> Soft
- * Soil, NEHRP E + F;
+ * Hard Rock, NEHRP A; 600 < vs30 <=1000 -> Rock, NEHRP A+B; 300 < vs30 <= 600
+ * -> Hard Soil, NEHRP C; 200 < vs30 <= 300 -> Medium Soil, NEHRP D, vs30 <=200
+ * -> Soft Soil, NEHRP E + F;
  * <LI>tectonicRegionTypeParam - shallow crust, interface, intra slab
  * <LI>focalDepthParam - depth to the earthquake rupture hypocenter
  * <LI>componentParam - geometric mean of two horizontal components
@@ -77,14 +78,14 @@ import org.opensha.sha.util.TectonicRegionType;
  * Verification - This model has been validated (see {@link ZhaoEtAl_2006_test})
  * against tables computed using the original Zhao's code. Tests were
  * implemented to check median PGA and SA (at different peridos) for shallow
- * crust, interface, intraslab events, at different magnitude (5.0 and 6.5), at
- * rock conditions.
+ * crust, interface, intraslab events, at different magnitude (5.0 and 6.5), and
+ * different soil conditions.
  * 
  * 
  * </p>
  * 
  ** 
- * @author Marco Pagani, D. Monelli
+ * @author L.Danciu, Marco Pagani, D. Monelli
  * @version 1.0, December 2010
  */
 public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
@@ -196,11 +197,9 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 	 */
 	protected void initEqkRuptureParams() {
 
-		// moment magnitude
 		magParam = new MagParam(ZhaoEtAl2006Constants.MAG_WARN_MIN,
 				ZhaoEtAl2006Constants.MAG_WARN_MAX);
 
-		// tectonic region type
 		StringConstraint options = new StringConstraint();
 		options.addString(TectonicRegionType.ACTIVE_SHALLOW.toString());
 		options.addString(TectonicRegionType.SUBDUCTION_INTERFACE.toString());
@@ -216,6 +215,10 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 
 		eqkRuptureParams.clear();
 		eqkRuptureParams.addParameter(magParam);
+		eqkRuptureParams.addParameter(tectonicRegionTypeParam);
+		eqkRuptureParams.addParameter(focalDepthParam);
+		eqkRuptureParams.addParameter(rakeParam);
+
 	}
 
 	/**
@@ -258,7 +261,6 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 		sigmaTruncTypeParam = new SigmaTruncTypeParam();
 		sigmaTruncLevelParam = new SigmaTruncLevelParam();
 
-		// stdDevType Parameter
 		StringConstraint stdDevTypeConstraint = new StringConstraint();
 		stdDevTypeConstraint.addString(StdDevTypeParam.STD_DEV_TYPE_TOTAL);
 		stdDevTypeConstraint.addString(StdDevTypeParam.STD_DEV_TYPE_NONE);
@@ -267,14 +269,12 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 		stdDevTypeConstraint.setNonEditable();
 		stdDevTypeParam = new StdDevTypeParam(stdDevTypeConstraint);
 
-		// component Parameter
 		StringConstraint constraint = new StringConstraint();
 		constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
 		constraint.setNonEditable();
 		componentParam = new ComponentParam(constraint,
 				ComponentParam.COMPONENT_AVE_HORZ);
 
-		// add these to the list
 		otherParams.clear();
 		otherParams.addParameter(sigmaTruncTypeParam);
 		otherParams.addParameter(sigmaTruncLevelParam);
@@ -348,6 +348,7 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 	 */
 	public void setEqkRupture(EqkRupture eqkRupture)
 			throws InvalidRangeException {
+
 		magParam.setValueIgnoreWarning(new Double(eqkRupture.getMag()));
 
 		if (eqkRupture.getTectRegType() != null) {
@@ -366,7 +367,9 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 					+ " earthquake rupture");
 		}
 
-		rakeParam.setValue(eqkRupture.getAveRake());
+		if(!Double.isNaN(eqkRupture.getAveRake())){
+			rakeParam.setValue(eqkRupture.getAveRake());
+		}
 
 		this.eqkRupture = eqkRupture;
 
@@ -468,16 +471,19 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 	/**
 	 * Compute mean (natural logarithm of median ground motion).
 	 */
-	public double getMean(int iper, double mag, double rRup, double hypodepth, double rake, double vs30,
-			String tectonicRegiontType) {
+	public double getMean(int iper, double mag, double rRup, double hypodepth,
+			double rake, double vs30, String tectonicRegiontType) {
 
-		double flag_sc = 0.0; // This is unity for crustal events - Otherwise 0
-		double flag_Fr = 0.0; // This is unity for reverse crustal events -
-								// Otherwise 0
-		double flag_Si = 0.0; // This is unity for interface events - Otherwise
-								// 0
-		double flag_Ss = 0.0; // This is unity for slab events - Otherwise 0
-		double flag_Ssl = 0.0; // This is unity for slab events - Otherwise 0
+		// This is unity for reverse crustal events - Otherwise 0
+		double flag_Fr = 0.0;
+		// This is unity for crustal events - Otherwise 0
+		double flag_sc = 0.0;
+		// This is unity for interface events - Otherwise 0
+		double flag_Si = 0.0;
+		// This is unity for slab events - Otherwise 0
+		double flag_Ss = 0.0;
+		// This is unity for slab events - Otherwise 0
+		double flag_Ssl = 0.0;
 
 		double hc = 125;
 		double hlow = 15; // see bottom of left column page 902
@@ -492,31 +498,33 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 
 		// Setting the flags in order to account for tectonic region and focal
 		// mechanism
-		if (rake > 30 && rake < 150
-				&& tectonicRegiontType.equalsIgnoreCase(ZhaoEtAl2006Constants.FLT_TEC_ENV_CRUSTAL)) {
+		if (rake > 30
+				&& rake < 150
+				&& tectonicRegiontType
+						.equalsIgnoreCase(TectonicRegionType.ACTIVE_SHALLOW.toString())) {
 			flag_Fr = 1.0;
 			mc = 6.3;
 			pFa = 0.0;
 			qFa = ZhaoEtAl2006Constants.Qc[iper];
 			wFa = ZhaoEtAl2006Constants.Wc[iper];
-		} else if (tectonicRegiontType.equalsIgnoreCase(ZhaoEtAl2006Constants.FLT_TEC_ENV_CRUSTAL)) {
+		} else if (tectonicRegiontType
+				.equalsIgnoreCase(TectonicRegionType.ACTIVE_SHALLOW.toString())) {
 			flag_sc = 1.0;
-			//
 			mc = 6.3;
 			pFa = 0.0;
 			qFa = ZhaoEtAl2006Constants.Qc[iper];
 			wFa = ZhaoEtAl2006Constants.Wc[iper];
-		} else if (tectonicRegiontType.equalsIgnoreCase(ZhaoEtAl2006Constants.FLT_TEC_ENV_INTERFACE)) {
+		} else if (tectonicRegiontType
+				.equalsIgnoreCase(TectonicRegionType.SUBDUCTION_INTERFACE.toString())) {
 			flag_Si = 1.0;
-			//
 			mc = 6.3;
 			pFa = 0.0;
 			qFa = ZhaoEtAl2006Constants.Qi[iper];
 			wFa = ZhaoEtAl2006Constants.Wi[iper];
-		} else if (tectonicRegiontType.equalsIgnoreCase(ZhaoEtAl2006Constants.FLT_TEC_ENV_SLAB)) {
+		} else if (tectonicRegiontType
+				.equalsIgnoreCase(TectonicRegionType.SUBDUCTION_SLAB.toString())) {
 			flag_Ss = 1.0;
 			flag_Ssl = 1.0;
-			//
 			mc = 6.5;
 			pFa = ZhaoEtAl2006Constants.Ps[iper];
 			qFa = ZhaoEtAl2006Constants.Qs[iper];
@@ -542,27 +550,14 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 
 		double r = rRup + ZhaoEtAl2006Constants.C[iper]
 				* Math.exp(ZhaoEtAl2006Constants.D[iper] * mag);
-		// System.out.println(hypodepth+" "+rRup+" "+Si[iper]+" "+Qi[iper]+" "+Wi[iper]);
-		// System.out.println("  r: "+r);
-		// System.out.println("  hypo term: "+e[iper] * hypodepth *
-		// delta_h+" hypo dep:"+hypodepth);
 
 		double lnGm = ZhaoEtAl2006Constants.A[iper] * mag
 				+ ZhaoEtAl2006Constants.B[iper] * rRup - Math.log(r)
-				+ ZhaoEtAl2006Constants.E[iper] * hypodepth * delta_h
-				+ flag_Fr
-				* ZhaoEtAl2006Constants.Sr[iper]
-				+ flag_Si
-				* ZhaoEtAl2006Constants.Si[iper]
-				+
-				// The following options give the same results (the first takes
-				// what's written in the
-				// BSSA paper the second follows Zhao's code implementation
-				flag_Ss * ZhaoEtAl2006Constants.Ss[iper] + flag_Ssl
-				* ZhaoEtAl2006Constants.Ssl[iper] * Math.log(rRup) + // Option 1
-				// flag_Ss *SsZhao[iper] + flag_Ssl * Ssl[iper] *
-				// (Math.log(rRup)-Math.log(125.0)) + // Option 2
-				soilCoeff;
+				+ ZhaoEtAl2006Constants.E[iper] * hypodepth * delta_h + flag_Fr
+				* ZhaoEtAl2006Constants.Sr[iper] + flag_Si
+				* ZhaoEtAl2006Constants.Si[iper] + flag_Ss
+				* ZhaoEtAl2006Constants.Ss[iper] + flag_Ssl
+				* ZhaoEtAl2006Constants.Ssl[iper] * Math.log(rRup) + soilCoeff;
 
 		// Return the computed mean value
 		lnGm += m2CorrFact;
@@ -575,7 +570,7 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 		double soilCoeff = 0.0;
 		if (vs30 > 1100) {
 			soilCoeff = ZhaoEtAl2006Constants.Ch[iper];
-		} else if (vs30 > 600 && vs30 <=1100) {
+		} else if (vs30 > 600 && vs30 <= 1100) {
 			soilCoeff = ZhaoEtAl2006Constants.C1[iper];
 		} else if (vs30 > 300 && vs30 <= 600) {
 			soilCoeff = ZhaoEtAl2006Constants.C2[iper];
@@ -588,29 +583,11 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 	}
 
 	/**
-	 * This gets the standard deviation for specific parameter settings. We
-	 * might want another version that takes the actual SA period rather than
-	 * the period index.
-	 * 
-	 * @param iper
-	 * @param vs30
-	 * @param f_rv
-	 * @param f_nm
-	 * @param rRup
-	 * @param distRupMinusJB_OverRup
-	 * @param distRupMinusDistX_OverRup
-	 * @param f_hw
-	 * @param dip
-	 * @param mag
-	 * @param depthTop
-	 * @param aftershock
-	 * @param stdDevType
-	 * @param f_meas
-	 * @return
+	 * This gets the standard deviation for specific parameter settings.
 	 */
 	public double getStdDev(int iper, String stdDevType, String tecRegType) {
 
-		if (tecRegType.equals(ZhaoEtAl2006Constants.FLT_TEC_ENV_CRUSTAL)) {
+		if (tecRegType.equals(TectonicRegionType.ACTIVE_SHALLOW.toString())) {
 			if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL))
 				return Math.sqrt(ZhaoEtAl2006Constants.Tau_c[iper]
 						* ZhaoEtAl2006Constants.Tau_c[iper]
@@ -625,7 +602,7 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 			else
 				return Double.NaN;
 		} else if (tecRegType
-				.equals(ZhaoEtAl2006Constants.FLT_TEC_ENV_INTERFACE)) {
+				.equals(TectonicRegionType.SUBDUCTION_INTERFACE.toString())) {
 			if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL))
 				return Math.sqrt(ZhaoEtAl2006Constants.Tau_i[iper]
 						* ZhaoEtAl2006Constants.Tau_i[iper]
@@ -639,7 +616,7 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 				return ZhaoEtAl2006Constants.Tau_i[iper];
 			else
 				return Double.NaN;
-		} else if (tecRegType.equals(ZhaoEtAl2006Constants.FLT_TEC_ENV_SLAB)) {
+		} else if (tecRegType.equals(TectonicRegionType.SUBDUCTION_SLAB.toString())) {
 			if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL))
 				return Math.sqrt(ZhaoEtAl2006Constants.Tau_s[iper]
 						* ZhaoEtAl2006Constants.Tau_s[iper]
@@ -668,53 +645,50 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 
 		String pName = e.getParameterName();
 		Object val = e.getNewValue();
-
-		if (D)
-			System.out.println("Changed param: " + pName);
-
-		if (pName.equals(DistanceRupParameter.NAME)) {
-			rRup = ((Double) val).doubleValue();
-		} else if (pName.equals(MagParam.NAME)) {
+		
+		if (pName.equals(MagParam.NAME)) {
 			mag = ((Double) val).doubleValue();
-		} else if (pName.equals(StdDevTypeParam.NAME)) {
-			stdDevType = (String) val;
-		} else if (pName.equals(FaultTypeParam.NAME)) {
-//			focMechType = fltTypeParam.getValue().toString();
-		} else if (pName.equals(TectonicRegionTypeParam.NAME)) {
-			tecRegType = tectonicRegionTypeParam.getValue().toString();
-			if (D)
-				System.out.println("tecRegType new value:" + tecRegType);
-		} else if (pName.equals(ZhaoEtAl2006Constants.SITE_TYPE_NAME)) {
-//			siteType = this.getParameter(ZhaoEtAl2006Constants.SITE_TYPE_NAME)
-//					.getValue().toString();
-		} else if (pName.equals(PeriodParam.NAME)) {
-			intensityMeasureChanged = true;
+		}
+		else if (pName.equals(DistanceRupParameter.NAME)) {
+			rRup = ((Double) val).doubleValue();
+		}
+		else if (pName.equals(FocalDepthParam.NAME)) {
+			focalDepth = ((Double) val).doubleValue();
+		}
+		else if (pName.equals(Vs30_Param.NAME)) {
+			vs30 = ((Double) val).doubleValue();
+		}
+		else if (pName.equals(RakeParam.NAME)) {
+			rake = ((Double) val).doubleValue();
+		}
+		else if (pName.equals(TectonicRegionTypeParam.NAME)) {
+			tecRegType = val.toString();
+		}
+		else if (pName.equals(StdDevTypeParam.NAME)) {
+			stdDevType = val.toString();
 		}
 	}
 
 	/**
-	 * Allows to reset the change listeners on the parameters
+	 * Allows to reset the change listeners on the parameters.
 	 */
 	public void resetParameterEventListeners() {
 		magParam.removeParameterChangeListener(this);
-		fltTypeParam.removeParameterChangeListener(this);
-		tectonicRegionTypeParam.removeParameterChangeListener(this);
 		distanceRupParam.removeParameterChangeListener(this);
+		focalDepthParam.removeParameterChangeListener(this);
+		rakeParam.removeParameterChangeListener(this);
+		vs30Param.removeParameterChangeListener(this);
+		tectonicRegionTypeParam.removeParameterChangeListener(this);
 		stdDevTypeParam.removeParameterChangeListener(this);
-		saPeriodParam.removeParameterChangeListener(this);
 		this.initParameterEventListeners();
 	}
 
 	/**
-	 * This provides a URL where more info on this model can be obtained
-	 * 
-	 * @throws MalformedURLException
-	 *             if returned URL is not a valid URL.
-	 * @returns the URL to the AttenuationRelationship document on the Web.
+	 * This provides a URL where more info on this model can be obtained.
+	 * Currently returns null because no URL has been defined.
 	 */
 	public URL getInfoURL() throws MalformedURLException {
-		return new URL(
-				"http://www.opensha.org/documentation/modelsImplemented/attenRel/ZhaoEtAl_2006.html");
+		return null;
 	}
 
 }
