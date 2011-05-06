@@ -236,18 +236,6 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 		distanceJBParam.setNonEditable();
 
 		propagationEffectParams.addParameter(distanceJBParam);
-
-		// distanceRupParam = new DistanceRupParameter(
-		// AkB2010Constants.DISTANCE_JB_WARN_MIN);
-		// distanceRupParam.addParameterChangeWarningListener(warningListener);
-		// DoubleConstraint warn = new DoubleConstraint(
-		// AkB2010Constants.DISTANCE_JB_WARN_MIN,
-		// AkB2010Constants.DISTANCE_JB_WARN_MAX);
-		// warn.setNonEditable();
-		// distanceRupParam.setWarningConstraint(warn);
-		// distanceRupParam.setNonEditable();
-		//
-		// propagationEffectParams.addParameter(distanceRupParam);
 	}
 
 	/**
@@ -350,18 +338,6 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 		} else if (pName.equals(StdDevTypeParam.NAME)) {
 			stdDevType = (String) val;
 		}
-
-		// if (pName.equals(MagParam.NAME)) {
-		// mag = ((Double) val).doubleValue();
-		// } else if (pName.equals(Vs30_Param.NAME)) {
-		// vs30 = ((Double) val).doubleValue();
-		// } else if (pName.equals(DistanceRupParameter.NAME)) {
-		// rJB = ((Double) val).doubleValue();
-		// } else if (pName.equals(StdDevTypeParam.NAME)) {
-		// stdDevType = (String) val;
-		// } else if (pName.equals(FaultTypeParam.NAME)) {
-		// rake = ((Double) val).doubleValue();
-		// }
 	}
 
 	/**
@@ -493,7 +469,7 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 	 */
 	public double getMean(int iper, double mag, final double rJB,
 			final double vs30, final double rake) {
-		//
+
 		double logY;
 
 		double[] s = computeSiteTerm(iper, vs30);

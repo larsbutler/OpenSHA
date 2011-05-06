@@ -136,28 +136,28 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 		pgaInterfaceTable = 
 			new double[INTERFACE_TABLE_NUM_ROWS]
 			           [TABLE_NUM_COL];
-		AttenRelTestHelper.readTable(
+		AttenRelTestHelper.readNumericTable(
 				new File(ClassLoader.getSystemResource(
 						PGA_INTERFACE_TABLE_FILE).toURI()),
 				pgaInterfaceTable);
 		saInterfaceTable = 
 			new double[INTERFACE_TABLE_NUM_ROWS]
 			           [TABLE_NUM_COL];
-		AttenRelTestHelper.readTable(
+		AttenRelTestHelper.readNumericTable(
 				new File(ClassLoader.getSystemResource(
 						SA_INTERFACE_TABLE_FILE).toURI()),
 				saInterfaceTable);
 		pgaIntraSlabTable =
 			new double[INTRA_SLAB_TABLE_NUM_ROWS]
 			           [TABLE_NUM_COL];
-		AttenRelTestHelper.readTable(
+		AttenRelTestHelper.readNumericTable(
 				new File(ClassLoader.getSystemResource(
 						PGA_INTRASLAB_TABLE_FILE).toURI()),
 				pgaIntraSlabTable);
 		saIntraSlabTable =
 			new double[INTRA_SLAB_TABLE_NUM_ROWS]
 			           [TABLE_NUM_COL];
-		AttenRelTestHelper.readTable(
+		AttenRelTestHelper.readNumericTable(
 				new File(ClassLoader.getSystemResource(
 						SA_INTRASLAB_TABLE_FILE).toURI()),
 				saIntraSlabTable);

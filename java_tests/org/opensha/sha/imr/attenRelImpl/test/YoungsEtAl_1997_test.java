@@ -126,28 +126,28 @@ public class YoungsEtAl_1997_test implements ParameterChangeWarningListener {
 		pgaInterfaceTable = 
 			new double[YoungsEtAl_1997_test.TABLE_NUM_ROWS]
 			           [YoungsEtAl_1997_test.TABLE_NUM_COL];
-		AttenRelTestHelper.readTable(
+		AttenRelTestHelper.readNumericTable(
 				new File(ClassLoader.getSystemResource(
 						YoungsEtAl_1997_test.PGA_INTERFACE_TABLE_FILE).toURI()),
 				pgaInterfaceTable);
 		saInterfaceTable = 
 			new double[YoungsEtAl_1997_test.TABLE_NUM_ROWS]
 			           [YoungsEtAl_1997_test.TABLE_NUM_COL];
-		AttenRelTestHelper.readTable(
+		AttenRelTestHelper.readNumericTable(
 				new File(ClassLoader.getSystemResource(
 						YoungsEtAl_1997_test.SA_INTERFACE_TABLE_FILE).toURI()),
 				saInterfaceTable);
 		pgaIntraSlabTable =
 			new double[YoungsEtAl_1997_test.TABLE_NUM_ROWS]
 			           [YoungsEtAl_1997_test.TABLE_NUM_COL];
-		AttenRelTestHelper.readTable(
+		AttenRelTestHelper.readNumericTable(
 				new File(ClassLoader.getSystemResource(
 						YoungsEtAl_1997_test.PGA_INTRASLAB_TABLE_FILE).toURI()),
 				pgaIntraSlabTable);
 		saIntraSlabTable =
 			new double[YoungsEtAl_1997_test.TABLE_NUM_ROWS]
 			           [YoungsEtAl_1997_test.TABLE_NUM_COL];
-		AttenRelTestHelper.readTable(
+		AttenRelTestHelper.readNumericTable(
 				new File(ClassLoader.getSystemResource(
 						YoungsEtAl_1997_test.SA_INTRASLAB_TABLE_FILE).toURI()),
 				saIntraSlabTable);

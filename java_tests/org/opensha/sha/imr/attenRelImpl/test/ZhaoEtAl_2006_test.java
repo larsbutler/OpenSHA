@@ -85,42 +85,42 @@ public class ZhaoEtAl_2006_test implements ParameterChangeWarningListener {
 		zhaoEtAlAttenRel = new ZhaoEtAl_2006_AttenRel(this);
 		zhaoEtAlAttenRel.setParamDefaults();
 		M65Dist20Depth10ShallowCrustNormalRockTable = new double[TABLE_NUM_ROWS][TABLE_NUM_COL];
-		AttenRelTestHelper.readTable(
+		AttenRelTestHelper.readNumericTable(
 				new File(ClassLoader.getSystemResource(
 						M65Dist20Depth10ShallowCrustNormalRockTableFile).toURI()),
 				M65Dist20Depth10ShallowCrustNormalRockTable);
 		M65Dist20Depth10ShallowCrustReverseRockTable = new double[TABLE_NUM_ROWS][TABLE_NUM_COL];
-		AttenRelTestHelper.readTable(
+		AttenRelTestHelper.readNumericTable(
 				new File(ClassLoader.getSystemResource(
 						M65Dist20Depth10ShallowCrustReverseRockTableFile).toURI()),
 				M65Dist20Depth10ShallowCrustReverseRockTable);
 		M65Dist223Depth20InterfaceRockTable = new double[TABLE_NUM_ROWS][TABLE_NUM_COL];
-		AttenRelTestHelper.readTable(
+		AttenRelTestHelper.readNumericTable(
 				new File(ClassLoader.getSystemResource(
 						M65Dist223Depth20InterfaceTableRockTableFile).toURI()),
 				M65Dist223Depth20InterfaceRockTable);
 		M65Dist223Depth20InterfaceHardSoilTable = new double[TABLE_NUM_ROWS][TABLE_NUM_COL];
-		AttenRelTestHelper.readTable(
+		AttenRelTestHelper.readNumericTable(
 				new File(ClassLoader.getSystemResource(
 						M65Dist223Depth20InterfaceHardSoilTableFile).toURI()),
 				M65Dist223Depth20InterfaceHardSoilTable);
 		M65Dist223Depth20InterfaceMediumSoilTable = new double[TABLE_NUM_ROWS][TABLE_NUM_COL];
-		AttenRelTestHelper.readTable(
+		AttenRelTestHelper.readNumericTable(
 				new File(ClassLoader.getSystemResource(
 						M65Dist223Depth20InterfaceMediumSoilTableFile).toURI()),
 						M65Dist223Depth20InterfaceMediumSoilTable);
 		M65Dist223Depth20InterfaceSoftSoilTable = new double[TABLE_NUM_ROWS][TABLE_NUM_COL];
-		AttenRelTestHelper.readTable(
+		AttenRelTestHelper.readNumericTable(
 				new File(ClassLoader.getSystemResource(
 						M65Dist223Depth20InterfaceSoftSoilTableFile).toURI()),
 						M65Dist223Depth20InterfaceSoftSoilTable);
 		M65Dist223Depth20IntraSlabRockTable = new double[TABLE_NUM_ROWS][TABLE_NUM_COL];
-		AttenRelTestHelper.readTable(
+		AttenRelTestHelper.readNumericTable(
 				new File(ClassLoader.getSystemResource(
 						M65Dist223Depth20IntraSlabRockTableFile).toURI()),
 						M65Dist223Depth20IntraSlabRockTable);
 		M5Dist30Depth30InterfaceRockTable = new double[TABLE_NUM_ROWS][TABLE_NUM_COL];
-		AttenRelTestHelper.readTable(
+		AttenRelTestHelper.readNumericTable(
 				new File(ClassLoader.getSystemResource(
 						M5Dist30Depth30InterfaceRockTableFile).toURI()),
 						M5Dist30Depth30InterfaceRockTable);
@@ -354,7 +354,6 @@ public class ZhaoEtAl_2006_test implements ParameterChangeWarningListener {
 					periodIndex, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString(),
 					tectRegType);
 			double expectedTotalStdDev = verificationTable[i][3];
-			//System.out.println("expected: "+expectedMedian+", computed: "+computedMedian);
 			assertEquals(computedTotalStdDev, expectedTotalStdDev, TOLERANCE);
 			assertEquals(computedMedian, expectedMedian, TOLERANCE);
 		}
