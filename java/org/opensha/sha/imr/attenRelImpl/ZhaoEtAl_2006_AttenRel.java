@@ -67,6 +67,8 @@ import org.opensha.sha.util.TectonicRegionType;
  * -> Hard Soil, NEHRP C; 200 < vs30 <= 300 -> Medium Soil, NEHRP D, vs30 <=200
  * -> Soft Soil, NEHRP E + F;
  * <LI>tectonicRegionTypeParam - shallow crust, interface, intra slab
+ * <LI>rakeParam - rake angle. Used to establish reverse faulting for shallow
+ * crust events (30 < rake < 150 -> reverse)
  * <LI>focalDepthParam - depth to the earthquake rupture hypocenter
  * <LI>componentParam - geometric mean of two horizontal components
  * <LI>stdDevTypeParam - total, inter-event, intra-event, none
@@ -367,7 +369,7 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 					+ " earthquake rupture");
 		}
 
-		if(!Double.isNaN(eqkRupture.getAveRake())){
+		if (!Double.isNaN(eqkRupture.getAveRake())) {
 			rakeParam.setValue(eqkRupture.getAveRake());
 		}
 
@@ -501,7 +503,8 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 		if (rake > 30
 				&& rake < 150
 				&& tectonicRegiontType
-						.equalsIgnoreCase(TectonicRegionType.ACTIVE_SHALLOW.toString())) {
+						.equalsIgnoreCase(TectonicRegionType.ACTIVE_SHALLOW
+								.toString())) {
 			flag_Fr = 1.0;
 			mc = 6.3;
 			pFa = 0.0;
@@ -515,7 +518,8 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 			qFa = ZhaoEtAl2006Constants.Qc[iper];
 			wFa = ZhaoEtAl2006Constants.Wc[iper];
 		} else if (tectonicRegiontType
-				.equalsIgnoreCase(TectonicRegionType.SUBDUCTION_INTERFACE.toString())) {
+				.equalsIgnoreCase(TectonicRegionType.SUBDUCTION_INTERFACE
+						.toString())) {
 			flag_Si = 1.0;
 			mc = 6.3;
 			pFa = 0.0;
@@ -601,8 +605,8 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 				return ZhaoEtAl2006Constants.Tau_c[iper];
 			else
 				return Double.NaN;
-		} else if (tecRegType
-				.equals(TectonicRegionType.SUBDUCTION_INTERFACE.toString())) {
+		} else if (tecRegType.equals(TectonicRegionType.SUBDUCTION_INTERFACE
+				.toString())) {
 			if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL))
 				return Math.sqrt(ZhaoEtAl2006Constants.Tau_i[iper]
 						* ZhaoEtAl2006Constants.Tau_i[iper]
@@ -616,7 +620,8 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 				return ZhaoEtAl2006Constants.Tau_i[iper];
 			else
 				return Double.NaN;
-		} else if (tecRegType.equals(TectonicRegionType.SUBDUCTION_SLAB.toString())) {
+		} else if (tecRegType.equals(TectonicRegionType.SUBDUCTION_SLAB
+				.toString())) {
 			if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL))
 				return Math.sqrt(ZhaoEtAl2006Constants.Tau_s[iper]
 						* ZhaoEtAl2006Constants.Tau_s[iper]
@@ -645,26 +650,20 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 
 		String pName = e.getParameterName();
 		Object val = e.getNewValue();
-		
+
 		if (pName.equals(MagParam.NAME)) {
 			mag = ((Double) val).doubleValue();
-		}
-		else if (pName.equals(DistanceRupParameter.NAME)) {
+		} else if (pName.equals(DistanceRupParameter.NAME)) {
 			rRup = ((Double) val).doubleValue();
-		}
-		else if (pName.equals(FocalDepthParam.NAME)) {
+		} else if (pName.equals(FocalDepthParam.NAME)) {
 			focalDepth = ((Double) val).doubleValue();
-		}
-		else if (pName.equals(Vs30_Param.NAME)) {
+		} else if (pName.equals(Vs30_Param.NAME)) {
 			vs30 = ((Double) val).doubleValue();
-		}
-		else if (pName.equals(RakeParam.NAME)) {
+		} else if (pName.equals(RakeParam.NAME)) {
 			rake = ((Double) val).doubleValue();
-		}
-		else if (pName.equals(TectonicRegionTypeParam.NAME)) {
+		} else if (pName.equals(TectonicRegionTypeParam.NAME)) {
 			tecRegType = val.toString();
-		}
-		else if (pName.equals(StdDevTypeParam.NAME)) {
+		} else if (pName.equals(StdDevTypeParam.NAME)) {
 			stdDevType = val.toString();
 		}
 	}
