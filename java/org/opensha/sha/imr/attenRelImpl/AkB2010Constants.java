@@ -178,17 +178,13 @@ public class AkB2010Constants {
 	 */
 	public static final Double DISTANCE_JB_WARN_MAX = new Double(100.0);
 	/**
-	 * SOIL CLASS ROCK Vs30 upper bound
+	 * STIFF SOIL Vs30 upper bound
 	 */
-	public static final double SOIL_TYPE_ROCK_UPPER_BOUND = 750.0;
+	public static final double STIFF_SOIL_UPPER_BOUND = 750.0;
 	/**
-	 * SOIL CLASS STIFF SOIL Vs30 upper bound
+	 * SOFT SOIL Vs30 upper bound
 	 */
-	public static final double SITE_TYPE_STIFF_SOIL_UPPER_BOUND = 360.0;
-	/**
-	 * SOIL CLASS ROCK Vs30 upper bound
-	 */
-	public static final double SITE_TYPE_SOFT__UPPER_BOUND  = 180;
+	public static final double SOFT_SOIL_UPPER_BOUND  = 360;
 	/**
 	 * NORMAL - STYLE of FAULTING (Definition based on rake angle minimum value)  
 	 */	

@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 import org.opensha.commons.data.NamedObjectAPI;
 import org.opensha.commons.data.Site;
+import org.opensha.commons.geo.Location;
 import org.opensha.commons.param.DoubleConstraint;
 import org.opensha.commons.param.DoubleDiscreteConstraint;
 import org.opensha.commons.param.StringConstraint;
@@ -43,9 +44,9 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  * Supported Intensity-Measure Parameters:
  * <p>
  * <UL>
- * <LI>pgaParam - Peak Ground Acceleration
- * <LI>pgvParam - Peak Ground Velocity
- * <LI>saParam - Response Spectral Acceleration
+ * <LI>pgaParam - Peak Ground Acceleration (g)
+ * <LI>pgvParam - Peak Ground Velocity (cm/s)
+ * <LI>saParam - Response Spectral Acceleration (g)
  * </UL>
  * <p>
  * Other Independent Parameters:
@@ -470,72 +471,65 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 	public double getMean(int iper, double mag, final double rJB,
 			final double vs30, final double rake) {
 
-		double logY;
+		double logY = Double.NaN;
 
-		double[] s = computeSiteTerm(iper, vs30);
-		double[] f = computeStyleOfFaultingTerm(iper, rake);
+		double[] b = new double[10];
 
-		double term1 = AkB2010Constants.b1[iper] + AkB2010Constants.b2[iper]
-				* mag + AkB2010Constants.b3[iper] * (mag * mag);
+		b[0] = AkB2010Constants.b1[iper];
 
-		double term2 = AkB2010Constants.b4[iper]
-				+ AkB2010Constants.b5[iper]
-				* mag
-				* Math.log10(Math.sqrt(rJB * rJB + AkB2010Constants.b6[iper]
-						* AkB2010Constants.b6[iper]));
+		b[1] = AkB2010Constants.b2[iper];
 
-		logY = term1 + term2 + s[2] + f[2];
+		b[2] = AkB2010Constants.b3[iper];
 
-		logY *= AkB2010Constants.LOG10_2_LN;
+		b[3] = AkB2010Constants.b4[iper];
 
-		if (iper == 0) {
-			logY *= Math.log(Math.exp(logY));
-		} else
-			logY *= Math.log(Math.exp(logY)
+		b[4] = AkB2010Constants.b5[iper];
+
+		b[5] = AkB2010Constants.b6[iper];
+
+		b[6] = AkB2010Constants.b7[iper];
+
+		b[7] = AkB2010Constants.b8[iper];
+
+		b[8] = AkB2010Constants.b9[iper];
+
+		b[9] = AkB2010Constants.b10[iper];
+
+		int[] soilTerms = new int[] { 0, 0 };
+		
+		if (vs30 < AkB2010Constants.SOFT_SOIL_UPPER_BOUND){
+			soilTerms[0] = 1;
+		}
+		if (vs30 >= AkB2010Constants.SOFT_SOIL_UPPER_BOUND && vs30 <= AkB2010Constants.STIFF_SOIL_UPPER_BOUND   ){
+			soilTerms[1] = 1;
+		}
+
+
+		int[] faultStyleTerms = new int[] { 0, 0 };
+		boolean normal = rake > -150.0 && rake < -30.0;
+		boolean reverse = rake > 30.0 && rake < 150.0;
+		if (normal) {
+			faultStyleTerms[0] = 1;
+		}
+		if (reverse) {
+			faultStyleTerms[1] = 1;
+		}
+
+		logY = b[0] + b[1] * mag + b[2] * mag * mag + (b[3] + b[4] * mag)
+				* Math.log10(Math.sqrt(rJB * rJB + b[5] * b[5])) + b[6]
+				* soilTerms[0] + b[7] * soilTerms[1] + b[8]
+				* faultStyleTerms[0] + b[9] * faultStyleTerms[1];
+		
+		logY = logY*AkB2010Constants.LOG10_2_LN;
+
+		if (iper != 0) {
+			logY = Math.log(Math.exp(logY)
 					* AkB2010Constants.CMS_TO_G_CONVERSION_FACTOR);
+		}
+		
 		return logY;
 	}
 
-	private double[] computeSiteTerm(final int iper, final double vs30) {
-		double[] s = new double[3];
-		if (vs30 > AkB2010Constants.SOIL_TYPE_ROCK_UPPER_BOUND) {
-			s[0] = 0.0;
-			s[1] = 0.0;
-			s[2] = 0.0;
-		} else if (vs30 > AkB2010Constants.SITE_TYPE_SOFT__UPPER_BOUND
-				&& vs30 <= AkB2010Constants.SOIL_TYPE_ROCK_UPPER_BOUND) {
-			s[0] = 0.0;
-			s[1] = 1.0;
-			s[2] = s[1] * AkB2010Constants.b8[iper];
-		} else if (vs30 < AkB2010Constants.SITE_TYPE_SOFT__UPPER_BOUND) {
-			s[0] = 1.0;
-			s[1] = 0.0;
-			s[2] = s[0] * AkB2010Constants.b7[iper];
-		}
-		return s;
-	}
-
-	private double[] computeStyleOfFaultingTerm(final int iper,
-			final double rake) {
-		double[] f = new double[3];
-		double faultTerm = Double.NaN;
-		if (rake > AkB2010Constants.FLT_TYPE_NORMAL_RAKE_LOWER
-				&& rake <= AkB2010Constants.FLT_TYPE_NORMAL_RAKE_UPPER) {
-			f[0] = 1.0;
-			f[1] = 0.0;
-			f[2] = f[0] * AkB2010Constants.b9[iper];
-		} else if (rake > AkB2010Constants.FLT_TYPE_REVERSE_RAKE_LOWER
-				&& rake <= AkB2010Constants.FLT_TYPE_REVERSE_RAKE_UPPER) {
-			f[0] = 0.0;
-			f[1] = 1.0;
-			f[2] = f[1] * AkB2010Constants.b10[iper];
-		} else {
-			f[0] = 0.0;
-			f[1] = 0.0;
-			faultTerm = 0.0;
-		}
-		return f;
-	}
 
 	public double getStdDev(int iper, String stdDevType) {
 		if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE))
