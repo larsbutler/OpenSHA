@@ -204,5 +204,5 @@ public class AkB2010Constants {
 	/**
 	 * cm/s to g conversion factor.
 	 */
-	public static final double CMS_TO_G_CONVERSION_FACTOR = 1.0/981.0;
+	public static final double CMS2_TO_G_CONVERSION_FACTOR = 1.0/981.0;
 }

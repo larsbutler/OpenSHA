@@ -473,6 +473,55 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 
 		double logY = Double.NaN;
 
+		double[] b = setConstants(iper);
+
+		int[] soilTerms = setSoilTerms(vs30);
+
+		int[] faultStyleTerms = setFaultStyleTerms(rake);
+
+		logY = b[0] + b[1] * mag + b[2] * mag * mag + (b[3] + b[4] * mag)
+				* Math.log10(Math.sqrt(rJB * rJB + b[5] * b[5])) + b[6]
+				* soilTerms[0] + b[7] * soilTerms[1] + b[8]
+				* faultStyleTerms[0] + b[9] * faultStyleTerms[1];
+		
+		// convert from log10 to natural logarithm
+		logY = logY*AkB2010Constants.LOG10_2_LN;
+
+		// convert PGA and SA from cm/s2 to g
+		if (iper != 0) {
+			logY = Math.log(Math.exp(logY)
+					* AkB2010Constants.CMS2_TO_G_CONVERSION_FACTOR);
+		}
+		
+		return logY;
+	}
+
+	private int[] setFaultStyleTerms(final double rake) {
+		int[] faultStyleTerms = new int[] { 0, 0 };
+		boolean normal = rake > -150.0 && rake < -30.0;
+		boolean reverse = rake > 30.0 && rake < 150.0;
+		if (normal) {
+			faultStyleTerms[0] = 1;
+		}
+		if (reverse) {
+			faultStyleTerms[1] = 1;
+		}
+		return faultStyleTerms;
+	}
+
+	private int[] setSoilTerms(final double vs30) {
+		int[] soilTerms = new int[] { 0, 0 };
+		
+		if (vs30 < AkB2010Constants.SOFT_SOIL_UPPER_BOUND){
+			soilTerms[0] = 1;
+		}
+		if (vs30 >= AkB2010Constants.SOFT_SOIL_UPPER_BOUND && vs30 <= AkB2010Constants.STIFF_SOIL_UPPER_BOUND   ){
+			soilTerms[1] = 1;
+		}
+		return soilTerms;
+	}
+
+	private double[] setConstants(int iper) {
 		double[] b = new double[10];
 
 		b[0] = AkB2010Constants.b1[iper];
@@ -494,40 +543,7 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 		b[8] = AkB2010Constants.b9[iper];
 
 		b[9] = AkB2010Constants.b10[iper];
-
-		int[] soilTerms = new int[] { 0, 0 };
-		
-		if (vs30 < AkB2010Constants.SOFT_SOIL_UPPER_BOUND){
-			soilTerms[0] = 1;
-		}
-		if (vs30 >= AkB2010Constants.SOFT_SOIL_UPPER_BOUND && vs30 <= AkB2010Constants.STIFF_SOIL_UPPER_BOUND   ){
-			soilTerms[1] = 1;
-		}
-
-
-		int[] faultStyleTerms = new int[] { 0, 0 };
-		boolean normal = rake > -150.0 && rake < -30.0;
-		boolean reverse = rake > 30.0 && rake < 150.0;
-		if (normal) {
-			faultStyleTerms[0] = 1;
-		}
-		if (reverse) {
-			faultStyleTerms[1] = 1;
-		}
-
-		logY = b[0] + b[1] * mag + b[2] * mag * mag + (b[3] + b[4] * mag)
-				* Math.log10(Math.sqrt(rJB * rJB + b[5] * b[5])) + b[6]
-				* soilTerms[0] + b[7] * soilTerms[1] + b[8]
-				* faultStyleTerms[0] + b[9] * faultStyleTerms[1];
-		
-		logY = logY*AkB2010Constants.LOG10_2_LN;
-
-		if (iper != 0) {
-			logY = Math.log(Math.exp(logY)
-					* AkB2010Constants.CMS_TO_G_CONVERSION_FACTOR);
-		}
-		
-		return logY;
+		return b;
 	}
 
 
