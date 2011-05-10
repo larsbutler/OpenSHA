@@ -483,16 +483,16 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 				* Math.log10(Math.sqrt(rJB * rJB + b[5] * b[5])) + b[6]
 				* soilTerms[0] + b[7] * soilTerms[1] + b[8]
 				* faultStyleTerms[0] + b[9] * faultStyleTerms[1];
-		
+
 		// convert from log10 to natural logarithm
-		logY = logY*AkB2010Constants.LOG10_2_LN;
+		logY = logY * AkB2010Constants.LOG10_2_LN;
 
 		// convert PGA and SA from cm/s2 to g
 		if (iper != 0) {
 			logY = Math.log(Math.exp(logY)
 					* AkB2010Constants.CMS2_TO_G_CONVERSION_FACTOR);
 		}
-		
+
 		return logY;
 	}
 
@@ -511,11 +511,12 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 
 	private int[] setSoilTerms(final double vs30) {
 		int[] soilTerms = new int[] { 0, 0 };
-		
-		if (vs30 < AkB2010Constants.SOFT_SOIL_UPPER_BOUND){
+
+		if (vs30 < AkB2010Constants.SOFT_SOIL_UPPER_BOUND) {
 			soilTerms[0] = 1;
 		}
-		if (vs30 >= AkB2010Constants.SOFT_SOIL_UPPER_BOUND && vs30 <= AkB2010Constants.STIFF_SOIL_UPPER_BOUND   ){
+		if (vs30 >= AkB2010Constants.SOFT_SOIL_UPPER_BOUND
+				&& vs30 <= AkB2010Constants.STIFF_SOIL_UPPER_BOUND) {
 			soilTerms[1] = 1;
 		}
 		return soilTerms;
@@ -545,7 +546,6 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 		b[9] = AkB2010Constants.b10[iper];
 		return b;
 	}
-
 
 	public double getStdDev(int iper, String stdDevType) {
 		if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE))

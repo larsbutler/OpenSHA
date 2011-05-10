@@ -154,6 +154,49 @@ public class AttenRelTestHelper {
 				magfreqDistFocMech, aveRupTopVsMag, aveHypoDepth);
 		return srcData;
 	}
+	
+	/**
+	 * Active crust simple fault data.
+	 */
+	public static GEMFaultSourceData getActiveCrustSimpleFaultSourceData(){
+		GEMFaultSourceData srcData = null;
+		String id = "ITCS034";
+		String name = "Irpinia-Agri Valley";
+		TectonicRegionType tectReg = TectonicRegionType.ACTIVE_SHALLOW;
+		double aValue = 3.62;
+		double bValue = 1.0;
+		double min = 5.0;
+		double max = 6.8;
+		double delta = 0.1;
+		int num = (int) Math.round((max - min) / delta + 1);
+		double totCumRate = Math.pow(10.0, aValue - bValue * min)
+				- Math.pow(10.0, aValue - bValue * max);
+		GutenbergRichterMagFreqDist mfd = new GutenbergRichterMagFreqDist(
+				bValue, totCumRate, min + delta / 2, max - delta / 2, num);
+		FaultTrace trc = new FaultTrace("");
+		trc.add(new Location(40.2317, 40.2317, 1.0));
+		trc.add(new Location(40.2915, 40.2915, 1.0));
+		trc.add(new Location(40.3513, 40.3513, 1.0));
+		trc.add(new Location(40.4111, 40.4111, 1.0));
+		trc.add(new Location(40.4751, 40.4751, 1.0));
+		trc.add(new Location(40.5179, 40.5179, 1.0));
+		trc.add(new Location(40.5607, 40.5607, 1.0));
+		trc.add(new Location(40.6256, 40.6256, 1.0));
+		trc.add(new Location(40.6544, 40.6544, 1.0));
+		trc.add(new Location(40.6831, 40.6831, 1.0));
+		trc.add(new Location(40.7262, 40.7262, 1.0));
+		trc.add(new Location(40.7692, 40.7692, 1.0));
+		trc.add(new Location(40.8123, 40.8123, 1.0));
+		trc.add(new Location(40.8553, 40.8553, 1.0));
+		double dip = 60.0;
+		double rake = -90.0;
+		double seismDepthLow = 14.0;
+		double seismDepthUpp = 1.0;
+		boolean floatRuptureFlag = true;
+		srcData = new GEMFaultSourceData(id, name, tectReg, mfd, trc, dip,
+				rake, seismDepthLow, seismDepthUpp, floatRuptureFlag);
+		return srcData;
+	}
 
 	/**
 	 * Subduction intraslab area source data.
