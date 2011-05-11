@@ -353,11 +353,11 @@ public class AkB_2010_test implements ParameterChangeWarningListener {
 	
 	/**
 	 * Check AB2003 usage for computing hazard curves using GEM1ERF constructed
-	 * from simple fault source data..
+	 * from simple fault source data.
 	 * @throws Exception 
 	 */
 	@Test
-	public final void ab2003WithGEM1ERFInterfaceSimpleFault() throws Exception{
+	public final void GEM1ERFSimpleFault() throws Exception{
 		akb2010AttenRel.setIntensityMeasure(PGA_Param.NAME);
 		ArrayList<GEMSourceData> srcDataList = new ArrayList<GEMSourceData>();
 		srcDataList.
@@ -366,7 +366,7 @@ public class AkB_2010_test implements ParameterChangeWarningListener {
 		GEM1ERF erf = GEM1ERF.getGEM1ERF(srcDataList, timeSpan);
 		HazardCurveCalculator hazCurveCalculator = new HazardCurveCalculator();
 		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper.setUpHazardCurve();
-		Site site = new Site(new Location(-1.515,-81.456));
+		Site site = new Site(new Location(40.2317, 15.8577));
 		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
 		hazCurveCalculator.getHazardCurve(hazCurve, site, akb2010AttenRel,
 				erf);
