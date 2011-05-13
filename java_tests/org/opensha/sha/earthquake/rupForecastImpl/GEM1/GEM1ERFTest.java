@@ -2,23 +2,34 @@ package org.opensha.sha.earthquake.rupForecastImpl.GEM1;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
+
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+import org.opensha.sha.earthquake.rupForecastImpl.GEM1.SourceData.GEMSourceData;
 
 public class GEM1ERFTest {
+	private ArrayList<GEMSourceData> srcList;
 	
-	@Test
-	public void GEM1ERFTest(){
-		//GEM1ERF.
+	@Before
+	public void setUp(){
+		srcList = new ArrayList<GEMSourceData>();
+		srcList.add(GEM1ERFTestHelper.getAreaSourceData());
+		srcList.add(GEM1ERFTestHelper.getFaultSourceData());
+		srcList.add(GEM1ERFTestHelper.getPointSourceData());
+		srcList.add(GEM1ERFTestHelper.getSubductionFaultSourceData());
 	}
-
-	@Test
-	public void testParameterChange() {
-		fail("Not yet implemented");
+	
+	@After
+	public void tearDown(){
+		srcList = null;
 	}
 
 	@Test
 	public void testGetNumSources() {
-		fail("Not yet implemented");
+		GEM1ERF erf = new GEM1ERF(srcList);
+		assertEquals(4, erf.getNumSources(),0);
 	}
 
 	@Test
