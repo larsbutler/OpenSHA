@@ -29,7 +29,7 @@ import org.opensha.sha.imr.attenRelImpl.BW_1997_AttenRelTest;
         Abrahamson_Silva_1997_test.class, AW_2010_test.class, BJF_1997_test.class,
         BW_1997_AttenRelTest.class, CB_2003_test.class, Campbell_1997_test.class, 
         Field_2000_test.class, AS_2008_test.class, BA_2008_test.class, 
-        CB_2008_test.class, CY_2008_test.class, NGA08_Site_EqkRup_Tests.class })
+        CB_2008_test.class, CY_2008_test.class, NGA08_Site_EqkRup_Tests.class, CL_2002_test.class })
 /**
  * <p>Title: </p>
  * <p>Description: </p>
