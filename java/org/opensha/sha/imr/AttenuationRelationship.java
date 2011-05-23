@@ -257,14 +257,11 @@ import org.opensha.sha.util.TectonicRegionType;
  * @version 1.0
  */
 
-/* 
- * 
- *
- */
-
 public abstract class AttenuationRelationship extends
         IntensityMeasureRelationship implements
         ScalarIntensityMeasureRelationshipAPI {
+
+    private static final long serialVersionUID = -5230687816643155822L;
 
     /**
      * Classname constant used for debugging statements
@@ -951,6 +948,36 @@ public abstract class AttenuationRelationship extends
      */
     public boolean isTectonicRegionSupported(TectonicRegionType tectRegion) {
         return isTectonicRegionSupported(tectRegion.toString());
+    }
+
+    @SuppressWarnings("unchecked")
+    /**
+     * Sets the component identified by the given name,
+     * if the IMT (Intensity Measure Type) allows it.
+     * 
+     * @param component the component name
+     * @param intensityMeasureType the intensity measure type
+     * @throws IllegalArgumentException when the given component is not available for this relationship
+     */
+    public void setComponentParameter(String component, String intensityMeasureType)
+    {
+        if (!intensityMeasureType.equalsIgnoreCase("MMI"))
+        {
+            ParameterAPI<Object> parameter = getParameter(ComponentParam.NAME);
+            
+            if (parameter.isAllowed(component))
+            {
+                parameter.setValue(component);
+            }
+            else
+            {
+                String msg = "The chosen component " + component + " is not supported by "
+                        + getClass().getCanonicalName() + "The supported components are the following:\n"
+                        + parameter.getConstraint() + "\nCheck your input file!\n" + "Execution stopped.";
+
+                throw new IllegalArgumentException(msg);
+            }
+        }
     }
 
 }
