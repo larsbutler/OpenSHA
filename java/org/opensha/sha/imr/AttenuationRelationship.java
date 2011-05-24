@@ -18,6 +18,8 @@
 
 package org.opensha.sha.imr;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.ListIterator;
@@ -971,11 +973,15 @@ public abstract class AttenuationRelationship extends
             }
             else
             {
-                String msg = "The chosen component " + component + " is not supported by "
-                        + getClass().getCanonicalName() + "The supported components are the following:\n"
-                        + parameter.getConstraint() + "\nCheck your input file!\n" + "Execution stopped.";
+                StringWriter writer = new StringWriter();
+                PrintWriter printer = new PrintWriter(writer);
+                
+                printer.print("The chosen component " + component + " ");
+                printer.println("is not supported by " + getClass().getCanonicalName());
+                printer.println("The supported components are the following:");
+                printer.println(parameter.getConstraint());
 
-                throw new IllegalArgumentException(msg);
+                throw new IllegalArgumentException(writer.toString());
             }
         }
     }
