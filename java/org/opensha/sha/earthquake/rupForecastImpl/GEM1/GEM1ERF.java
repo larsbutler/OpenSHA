@@ -2,6 +2,7 @@ package org.opensha.sha.earthquake.rupForecastImpl.GEM1;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.opensha.commons.calc.magScalingRelations.MagAreaRelationship;
 import org.opensha.commons.calc.magScalingRelations.MagScalingRelationship;
@@ -404,7 +405,7 @@ public class GEM1ERF extends EqkRupForecast {
      * This takes a allGemSourceDataList (which get parsed into separate lists)
      * and a CalculationSettings object.
      */
-    public GEM1ERF(ArrayList<GEMSourceData> allGemSourceDataList) {
+    public GEM1ERF(List<GEMSourceData> allGemSourceDataList) {
         parseSourceListIntoDifferentTypes(allGemSourceDataList);
         initialize();
     }
@@ -428,7 +429,7 @@ public class GEM1ERF extends EqkRupForecast {
     }
 
     protected void parseSourceListIntoDifferentTypes(
-            ArrayList<GEMSourceData> allGemSourceDataList) {
+            List<GEMSourceData> allGemSourceDataList) {
 
         areaSourceDataList = new ArrayList<GEMSourceData>();
         griddedSeisSourceDataList = new ArrayList<GEMSourceData>();
@@ -877,6 +878,7 @@ public class GEM1ERF extends EqkRupForecast {
         FloatingPoissonFaultSource src = null;
 
         if (gemFaultSourceData.getFloatRuptureFlag()) {
+
             src = new FloatingPoissonFaultSource(gemFaultSourceData.getMfd(), // IncrementalMagFreqDist
                     faultSurface, // EvenlyGriddedSurface
                     faultMagScalingRel, // MagScalingRelationship
