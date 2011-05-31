@@ -4,5 +4,5 @@ build/**/*
 build-stamp
 dist/**/*
 src/resources/data
-lib
 classes/
+dist/
