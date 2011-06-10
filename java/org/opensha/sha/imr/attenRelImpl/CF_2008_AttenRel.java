@@ -302,8 +302,7 @@ NamedObjectAPI, ParameterChangeListener {
 		// params that the mean depends upon
 		meanIndependentParams.clear();
 		meanIndependentParams.addParameter(magParam);
-		// not sure about this! check with Damiano
-		meanIndependentParams.addParameter(tectonicRegionTypeParam);
+
 		meanIndependentParams.addParameter(vs30Param);
 		meanIndependentParams.addParameter(distanceHypoParam);
 
