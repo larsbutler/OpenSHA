@@ -728,11 +728,13 @@ public class CY_2008_AttenRel extends AttenuationRelationship implements
 
         // the Component Parameter
         StringConstraint constraint = new StringConstraint();
-        constraint.addString(ComponentParam.COMPONENT_GMRotI50);
+        // modified by l.danciu for oslo meeting
+        // this is a GMrotI50
+        constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
         constraint.setNonEditable();
         componentParam =
                 new ComponentParam(constraint,
-                        ComponentParam.COMPONENT_GMRotI50);
+                        ComponentParam.COMPONENT_AVE_HORZ);
 
         // the stdDevType Parameter
         StringConstraint stdDevTypeConstraint = new StringConstraint();
