@@ -610,7 +610,7 @@ NamedObjectAPI, ParameterChangeListener {
 		else if (pName.equals(StdDevTypeParam.NAME)) {
 			stdDevType = (String) val;
 		}
-		else if (pName.equals(FaultTypeParam.NAME)) {
+		else if (pName.equals(siteTypeParam.getName())) {
 			siteType = (String)siteTypeParam.getValue();
 		}
 //		else if (pName.equals(FaultTypeParam.NAME)) {
