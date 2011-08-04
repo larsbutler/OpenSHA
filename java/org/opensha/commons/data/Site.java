@@ -190,6 +190,14 @@ public class Site extends ParameterList implements NamedObjectAPI,
     }
 
     /**
+     * This is weaker than necessary (does not take properties into account)
+     * but at least is correct.
+     */
+    public int hashCode() {
+        return location.hashCode() ^ (name != null ? name.hashCode() : 0);
+    }
+
+    /**
      * Returns a copy of this list, therefore any changes to the copy cannot
      * affect this original list. The name, Location and each parameter is
      * cloned.

@@ -46,4 +46,36 @@ public class SiteTests {
         assertThat(s12_2a, is(not(equalTo(s12_1))));
         assertThat(s12_1,  is(not(equalTo(s12_2a))));
     }
+
+    @Test
+    public void checkSitesHashing() {
+        Object s21_1  = new Site(new Location(2.0, 1.0));
+        Object s21_2  = new Site(new Location(2.0, 1.0));
+        Object s12_1  = new Site(new Location(1.0, 2.0));
+        Object s12_2  = new Site(new Location(1.0, 2.0));
+        Object s12_2a = new Site(new Location(1.0, 2.0), "a");
+        Object s12_3a = new Site(new Location(1.0, 2.0), "a");
+
+        // this is more a sanity test than a real test
+        assertThat(s21_1.hashCode(),  is(equalTo(s21_2.hashCode())));
+        assertThat(s12_1.hashCode(),  is(equalTo(s12_2.hashCode())));
+        assertThat(s12_2a.hashCode(), is(equalTo(s12_3a.hashCode())));
+    }
+
+    @Test
+    public void checkHashMap() {
+        HashMap<Site, Integer> map = new HashMap<Site, Integer>();
+
+        for (int i = -90, k = 0; i < 90; ++i)
+            for (int j = -90; j < 90; ++j, ++k)
+                map.put(new Site(new Location(i, j)), k);
+
+        for (int i = -90, k = 0; i < 90; ++i)
+            for (int j = -90; j < 90; ++j, ++k)
+            {
+                int value = map.remove(new Site(new Location(i, j)));
+
+                assertThat(k, is(equalTo(value)));
+            }
+    }
 }
