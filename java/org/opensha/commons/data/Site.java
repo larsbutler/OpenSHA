@@ -172,38 +172,7 @@ public class Site extends ParameterList implements NamedObjectAPI,
         if (this.size() != site.size())
             return false;
 
-        // Check each individual Parameter
-        ListIterator it = this.getParametersIterator();
-        while (it.hasNext()) {
-
-            // This list's parameter
-            ParameterAPI param1 = (ParameterAPI) it.next();
-
-            // List may not contain parameter with this list's parameter name
-            if (!site.containsParameter(param1.getName()))
-                return false;
-
-            // Found two parameters with same name, check equals, actually
-            // redundent,
-            // because that is what equals does
-            ParameterAPI param2 =
-                    (ParameterAPI) site.getParameter(param1.getName());
-            if (!param1.equals(param2))
-                return false;
-
-            // Now try compare to to see if value the same, can fail if two
-            // values
-            // are different, or if the value object types are different
-            try {
-                if (param1.compareTo(param2) != 0)
-                    return false;
-            } catch (ClassCastException ee) {
-                return false;
-            }
-
-        }
-
-        return true;
+        return equalsParameterList(site);
     }
 
     /**
