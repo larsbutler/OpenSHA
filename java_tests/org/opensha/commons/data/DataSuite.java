@@ -25,7 +25,8 @@ import org.opensha.commons.geo.RegionTest;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({ DataPoint2DTests.class, DataPoint2DTreeMapTests.class,
-        TimeSpanTests.class, GriddedRegionTest.class, RegionTest.class })
+            TimeSpanTests.class, GriddedRegionTest.class, RegionTest.class,
+            SiteTests.class})
 public class DataSuite {
 
     public static void main(String args[]) {
