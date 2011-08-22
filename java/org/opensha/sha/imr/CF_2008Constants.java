@@ -1,4 +1,4 @@
-package org.opensha.sha.imr.attenRelImpl;
+package org.opensha.sha.imr;
 
 import org.opensha.commons.exceptions.InvalidRangeException;
 import org.opensha.commons.util.FaultUtils;
@@ -523,10 +523,9 @@ public class CF_2008Constants {
 		/**
 		 * cm/s to g conversion factor.
 		 */
-		public static final double CMS_TO_G_CONVERSION_FACTOR = 1.0/981.0;
+		public static final double CMS_TO_G_CONVERSION_FACTOR = 1.0/981;
 		/**
-		 * cm/s to g conversion factor.
+		 * m/s to g conversion factor.
 		 */
-		public static final double MSS_TO_G_CONVERSION_FACTOR = 1.0/9.810;
-
+		public static final double MSS_TO_G_CONVERSION_FACTOR = 1.0/9.81;
 	}

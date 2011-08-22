@@ -17,7 +17,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package org.opensha.sha.imr.attenRelImpl;
+package org.opensha.sha.imr;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -25,12 +25,9 @@ import java.util.HashMap;
 
 import org.opensha.commons.data.NamedObjectAPI;
 import org.opensha.commons.data.Site;
-import org.opensha.commons.exceptions.InvalidRangeException;
-import org.opensha.commons.exceptions.ParameterException;
 import org.opensha.commons.param.DoubleConstraint;
 import org.opensha.commons.param.DoubleDiscreteConstraint;
 import org.opensha.commons.param.StringConstraint;
-import org.opensha.commons.param.StringParameter;
 import org.opensha.commons.param.event.ParameterChangeEvent;
 import org.opensha.commons.param.event.ParameterChangeListener;
 import org.opensha.commons.param.event.ParameterChangeWarningListener;
@@ -42,25 +39,25 @@ import org.opensha.sha.imr.param.EqkRuptureParams.MagParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.RakeParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.DampingParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PGA_Param;
+import org.opensha.sha.imr.param.IntensityMeasureParams.PGV_Param;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PeriodParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.SA_Param;
 import org.opensha.sha.imr.param.OtherParams.ComponentParam;
 import org.opensha.sha.imr.param.OtherParams.SigmaTruncLevelParam;
 import org.opensha.sha.imr.param.OtherParams.SigmaTruncTypeParam;
 import org.opensha.sha.imr.param.OtherParams.StdDevTypeParam;
-import org.opensha.sha.imr.param.PropagationEffectParams.DistanceRupParameter;
+import org.opensha.sha.imr.param.PropagationEffectParams.DistanceHypoParameter;
 import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
 
 /**
  * <b>Title:</b> CF_2008_AttenRel<p>
  *
- * <b>Description:</b> 
- * This implements the GMPE published by E., Faccioli, A., Bianchini, and M., Villani (2010),
- * "New ground motion prediction equations for T> 1s and their influence on seismic hazard assesment", 
- * Procceedings of the University of Tokyo Symposium on Long_Period Ground Motion 
- * and Urban Disastser Mitigation, March 17-18, 2010)
+ * <b>Description:</b> This implements the GMPE published by Cauzzi & Faccioli (2008,
+ * "Broadband (0.05 to 20s) prediction of displacement response spectra based on worldwide digital records", 
+ * journal of Seismology, Volume 12,pp. 453-475)
  * This implements only horizontal components and the equation (2) page 462.
  * 
+ *
  * Supported Intensity-Measure Parameters:<p>
  * <UL>
  * <LI>pgaParam - Peak Ground Acceleration
@@ -70,7 +67,7 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  * Other Independent Parameters:<p>
  * <UL>
  * <LI>magParam - moment Magnitude
- * <LI>distanceRup - Rupture distance;
+ * <LI>distanceHypo - hypocentral(focal) distance;
  * <LI>vs30Param [>= 800m/sec]  default 30-meter shear wave velocity;
  *     The model assumes the following classification (based on EC 8 scheme):
  *     vs30 >= 800 -> Class A (rock-like); 360 <= vs30 <800 -> Class B (Stiff Soil); 
@@ -90,21 +87,21 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  *</p>
  *
  *
- * @author     L. Danciu  
- * @created    July, 2011
+ * @author     L. Danciu alias Ciccio 
+ * @created    August, 2010
  * @version    1.0
  */
 
 
-public class FaccioliEtAl_2010_AttenRel extends AttenuationRelationship implements
+public class CF_2008_AttenRel extends AttenuationRelationship implements
 ScalarIntensityMeasureRelationshipAPI,
 NamedObjectAPI, ParameterChangeListener {
 
 	/** Short name. */
-	public static final String SHORT_NAME = "Faccioli2010";
+	public static final String SHORT_NAME = "CF2008";
 
 	/** Full name. */
-	public static final String NAME = "FaccioliEtAl (2010)";
+	public static final String NAME = "Cauzzi & Faccioli (2008)";
 
 	/** Version number. */
 	private static final long serialVersionUID = 1234567890987654353L;
@@ -115,9 +112,6 @@ NamedObjectAPI, ParameterChangeListener {
 	/** Tectonic region type. */
 	private String tecRegType;
 
-	/** Focal depth. */
-	private double focalDepth;
-
 	/** rake angle. */
 	private double rake;
 
@@ -125,7 +119,7 @@ NamedObjectAPI, ParameterChangeListener {
 	private double vs30;
 
 	/** hypocentral distance */
-	private double rRup;
+	private double rhypo;
 
 	/** Standard deviation type. */
 	private String stdDevType;
@@ -142,7 +136,7 @@ NamedObjectAPI, ParameterChangeListener {
 	 * Construct attenuation relationship. Initialize parameters and parameter
 	 * lists.
 	 */
-	public FaccioliEtAl_2010_AttenRel(ParameterChangeWarningListener warningListener) {
+	public CF_2008_AttenRel(ParameterChangeWarningListener warningListener) {
 
 		// creates exceedProbParam
 		super();
@@ -152,8 +146,8 @@ NamedObjectAPI, ParameterChangeListener {
 		initSupportedIntensityMeasureParams();
 
 		indexFromPerHashMap = new HashMap<Double, Integer>();
-		for (int i = 0; i < FaccioliEtAl_2010Constants.PERIOD.length; i++) {
-			indexFromPerHashMap.put(new Double(FaccioliEtAl_2010Constants.PERIOD[i]),
+		for (int i = 1; i < CF_2008Constants.PERIOD.length; i++) {
+			indexFromPerHashMap.put(new Double(CF_2008Constants.PERIOD[i]),
 					new Integer(i));
 		}
 
@@ -180,15 +174,15 @@ NamedObjectAPI, ParameterChangeListener {
 
 		// set supported periods for spectral acceleration
 		DoubleDiscreteConstraint periodConstraint = new DoubleDiscreteConstraint();
-		for (int i = 0; i < FaccioliEtAl_2010Constants.PERIOD.length; i++) {
-			periodConstraint.addDouble(new Double(FaccioliEtAl_2010Constants.PERIOD[i]));
+		for (int i = 1; i < CF_2008Constants.PERIOD.length; i++) {
+			periodConstraint.addDouble(new Double(CF_2008Constants.PERIOD[i]));
 		}
 		periodConstraint.setNonEditable();
-		// set period param (default is 1s, which is provided by Faccioli2010 GMPE)
+		// set period param (default is 1s, which is provided by CF2008 GMPE)
 		saPeriodParam = new PeriodParam(periodConstraint);
 
 		// set damping parameter. Empty constructor set damping
-		// factor to 5 % (which is the one provided by Faccioli2010 GMPE)
+		// factor to 5 % (which is the one provided by CF2008 GMPE)
 		saDampingParam = new DampingParam();
 
 		// initialize spectral acceleration parameter (units: g)
@@ -200,19 +194,19 @@ NamedObjectAPI, ParameterChangeListener {
 		pgaParam.setNonEditable();
 
 		// initialize peak ground velocity parameter (units: cm/sec)
-//		pgvParam = new PGV_Param();
-//		pgvParam.setNonEditable();
+		pgvParam = new PGV_Param();
+		pgvParam.setNonEditable();
 
 		// add the warning listeners
 		saParam.addParameterChangeWarningListener(warningListener);
 		pgaParam.addParameterChangeWarningListener(warningListener);
-//		pgvParam.addParameterChangeWarningListener(warningListener);
+		pgvParam.addParameterChangeWarningListener(warningListener);
 
 		// put parameters in the supportedIMParams list
 		supportedIMParams.clear();
 		supportedIMParams.addParameter(saParam);
 		supportedIMParams.addParameter(pgaParam);
-//		supportedIMParams.addParameter(pgvParam);
+		supportedIMParams.addParameter(pgvParam);
 
 	}
 	/**
@@ -222,8 +216,8 @@ NamedObjectAPI, ParameterChangeListener {
 	protected final void initEqkRuptureParams() {
 
 		// moment magnitude (default 5.0)
-		magParam = new MagParam(FaccioliEtAl_2010Constants.MAG_WARN_MIN,
-				FaccioliEtAl_2010Constants.MAG_WARN_MAX);
+		magParam = new MagParam(CF_2008Constants.MAG_WARN_MIN,
+				CF_2008Constants.MAG_WARN_MAX);
 		// Focal mechanism
 		rakeParam = new RakeParam(); 
 		eqkRuptureParams.clear();
@@ -249,17 +243,17 @@ NamedObjectAPI, ParameterChangeListener {
 	 */
 	protected final void initPropagationEffectParams() {
 
-		distanceRupParam = new DistanceRupParameter(
-				FaccioliEtAl_2010Constants.DISTANCE_RUP_WARN_MIN);
-		distanceRupParam.addParameterChangeWarningListener(warningListener);
+		distanceHypoParam = new DistanceHypoParameter(
+				CF_2008Constants.DISTANCE_HYPO_WARN_MIN);
+		distanceHypoParam.addParameterChangeWarningListener(warningListener);
 		DoubleConstraint warn = new DoubleConstraint(
-				FaccioliEtAl_2010Constants.DISTANCE_RUP_WARN_MIN,
-				FaccioliEtAl_2010Constants.DISTANCE_RUP_WARN_MAX);
+				CF_2008Constants.DISTANCE_HYPO_WARN_MIN,
+				CF_2008Constants.DISTANCE_HYPO_WARN_MAX);
 		warn.setNonEditable();
-		distanceRupParam.setWarningConstraint(warn);
-		distanceRupParam.setNonEditable();
+		distanceHypoParam.setWarningConstraint(warn);
+		distanceHypoParam.setNonEditable();
 
-		propagationEffectParams.addParameter(distanceRupParam);
+		propagationEffectParams.addParameter(distanceHypoParam);
 	}
 
 	/**
@@ -305,7 +299,7 @@ NamedObjectAPI, ParameterChangeListener {
 		meanIndependentParams.clear();
 		meanIndependentParams.addParameter(magParam);
 		meanIndependentParams.addParameter(vs30Param);
-		meanIndependentParams.addParameter(distanceRupParam);
+		meanIndependentParams.addParameter(distanceHypoParam);
 
 		// params that the stdDev depends upon
 		stdDevIndependentParams.clear();
@@ -334,7 +328,7 @@ NamedObjectAPI, ParameterChangeListener {
 		magParam.addParameterChangeListener(this);
 		rakeParam.addParameterChangeListener(this);
 		vs30Param.addParameterChangeListener(this);
-		distanceRupParam.addParameterChangeListener(this);
+		distanceHypoParam.addParameterChangeListener(this);
 		stdDevTypeParam.addParameterChangeListener(this);
 		saPeriodParam.addParameterChangeListener(this);
 	}
@@ -351,8 +345,8 @@ NamedObjectAPI, ParameterChangeListener {
 			mag = ((Double) val).doubleValue();
 		} else if (pName.equals(Vs30_Param.NAME)) {
 			vs30 = ((Double) val).doubleValue();
-		} else if (pName.equals(DistanceRupParameter.NAME)) {
-			rRup = ( (Double) val).doubleValue();
+		} else if (pName.equals(DistanceHypoParameter.NAME)) {
+			rhypo = ( (Double) val).doubleValue();
 		} else if (pName.equals(StdDevTypeParam.NAME)) {
 			stdDevType = (String) val;
 		} else if (pName.equals(FaultTypeParam.NAME)) {
@@ -367,7 +361,7 @@ NamedObjectAPI, ParameterChangeListener {
 		magParam.removeParameterChangeListener(this);
 		rakeParam.removeParameterChangeListener(this);
 		vs30Param.removeParameterChangeListener(this);
-		distanceRupParam.removeParameterChangeListener(this);
+		distanceHypoParam.removeParameterChangeListener(this);
 		stdDevTypeParam.removeParameterChangeListener(this);
 		saPeriodParam.removeParameterChangeListener(this);
 		this.initParameterEventListeners();
@@ -405,7 +399,7 @@ NamedObjectAPI, ParameterChangeListener {
 	protected void setPropagationEffectParams() {
 
 		if ( (this.site != null) && (this.eqkRupture != null)) {
-			distanceRupParam.setValue(eqkRupture, site);
+			distanceHypoParam.setValue(eqkRupture, site);
 		}
 	}
 
@@ -413,8 +407,10 @@ NamedObjectAPI, ParameterChangeListener {
 	 * Set period index.
 	 */
 	protected final void setPeriodIndex() {
-		if (im.getName().equalsIgnoreCase(PGA_Param.NAME)) {
+		if (im.getName().equalsIgnoreCase(PGV_Param.NAME)) {
 			iper = 0;
+		} else if (im.getName().equalsIgnoreCase(PGA_Param.NAME)) {
+			iper = 1;
 		} else {
 			iper = ((Integer) indexFromPerHashMap.get(saPeriodParam.getValue()))
 			.intValue();
@@ -425,12 +421,12 @@ NamedObjectAPI, ParameterChangeListener {
 	 * Compute mean. 
 	 */
 	public double getMean(){
-		if (rRup > USER_MAX_DISTANCE) {
+		if (rhypo > USER_MAX_DISTANCE) {
 			return VERY_SMALL_MEAN;
 		}
 		else{
 			setPeriodIndex();
-			return getMean (iper, mag, rRup, vs30, rake);
+			return getMean (iper, mag, rhypo, vs30, rake);
 		}
 	}
 
@@ -453,12 +449,12 @@ NamedObjectAPI, ParameterChangeListener {
 		magParam.setValueAsDefault();
 		rakeParam.setValueAsDefault();
 		vs30Param.setValueAsDefault();
-		distanceRupParam.setValueAsDefault();
+		distanceHypoParam.setValueAsDefault();
 		saPeriodParam.setValueAsDefault();
 		saDampingParam.setValueAsDefault();
 		saParam.setValueAsDefault();
 		pgaParam.setValueAsDefault();
-//		pgvParam.setValueAsDefault();
+		pgvParam.setValueAsDefault();
 		stdDevTypeParam.setValueAsDefault();
 		sigmaTruncTypeParam.setValueAsDefault();
 		sigmaTruncLevelParam.setValueAsDefault();
@@ -485,97 +481,102 @@ NamedObjectAPI, ParameterChangeListener {
 	/**
 	 * This computes the mean log10(Y) 
 	 * @param iper
-	 * @param rRup
+	 * @param rhypo
 	 * @param mag
 	 */
-	public double getMean(int iper, double mag, double rRup, final double vs30, final double rake){
+	public double getMean(int iper, double mag, double rhypo, final double vs30, final double rake){
 
 		double logY;
 
-		// This is to avoid rRup == 0 distances
-		if (rRup < 1e-3) {
-			rRup = 1;
+		// This is to avoid rhypo == 0 distances
+		if (rhypo < 1e-3) {
+			rhypo = 1;
 		}
 
+		double[] s = computeSiteTerm(iper, vs30);
+		double[] f = computeStyleOfFaultingTerm(iper, rake);
 
-		double soilTerms = computeSiteTerm(iper, vs30);
-		double faultTerm = computeStyleOfFaultingTerm(iper, rake);
-		double[] a = setConstants(iper);
-		double drs2psa = convert2psa(iper);
+		double term1 = CF_2008Constants.a1[iper] + CF_2008Constants.a2[iper] * mag;
 
-		logY = a[0] + a[1] * mag + a[2] * Math.log10(rRup + a[3] * Math.pow(10, a[4] * mag)) 
-		     + soilTerms + faultTerm;
-		
-		logY = logY*FaccioliEtAl_2010Constants.LOG10_2_LN;
+		double term2 = CF_2008Constants.a3[iper] * Math.log10(rhypo);
 
-		if (iper == 0) {
+		logY = term1 + term2 + s[2] + f[2];
 
-			logY = (Math.exp(logY) * FaccioliEtAl_2010Constants.MS2_TO_G_CONVERSION_FACTOR);
+		logY *= CF_2008Constants.LOG10_2_LN;
 
-		} else {
+		//tmp variable to convert to DRS to mean PSA(g);
+		double tmp1 = Math.pow((2 * Math.PI)/CF_2008Constants.PERIOD[iper], 2);
+
+		if ((im.getName().equalsIgnoreCase(PGV_Param.NAME)) ||
+				(CF_2008Constants.PERIOD[iper] == -1)) {
+			logY = Math.exp(logY);
+//			System.out.println("pgv_case in cm/sec ");
+
+		} else if ((im.getName().equalsIgnoreCase(PGA_Param.NAME)) ||
+				(CF_2008Constants.PERIOD[iper] == 0.00)){
+
+//			System.out.println("pga_case");
 			
-			logY = Math.exp(logY) * drs2psa;
-
+			logY = Math.exp(logY) * CF_2008Constants.MSS_TO_G_CONVERSION_FACTOR;
+			
+		} else {
+			logY = Math.exp(logY) * tmp1 * CF_2008Constants.CMS_TO_G_CONVERSION_FACTOR;
+//			System.out.println("Sa_case");
 		}
-		
 		return Math.log(logY);
 	}
 
+	private double[] computeSiteTerm(final int iper, final double vs30) {
+		double[] s = new double[3];
+		if (vs30 > CF_2008Constants.SOIL_TYPE_ROCK_UPPER_BOUND) {
+			s[0] = 0.0;
+			s[1] = 0.0;
+			s[2] = 0.0;
+		} else if (vs30 >= CF_2008Constants.SITE_TYPE_STIFF_SOIL_UPPER_BOUND
+				&& vs30 < CF_2008Constants.SOIL_TYPE_ROCK_UPPER_BOUND) {
+			s[0] = 1.00;
+			s[1] = 0.00;
+			s[2] = s[0]*CF_2008Constants.aB[iper];
+		} else if (vs30 >= CF_2008Constants.SITE_TYPE_SOFT_UPPER_BOUND
+				&& vs30 < CF_2008Constants.SITE_TYPE_STIFF_SOIL_UPPER_BOUND) {
+			s[0] = 0.00;
+			s[1] = 1.00;
+			s[2] = s[1]*CF_2008Constants.aC[iper];
+		} else if (vs30 < CF_2008Constants.SITE_TYPE_SOFT_UPPER_BOUND) {
+			s[0] = 0.00;
+			s[1] = 0.00;
+			s[2] = CF_2008Constants.aD[iper];
+		}
+		return s;
+	}
 	// set fault mechanism 
-	private double computeStyleOfFaultingTerm(final int iper, final double rake) {
+	private double[] computeStyleOfFaultingTerm(final int iper, final double rake) {
+		double[] f = new double[3];
 		double faultTerm = Double.NaN;
-		if (rake > FaccioliEtAl_2010Constants.FLT_TYPE_NORMAL_RAKE_LOWER
-				&& rake <= FaccioliEtAl_2010Constants.FLT_TYPE_NORMAL_RAKE_UPPER){
-			faultTerm = FaccioliEtAl_2010Constants.aN[iper];
-		} else if (rake > FaccioliEtAl_2010Constants.FLT_TYPE_REVERSE_RAKE_LOWER
-				&& rake <= FaccioliEtAl_2010Constants.FLT_TYPE_REVERSE_RAKE_UPPER) {
-			faultTerm = FaccioliEtAl_2010Constants.aR[iper];
+		if (rake > CF_2008Constants.FLT_TYPE_NORMAL_RAKE_LOWER
+				&& rake <= CF_2008Constants.FLT_TYPE_NORMAL_RAKE_UPPER){
+			f[0] = 1.00;
+			f[1] = 0.00;
+			f[2] = f[0]*CF_2008Constants.aN[iper];
+		} else if (rake > CF_2008Constants.FLT_TYPE_REVERSE_RAKE_LOWER
+				&& rake <= CF_2008Constants.FLT_TYPE_REVERSE_RAKE_UPPER) {
+			f[0] = 0.00;
+			f[1] = 1.00;
+			f[2] = f[1]*CF_2008Constants.aR[iper];
 		} else {
-			faultTerm = FaccioliEtAl_2010Constants.aS[iper];
+			f[0] = 0.00;
+			f[1] = 0.00;
+			f[2] = CF_2008Constants.aS[iper];
 		}
-		return faultTerm;
-	}
-	
-	private double computeSiteTerm(final int iper, final double vs30) {
-		double soilTerms = Double.NaN;
-
-		if (vs30 >= FaccioliEtAl_2010Constants.SITE_TYPE_STIFF_SOIL_UPPER_BOUND
-				&& vs30 < FaccioliEtAl_2010Constants.SOIL_TYPE_ROCK_UPPER_BOUND) {
-			soilTerms = FaccioliEtAl_2010Constants.aB[iper];
-		} else if (vs30 >= FaccioliEtAl_2010Constants.SITE_TYPE_SOFT_UPPER_BOUND
-				&& vs30 < FaccioliEtAl_2010Constants.SITE_TYPE_STIFF_SOIL_UPPER_BOUND) {
-			soilTerms = FaccioliEtAl_2010Constants.aC[iper];
-		} else if (vs30 < FaccioliEtAl_2010Constants.SITE_TYPE_SOFT_UPPER_BOUND) {
-			soilTerms = FaccioliEtAl_2010Constants.aC[iper];
-		} else {
-			soilTerms = 0;
-		}
-		return soilTerms;
-	}
-	
-	private double[] setConstants(int iper) {
-		double[] a = new double[5];
-		a[0]  = FaccioliEtAl_2010Constants.a1[iper];
-		a[1]  = FaccioliEtAl_2010Constants.a2[iper];
-		a[2]  = FaccioliEtAl_2010Constants.a3[iper];
-		a[3]  = FaccioliEtAl_2010Constants.a4[iper];
-		a[4]  = FaccioliEtAl_2010Constants.a5[iper];
-		return a;
+		return f;
 	}
 
-	//tmp variables to convert to DRS to mean PSA(g);
-	private double convert2psa (final int iper){
-		double drs2psa = Double.NaN;
-		return drs2psa = Math.pow((2*Math.PI)/FaccioliEtAl_2010Constants.PERIOD[iper], 2) 
-        * FaccioliEtAl_2010Constants.CMS2_TO_G_CONVERSION_FACTOR;
-	}
-	
+
 	public double getStdDev(int iper, String stdDevType) {
 		if(stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE))
 			return 0;
 		else if(stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL))
-			return FaccioliEtAl_2010Constants.LOG10_2_LN * 
-			       FaccioliEtAl_2010Constants.TOTAL_STD[iper];
+			return CF_2008Constants.LOG10_2_LN*CF_2008Constants.TOTAL_STD[iper];
 		else 
 			return Double.NaN;
 	}
@@ -591,14 +592,15 @@ NamedObjectAPI, ParameterChangeListener {
 	 * For testing
 	 * 
 	 */
-	public static void main(String[] args) {
-		
-		FaccioliEtAl_2010_AttenRel ar = new FaccioliEtAl_2010_AttenRel(null);
 
-		for (int i= 0; i < 23; i++){
-			System.out.println("reverse - rock "  + FaccioliEtAl_2010Constants.PERIOD[i]);
-			System.out.println("mean = " + Math.exp(ar.getMean(i, 7.00, 10, 800, -60.0)));
-		}
+	public static void main(String[] args) {
+
+		CF_2008_AttenRel ar = new CF_2008_AttenRel(null);
+		ar.setParamDefaults();
+		ar.setIntensityMeasure(SA_Param.NAME);
+		 for (int i=0; i < 10; i++){
+			 System.out.println("iper = " + CF_2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 7.00, 15, 800, -60)));
+		 }
 	}	
 
 }

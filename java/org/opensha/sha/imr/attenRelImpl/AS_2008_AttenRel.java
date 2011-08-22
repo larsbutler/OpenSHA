@@ -927,12 +927,19 @@ public class AS_2008_AttenRel extends AttenuationRelationship implements
         // init other params defined in parent class
         super.initOtherParams();
 
-        // the Component Parameter
-        StringConstraint constraint = new StringConstraint();
-        constraint.addString(ComponentParam.COMPONENT_GMRotI50);
-        componentParam =
-                new ComponentParam(constraint,
-                        ComponentParam.COMPONENT_GMRotI50);
+//        // the Component Parameter
+//        StringConstraint constraint = new StringConstraint();
+//        constraint.addString(ComponentParam.COMPONENT_GMRotI50);
+//        componentParam =
+//                new ComponentParam(constraint,
+//                        ComponentParam.COMPONENT_GMRotI50);
+		// component Parameter
+		StringConstraint constraint = new StringConstraint();
+		constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
+		constraint.setNonEditable();
+		componentParam = new ComponentParam(constraint,
+				ComponentParam.COMPONENT_AVE_HORZ);
+
 
         // the stdDevType Parameter
         StringConstraint stdDevTypeConstraint = new StringConstraint();

@@ -511,17 +511,21 @@ NamedObjectAPI, ParameterChangeListener {
 		//tmp variables to convert to DRS to mean PSA(g);
 		double tmp1 = Math.pow((2*Math.PI)/CF_2008Constants.PERIOD[iper], 2);
 
-		if (im.getName().equals(PGV_Param.NAME) && iper == 0) {
-			logY *= Math.log(Math.exp(logY));
+		if (iper == 0) {
+			logY = Math.exp(logY);
+//			System.out.println("pgv_case in cm/sec ");
 
-		} else if (im.getName().equals(PGA_Param.NAME) && (iper == 1)){
+		} else if (iper == 1){
 
-			logY *= Math.log(Math.exp(logY)
-					*CF_2008Constants.MSS_TO_G_CONVERSION_FACTOR);
+//			System.out.println("pga_case");
+			
+			logY = Math.exp(logY) * CF_2008Constants.MSS_TO_G_CONVERSION_FACTOR;
+			
 		} else {
-			logY *= Math.exp(logY)*tmp1*CF_2008Constants.CMS_TO_G_CONVERSION_FACTOR;
+			logY = Math.exp(logY) * tmp1 * CF_2008Constants.CMS_TO_G_CONVERSION_FACTOR;
+//			System.out.println("Sa_case");
 		}
-		return logY;
+		return Math.log(logY);
 	}
 
 	private double[] computeSiteTerm(final int iper, final double vs30) {
@@ -586,4 +590,17 @@ NamedObjectAPI, ParameterChangeListener {
 	public final URL getInfoURL() throws MalformedURLException {
 		return null;
 	}
+	/**
+	 * For testing
+	 * 
+	 */
+	public static void main(String[] args) {
+		
+		CF_2008_AttenRel ar = new CF_2008_AttenRel(null);
+
+		for (int i= 0; i < 10; i++){
+			System.out.println("reverse - rock "  + CF_2008Constants.PERIOD[i]);
+			System.out.println("mean = " + Math.exp(ar.getMean(i, 7.00, 10, 800, -60.0)));
+		}
+	}	
 }
