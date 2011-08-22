@@ -517,9 +517,9 @@ NamedObjectAPI, ParameterChangeListener {
 		} else if (im.getName().equals(PGA_Param.NAME) && (iper == 1)){
 
 			logY *= Math.log(Math.exp(logY)
-					*CF_2008Constants.CMS_TO_G_CONVERSION_FACTOR);
+					*CF_2008Constants.MSS_TO_G_CONVERSION_FACTOR);
 		} else {
-			logY *= Math.exp(logY)*tmp1/981;
+			logY *= Math.exp(logY)*tmp1*CF_2008Constants.CMS_TO_G_CONVERSION_FACTOR;
 		}
 		return logY;
 	}
