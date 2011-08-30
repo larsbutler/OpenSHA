@@ -1,5 +1,6 @@
 package org.opensha.sha.imr.attenRelImpl;
 
+
 public class AkB2010Constants {
 
 	/**

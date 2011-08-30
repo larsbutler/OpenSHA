@@ -88,7 +88,7 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  *</p>
  *
  *
- * @author     L. Danciu alias Ciccio 
+ * @author     L. Danciu
  * @created    August, 2010
  * @version    1.0
  */
@@ -507,7 +507,7 @@ NamedObjectAPI, ParameterChangeListener {
 
 		logY = term1 + term2 + s[2] + f[2];
 
-		logY *= CF2008Constants.LOG10_2_LN;
+		logY *= CF_2008Constants.LOG10_2_LN;
 
 		//tmp variables to convert to DRS to mean PSA(g);
 		double tmp1 = Math.pow((2*Math.PI)/CF_2008Constants.PERIOD[iper], 2);
