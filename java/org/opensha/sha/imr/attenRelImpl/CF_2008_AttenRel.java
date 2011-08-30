@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2009 OpenSHA.org in partnership with
+ * Copyright 2009 OpenSHA.org in partnership with 
  * the Southern California Earthquake Center (SCEC, http://www.scec.org)
  * at the University of Southern California and the UnitedStates Geological
  * Survey (USGS; http://www.usgs.gov)
