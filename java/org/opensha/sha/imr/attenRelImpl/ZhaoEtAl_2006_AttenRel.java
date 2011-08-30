@@ -491,8 +491,7 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 
 		// Setting the flags in order to account for tectonic region and focal
 		// mechanism
-		if (rake > 30
-				&& rake < 150
+		if (rake > 30 && rake < 150 
 				&& tectonicRegiontType
 						.equalsIgnoreCase(TectonicRegionType.ACTIVE_SHALLOW
 								.toString())) {
@@ -680,5 +679,21 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 	public URL getInfoURL() throws MalformedURLException {
 		return null;
 	}
+	public static void main(String[] args) {
+		
+		ZhaoEtAl_2006_AttenRel  ar = new ZhaoEtAl_2006_AttenRel(null);
+		
+		ar.setParamDefaults();
+        ar.setIntensityMeasure(SA_Param.NAME);
+        
+//    	public double getMean(int iper, double mag, double rRup, double hypodepth,
+//    			double rake, double vs30, String tectonicRegiontType)
+
+		for (int i= 1; i < 10; i++){
+			System.out.println("mean = " + Math.exp(ar.getMean(i, 7.00, 10, 20, 90.0, 800, TectonicRegionType.ACTIVE_SHALLOW.toString())));
+		}
+
+		}		
+
 
 }

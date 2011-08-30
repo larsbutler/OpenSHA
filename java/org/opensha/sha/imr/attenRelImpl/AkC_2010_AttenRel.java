@@ -543,7 +543,7 @@ ParameterChangeListener {
 		// convert PGA and SA from cm/s2 to g
 		if (iper != 0) {
 			lnY = Math.log(Math.exp(lnY)
-					* AkB2010Constants.CMS2_TO_G_CONVERSION_FACTOR);
+					* CF2008Constants.CMS2_TO_G_CONVERSION_FACTOR);
 		}
 
 		return (lnY);

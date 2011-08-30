@@ -569,7 +569,8 @@ public static void main(String[] args) {
 	LL_2008_AttenRel ar = new LL_2008_AttenRel(null);
 	ar.setParamDefaults();
 	 for (int i=0; i < 16; i++){
-		 System.out.println("iper" + i + " mean = " + Math.exp(ar.getMean(i, 7.00, 15, 800, "SUBDUCTION_INTERFACE")));
+		 System.out.println("iper" + i + " mean = " + Math.exp(ar.getMean(i, 7.00, 15, 800, 
+				 TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
 	 }
 }	
 

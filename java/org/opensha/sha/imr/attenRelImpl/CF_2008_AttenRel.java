@@ -251,7 +251,7 @@ NamedObjectAPI, ParameterChangeListener {
 				CF_2008Constants.DISTANCE_HYPO_WARN_MIN);
 		distanceHypoParam.addParameterChangeWarningListener(warningListener);
 		DoubleConstraint warn = new DoubleConstraint(
-				CF_2008Constants.DISTANCE_HYPO_WARN_MIN,
+				new Double(0.0),
 				CF_2008Constants.DISTANCE_HYPO_WARN_MAX);
 		warn.setNonEditable();
 		distanceHypoParam.setWarningConstraint(warn);
@@ -429,6 +429,7 @@ NamedObjectAPI, ParameterChangeListener {
 			return VERY_SMALL_MEAN;
 		}
 		else{
+			
 			setPeriodIndex();
 			return getMean (iper, mag, rhypo, vs30, rake);
 		}
@@ -493,8 +494,8 @@ NamedObjectAPI, ParameterChangeListener {
 		double logY;
 
 		// This is to avoid rhypo == 0 distances
-		if (rhypo < 1e-3) {
-			rhypo = 1;
+		if (rhypo < CF_2008Constants.DISTANCE_HYPO_WARN_MIN) {
+			rhypo = CF_2008Constants.DISTANCE_HYPO_WARN_MIN;
 		}
 
 		double[] s = computeSiteTerm(iper, vs30);
@@ -506,7 +507,7 @@ NamedObjectAPI, ParameterChangeListener {
 
 		logY = term1 + term2 + s[2] + f[2];
 
-		logY *= AkB2010Constants.LOG10_2_LN;
+		logY *= CF2008Constants.LOG10_2_LN;
 
 		//tmp variables to convert to DRS to mean PSA(g);
 		double tmp1 = Math.pow((2*Math.PI)/CF_2008Constants.PERIOD[iper], 2);
@@ -600,7 +601,7 @@ NamedObjectAPI, ParameterChangeListener {
 
 		for (int i= 0; i < 10; i++){
 			System.out.println("reverse - rock "  + CF_2008Constants.PERIOD[i]);
-			System.out.println("mean = " + Math.exp(ar.getMean(i, 7.00, 10, 800, -60.0)));
+			System.out.println("mean = " + Math.exp(ar.getMean(i, 7.00, 10, 100, -60.0)));
 		}
 	}	
 }

@@ -598,14 +598,14 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 	 * 
 	 */
 	
-//	public static void main(String[] args) {
-//		
-//		ToroEtAl2002_AttenRel ar = new ToroEtAl2002_AttenRel(null);
-//
-//		System.out.println("A first test on ToroEtAl2002_AttenRel GMPE!");
-//		for (int i=0; i < 8; i++){
-//			System.out.println("mean = " + Math.exp(ar.getMean(i, 7.50, 10, 800, 45)));
-//		}
-//	}	
+	public static void main(String[] args) {
+		
+		ToroEtAl2002_AttenRel ar = new ToroEtAl2002_AttenRel(null);
+
+		System.out.println("A first test on ToroEtAl2002_AttenRel GMPE!");
+		for (int i=0; i < 8; i++){
+			System.out.println("mean = " + Math.exp(ar.getMean(i, 7.50, 10, 800, 45)));
+		}
+	}	
 
 }

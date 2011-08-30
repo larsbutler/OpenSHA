@@ -528,5 +528,9 @@ public class CF_2008Constants {
 		 * cm/s to g conversion factor.
 		 */
 		public static final double MSS_TO_G_CONVERSION_FACTOR = 1.0/9.810;
+		public static void main(String [] args){
+		System.out.print(PERIOD.length);
+		}
+		
 
 	}

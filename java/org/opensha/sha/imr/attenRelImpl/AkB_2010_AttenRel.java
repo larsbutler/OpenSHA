@@ -131,8 +131,8 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 
 		// Create an Hash map that links the period with its index
 		indexFromPerHashMap = new HashMap<Double, Integer>();
-		for (int i = 0; i < AkB2010Constants.PERIOD.length; i++) {
-			indexFromPerHashMap.put(new Double(AkB2010Constants.PERIOD[i]),
+		for (int i = 0; i < CF2008Constants.PERIOD.length; i++) {
+			indexFromPerHashMap.put(new Double(CF2008Constants.PERIOD[i]),
 					new Integer(i));
 		}
 
@@ -153,8 +153,8 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 
 		// set supported periods for spectral acceleration
 		DoubleDiscreteConstraint periodConstraint = new DoubleDiscreteConstraint();
-		for (int i = 1; i < AkB2010Constants.PERIOD.length; i++) {
-			periodConstraint.addDouble(new Double(AkB2010Constants.PERIOD[i]));
+		for (int i = 1; i < CF2008Constants.PERIOD.length; i++) {
+			periodConstraint.addDouble(new Double(CF2008Constants.PERIOD[i]));
 		}
 		periodConstraint.setNonEditable();
 		// set period param (default is 1s, which is provided by AkB2010 GMPE)
@@ -196,8 +196,8 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 	protected final void initEqkRuptureParams() {
 
 		// moment magnitude (default 5.5)
-		magParam = new MagParam(AkB2010Constants.MAG_WARN_MIN,
-				AkB2010Constants.MAG_WARN_MAX);
+		magParam = new MagParam(CF2008Constants.MAG_WARN_MIN,
+				CF2008Constants.MAG_WARN_MAX);
 		// rake angle (default 0.0 -> strike-slip)
 		rakeParam = new RakeParam();
 
@@ -227,11 +227,11 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 	protected final void initPropagationEffectParams() {
 
 		distanceJBParam = new DistanceJBParameter(
-				AkB2010Constants.DISTANCE_JB_WARN_MIN);
+				CF2008Constants.DISTANCE_JB_WARN_MIN);
 		distanceJBParam.addParameterChangeWarningListener(warningListener);
 		DoubleConstraint warn = new DoubleConstraint(
-				AkB2010Constants.DISTANCE_JB_WARN_MIN,
-				AkB2010Constants.DISTANCE_JB_WARN_MAX);
+				CF2008Constants.DISTANCE_JB_WARN_MIN,
+				CF2008Constants.DISTANCE_JB_WARN_MAX);
 		warn.setNonEditable();
 		distanceJBParam.setWarningConstraint(warn);
 		distanceJBParam.setNonEditable();
@@ -485,12 +485,12 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 				* faultStyleTerms[0] + b[9] * faultStyleTerms[1];
 
 		// convert from log10 to natural logarithm
-		logY = logY * AkB2010Constants.LOG10_2_LN;
+		logY = logY * CF2008Constants.LOG10_2_LN;
 
 		// convert PGA and SA from cm/s2 to g
 		if (iper != 0) {
 			logY = Math.log(Math.exp(logY)
-					* AkB2010Constants.CMS2_TO_G_CONVERSION_FACTOR);
+					* CF2008Constants.CMS2_TO_G_CONVERSION_FACTOR);
 		}
 
 		return logY;
@@ -512,11 +512,11 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 	private int[] setSoilTerms(final double vs30) {
 		int[] soilTerms = new int[] { 0, 0 };
 
-		if (vs30 < AkB2010Constants.SOFT_SOIL_UPPER_BOUND) {
+		if (vs30 < CF2008Constants.SOFT_SOIL_UPPER_BOUND) {
 			soilTerms[0] = 1;
 		}
-		if (vs30 >= AkB2010Constants.SOFT_SOIL_UPPER_BOUND
-				&& vs30 <= AkB2010Constants.STIFF_SOIL_UPPER_BOUND) {
+		if (vs30 >= CF2008Constants.SOFT_SOIL_UPPER_BOUND
+				&& vs30 <= CF2008Constants.STIFF_SOIL_UPPER_BOUND) {
 			soilTerms[1] = 1;
 		}
 		return soilTerms;
@@ -525,25 +525,25 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 	private double[] setConstants(int iper) {
 		double[] b = new double[10];
 
-		b[0] = AkB2010Constants.b1[iper];
+		b[0] = CF2008Constants.b1[iper];
 
-		b[1] = AkB2010Constants.b2[iper];
+		b[1] = CF2008Constants.b2[iper];
 
-		b[2] = AkB2010Constants.b3[iper];
+		b[2] = CF2008Constants.b3[iper];
 
-		b[3] = AkB2010Constants.b4[iper];
+		b[3] = CF2008Constants.b4[iper];
 
-		b[4] = AkB2010Constants.b5[iper];
+		b[4] = CF2008Constants.b5[iper];
 
-		b[5] = AkB2010Constants.b6[iper];
+		b[5] = CF2008Constants.b6[iper];
 
-		b[6] = AkB2010Constants.b7[iper];
+		b[6] = CF2008Constants.b7[iper];
 
-		b[7] = AkB2010Constants.b8[iper];
+		b[7] = CF2008Constants.b8[iper];
 
-		b[8] = AkB2010Constants.b9[iper];
+		b[8] = CF2008Constants.b9[iper];
 
-		b[9] = AkB2010Constants.b10[iper];
+		b[9] = CF2008Constants.b10[iper];
 		return b;
 	}
 
@@ -551,14 +551,14 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 		if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE))
 			return 0;
 		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTER))
-			return AkB2010Constants.LOG10_2_LN
-					* AkB2010Constants.INTER_EVENT_STD[iper];
+			return CF2008Constants.LOG10_2_LN
+					* CF2008Constants.INTER_EVENT_STD[iper];
 		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTRA))
-			return AkB2010Constants.LOG10_2_LN
-					* AkB2010Constants.INTRA_EVENT_STD[iper];
+			return CF2008Constants.LOG10_2_LN
+					* CF2008Constants.INTRA_EVENT_STD[iper];
 		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL))
-			return AkB2010Constants.LOG10_2_LN
-					* AkB2010Constants.TOTAL_STD[iper];
+			return CF2008Constants.LOG10_2_LN
+					* CF2008Constants.TOTAL_STD[iper];
 		else
 			return Double.NaN;
 	}
