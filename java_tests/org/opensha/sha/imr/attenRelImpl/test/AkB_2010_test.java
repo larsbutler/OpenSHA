@@ -17,7 +17,7 @@ import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.calc.HazardCurveCalculator;
 import org.opensha.sha.earthquake.rupForecastImpl.GEM1.GEM1ERF;
 import org.opensha.sha.earthquake.rupForecastImpl.GEM1.SourceData.GEMSourceData;
-import org.opensha.sha.imr.attenRelImpl.CF2008Constants;
+import org.opensha.sha.imr.attenRelImpl.AkB2010Constants;
 import org.opensha.sha.imr.attenRelImpl.AkB_2010_AttenRel;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PGA_Param;
 import org.opensha.sha.imr.param.OtherParams.StdDevTypeParam;
@@ -413,7 +413,7 @@ public class AkB_2010_test implements ParameterChangeWarningListener {
 			for (int j = 0; j < table.length; j++) {
 				double expectedStd = table[j][i];
 				double computedStd = akb2010AttenRel.getStdDev(i - 1,
-						stdDevType) / CF2008Constants.LOG10_2_LN;
+						stdDevType) / AkB2010Constants.LOG10_2_LN;
 				assertEquals(expectedStd, computedStd, TOLERANCE);
 			}
 		}
@@ -421,14 +421,14 @@ public class AkB_2010_test implements ParameterChangeWarningListener {
 		for (int j = 0; j < table.length; j++) {
 			double expectedStd = table[j][columnDescr.length - 2];
 			double computedStd = akb2010AttenRel.getStdDev(1, stdDevType)
-					/ CF2008Constants.LOG10_2_LN;
+					/ AkB2010Constants.LOG10_2_LN;
 			assertEquals(expectedStd, computedStd, TOLERANCE);
 		}
 		// check for PGV
 		for (int j = 0; j < table.length; j++) {
 			double expectedStd = table[j][columnDescr.length - 1];
 			double computedStd = akb2010AttenRel.getStdDev(0, stdDevType)
-					/ CF2008Constants.LOG10_2_LN;
+					/ AkB2010Constants.LOG10_2_LN;
 			assertEquals(expectedStd, computedStd, TOLERANCE);
 		}
 	}

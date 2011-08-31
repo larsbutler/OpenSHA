@@ -62,7 +62,7 @@ import org.opensha.sha.util.TectonicRegionType;
  * <p>
  * 
  * <b>Description:</b> This implements the Attenuation Relationship developed by
- * Akkar and Cagnac ("A local Ground-Motion Predictive Model for Turkey and its
+ * Akkar and Cagnan ("A local Ground-Motion Predictive Model for Turkey and its
  * comparison with Other Regional and Global Ground-Motion Models" Bulletin of
  * the Seismological Society of America, Vol. 100, No 6, pp 2978-2995)
  * <p>
