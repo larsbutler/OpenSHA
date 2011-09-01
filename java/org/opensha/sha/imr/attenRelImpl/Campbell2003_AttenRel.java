@@ -20,6 +20,7 @@ import org.opensha.sha.imr.param.EqkRuptureParams.MagParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.RakeParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.DampingParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PGA_Param;
+import org.opensha.sha.imr.param.IntensityMeasureParams.PGV_Param;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PeriodParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.SA_Param;
 import org.opensha.sha.imr.param.OtherParams.ComponentParam;
@@ -36,11 +37,14 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  * <b>Description:</b> This implements the  GMPE developed by K. W. Campbell (2003, BSSA, vol
  * 93, no 3, pp 1012-1033) <p>
  * The GMPE is adjusted to account the style -of faulting and a default rock soil (Vs30 >=800m/sec)
- * The adjustment coefficients were proposed by S. Drouet [2010];  
+ * The adjustment coefficients were proposed by S. Drouet [2010] - internal SHARE WP4 report;  
  * Supported Intensity-Measure Parameters:<p>
  * <UL>
- * <LI>PGA - Peak Ground Velocity
+ * <LI>PGA - Peak Ground Acceleration
  * <LI>saParam - Response Spectral Acceleration
+ * <LI>PGV - The original GMPE does not have a PGV parameter. Peak Ground Velocity was obtained from PSA (0.5) divided by 20 
+ * <LI> as proposed by Bommer (2006); The coeficients for PGV identical with those of the PSA(0.5s) - the median is obtained
+ * <LI> PSA (in cm/sec)/20;
  * <LI>
  * </UL><p>
  * Other Independent Parameters:<p>
@@ -134,7 +138,7 @@ NamedObjectAPI, ParameterChangeListener {
 	}
 
 	/**
-	 * Creates the two supported IM parameters (PGA and SA), as well as the
+	 * Creates the three supported IM parameters (PGA, PGV and SA), as well as the
 	 * independenParameters of SA (periodParam and dampingParam) and adds them
 	 * to the supportedIMParams list. Makes the parameters non-editable.
 	 */
@@ -161,6 +165,10 @@ NamedObjectAPI, ParameterChangeListener {
 		pgaParam = new PGA_Param();
 		pgaParam.setNonEditable();
 
+		// initialize peak ground velocity parameter (units: cm/sec)
+		pgvParam = new PGV_Param();
+		pgvParam.setNonEditable();
+
 		// add the warning listeners
 		saParam.addParameterChangeWarningListener(warningListener);
 		pgaParam.addParameterChangeWarningListener(warningListener);
@@ -169,6 +177,8 @@ NamedObjectAPI, ParameterChangeListener {
 		supportedIMParams.clear();
 		supportedIMParams.addParameter(saParam);
 		supportedIMParams.addParameter(pgaParam);
+		supportedIMParams.addParameter(pgvParam);
+
 
 	}
 
@@ -239,12 +249,14 @@ NamedObjectAPI, ParameterChangeListener {
 		stdDevTypeConstraint.setNonEditable();
 		stdDevTypeParam = new StdDevTypeParam(stdDevTypeConstraint);
 
-		// component Parameter
-		StringConstraint constraint = new StringConstraint();
-		constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
-		constraint.setNonEditable();
-		componentParam = new ComponentParam(constraint,
-				ComponentParam.COMPONENT_AVE_HORZ);
+        // the Component Parameter
+		// Geometrical Mean (COMPONENT_AVE_HORZ) = Geometrical MeanI50 (COMPONENT_GMRotI50)
+        StringConstraint constraint = new StringConstraint();
+        constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
+        constraint.addString(ComponentParam.COMPONENT_GMRotI50);
+        constraint.setNonEditable();
+        componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_GMRotI50);
+        componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_AVE_HORZ);
 
 		// add these to the list
 		otherParams.clear();
@@ -323,16 +335,19 @@ NamedObjectAPI, ParameterChangeListener {
 	}
 
 	/**
-	 * Set period index. PGV is missing
+	 * Set period index.
 	 */
 	protected final void setPeriodIndex() {
-		if (im.getName().equalsIgnoreCase(PGA_Param.NAME)) {
+		if (im.getName().equalsIgnoreCase(PGV_Param.NAME)) {
 			iper = 0;
+		} else if (im.getName().equalsIgnoreCase(PGA_Param.NAME)) {
+			iper = 1;
 		} else {
 			iper = ((Integer) indexFromPerHashMap.get(saPeriodParam.getValue()))
 			.intValue();
 		}
 	}
+
 
 	/**
 	 * Compute mean. Applies correction for style of faulting and 
@@ -352,7 +367,7 @@ NamedObjectAPI, ParameterChangeListener {
 		if (intensityMeasureChanged){
 			setPeriodIndex();
 		}
-		return getStdDev(iper, mag, stdDevType, vs30);
+		return getStdDev(iper, mag, stdDevType);
 	}
 
 	/**
@@ -363,7 +378,7 @@ NamedObjectAPI, ParameterChangeListener {
 	 * @param vs30
 	 * @param rake
 	 */
-	public double getMean(final int iper, double mag, double rRup, double vs30, double rake){
+	public double getMean(int iper, double mag, double rRup, double vs30, double rake){
 
 		/**
 		 * This is to avoid very small values for Rup 
@@ -373,17 +388,26 @@ NamedObjectAPI, ParameterChangeListener {
 			rRup = 1;
 		}
 		double lnY_adj = Double.NaN;
+		double lnY_rock = Double.NaN;
 		double[] s = computeSiteTerm(iper, vs30);
 		double[] f = computeStyleOfFaultingTerm(iper, rake);
 		double lnY_Hrock = computeHardRockResponse(iper, mag, rRup);
 
-//		lnY_adj = Math.exp(lnY_Hrock) * f[2] * s[0];
-		lnY_adj = Math.exp(lnY_Hrock);
+//		lnY_rock = Math.exp(lnY_Hrock) * f[2] * s[0];
+		lnY_rock = Math.exp(lnY_Hrock);
 
+		if  (iper == 0.00) {
+			lnY_adj = Math.exp(lnY_Hrock) * 981/20;
+
+		} else {
+			lnY_adj = Math.exp(lnY_Hrock);
+
+		}
 		return Math.log(lnY_adj);
+	}
 
-	};
 
+		
 	private double computeHardRockResponse (int iper, double mag, double rRup){
 		double f1 = Double.NaN;
 		double f2 = Double.NaN;
@@ -423,169 +447,179 @@ NamedObjectAPI, ParameterChangeListener {
 	/**
 	 * Compute style-of-faulting adjustment
 	 **/		
-	 private double[] computeStyleOfFaultingTerm(final int iper, final double rake) {
-		 double[] f = new double[3];
-		 if (rake > Campbell2003Constants.FLT_TYPE_NORMAL_RAKE_LOWER
-				 && rake <= Campbell2003Constants.FLT_TYPE_NORMAL_RAKE_UPPER){
-			 f[0] = 1.0;
-			 f[1] = 0.0;
-			 f[2] = f[0]*Math.pow(Campbell2003Constants.Frss[iper], (1-Campbell2003Constants.pR)) * 
-			 Math.pow(Campbell2003Constants.Fnss, - Campbell2003Constants.pN);
-		 } else if (rake > Campbell2003Constants.FLT_TYPE_REVERSE_RAKE_LOWER
-				 && rake <= Campbell2003Constants.FLT_TYPE_REVERSE_RAKE_UPPER) {
-			 f[0] = 0.0;
-			 f[1] = 1.0;
-			 f[2] = f[1] * Math.pow(Campbell2003Constants.Frss[iper], -Campbell2003Constants.pR) * 
-			 Math.pow(Campbell2003Constants.Fnss, (1-Campbell2003Constants.pN));;
-		 } else {
-			 f[0] = 0.0;
-			 f[1] = 0.0;
-			 f[2] = Math.pow(Campbell2003Constants.Frss[iper], -Campbell2003Constants.pR) * 
-			 Math.pow(Campbell2003Constants.Fnss, -Campbell2003Constants.pN);
+	private double[] computeStyleOfFaultingTerm(final int iper, final double rake) {
+		double[] f = new double[3];
+		if (rake > Campbell2003Constants.FLT_TYPE_NORMAL_RAKE_LOWER
+				&& rake <= Campbell2003Constants.FLT_TYPE_NORMAL_RAKE_UPPER){
+			f[0] = 1.0;
+			f[1] = 0.0;
+			f[2] = f[0]*Math.pow(Campbell2003Constants.Frss[iper], (1-Campbell2003Constants.pR)) * 
+			Math.pow(Campbell2003Constants.Fnss, - Campbell2003Constants.pN);
+		} else if (rake > Campbell2003Constants.FLT_TYPE_REVERSE_RAKE_LOWER
+				&& rake <= Campbell2003Constants.FLT_TYPE_REVERSE_RAKE_UPPER) {
+			f[0] = 0.0;
+			f[1] = 1.0;
+			f[2] = f[1] * Math.pow(Campbell2003Constants.Frss[iper], -Campbell2003Constants.pR) * 
+			Math.pow(Campbell2003Constants.Fnss, (1-Campbell2003Constants.pN));;
+		} else {
+			f[0] = 0.0;
+			f[1] = 0.0;
+			f[2] = Math.pow(Campbell2003Constants.Frss[iper], -Campbell2003Constants.pR) * 
+			Math.pow(Campbell2003Constants.Fnss, -Campbell2003Constants.pN);
+		}
+		return f;
+	}
+	/**
+	 * Compute adjustment factor for rock (vs30 = 800m/s)
+	 **/		
+	private double[] computeSiteTerm(final int iper, final double vs30) {
+		double[] s = new double[2];
+		if (vs30 == Campbell2003Constants.SITE_TYPE_ROCK_UPPER_BOUND) {
+			s[0] = Campbell2003Constants.AFrock[iper];
+			s[1] = 0.0; 
+		} else {
+			s[0] = 0.0;
+			s[1] = 0.0;
+		}
+		return s;
+	}
+
+	public double getStdDev(int iper, double mag, String stdDevType ) {
+		double sigma = Double.NaN;;
+
+		if(stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE))
+			return 0;
+		else {
+			final double M1 = 7.16; 
+			if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL_MAG_DEP))
+					//&& vs30 == Campbell2003Constants.SITE_TYPE_ROCK_UPPER_BOUND)
+				if (mag < M1) {
+					sigma = (Campbell2003Constants.c11[iper] + Campbell2003Constants.c12[iper] * mag);
+					// *Campbell2003Constants.sig_AFrock[iper];
+				} 
+				else {
+					sigma = Campbell2003Constants.c13[iper];
+			       //*Campbell2003Constants.sig_AFrock[iper];
+				}
+			return (sigma);
+		}
+	}
+
+	/**
+	 * Allows the user to set the default parameter values for the selected
+	 * Attenuation Relationship.
+	 */
+	public final void setParamDefaults() {
+
+		magParam.setValueAsDefault();
+		rakeParam.setValueAsDefault();
+		vs30Param.setValueAsDefault();
+		distanceRupParam.setValueAsDefault();
+		saPeriodParam.setValueAsDefault();
+		saDampingParam.setValueAsDefault();
+		saParam.setValueAsDefault();
+		pgaParam.setValueAsDefault();
+		pgvParam.setValueAsDefault();
+		stdDevTypeParam.setValueAsDefault();
+		sigmaTruncTypeParam.setValueAsDefault();
+		sigmaTruncLevelParam.setValueAsDefault();
+		componentParam.setValueAsDefault();
+	}
+	/**
+	 * This listens for parameter changes and updates the primitive parameters
+	 * accordingly
+	 */
+	public final void parameterChange(final ParameterChangeEvent e) {
+
+		String pName = e.getParameterName();
+		Object val = e.getNewValue();
+
+		if (pName.equals(MagParam.NAME)) {
+			mag = ((Double) val).doubleValue();
+		} else if (pName.equals(Vs30_Param.NAME)) {
+			vs30 = ((Double) val).doubleValue();
+		} else if (pName.equals(DistanceRupParameter.NAME)) {
+			rRup = ((Double) val).doubleValue();
+		} else if (pName.equals(StdDevTypeParam.NAME)) {
+			stdDevType = (String) val;
+		} else if (pName.equals(FaultTypeParam.NAME)) {
+			rake = ((Double) val).doubleValue();
+		}
+	}
+	/**
+	 * Allows to reset the change listeners on the parameters
+	 */
+	public void resetParameterEventListeners(){
+		magParam.removeParameterChangeListener(this);
+		rakeParam.removeParameterChangeListener(this);
+		vs30Param.removeParameterChangeListener(this);
+		distanceRupParam.removeParameterChangeListener(this);
+		stdDevTypeParam.removeParameterChangeListener(this);
+		saPeriodParam.removeParameterChangeListener(this);
+		this.initParameterEventListeners();
+	}
+	/**
+	 * Adds the parameter change listeners. This allows to listen to when-ever the
+	 * parameter is changed.
+	 */
+	protected void initParameterEventListeners() {
+
+		magParam.addParameterChangeListener(this);
+		rakeParam.addParameterChangeListener(this);
+		vs30Param.addParameterChangeListener(this);
+		distanceRupParam.addParameterChangeListener(this);
+		stdDevTypeParam.addParameterChangeListener(this);
+		saPeriodParam.addParameterChangeListener(this);
+	}
+	/**
+	 * Get the name of this IMR.
+	 */
+	public final String getName() {
+		return NAME;
+	}
+
+	/**
+	 * Returns the Short Name of each AttenuationRelationship
+	 * 
+	 */
+	public final String getShortName() {
+		return SHORT_NAME;
+	}
+	/**
+	 * This provides a URL where more info on this model can be obtained
+	 * @throws MalformedURLException if returned URL is not a valid URL.
+	 * @returns the URL to the AttenuationRelationship document on the Web.
+	 */
+	public URL getInfoURL() throws MalformedURLException{
+		return new URL("http://www.opensha.org/documentation/modelsImplemented/attenRel/Campbell2003.html");
+	}
+	/**
+	 * For testing
+	 * 
+	 */
+
+	public static void main(String[] args) {
+
+		Campbell2003_AttenRel ar = new Campbell2003_AttenRel(null);
+		ar.setParamDefaults();
+		ar.setIntensityMeasure(SA_Param.NAME);
+     		for (int i=2; i < 3; i++){
+			 System.out.println(i + ". T(sec) ="  + Campbell2003Constants.PERIOD[i]);
+			 System.out.println(" mag = 5.00 " + "r =    1.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,    1.00, 800, -90)));
+			 System.out.println(" mag = 5.00 " + "r =   20.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,   20.00, 800, -90)));
+			 System.out.println(" mag = 5.00 " + "r =   30.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,   30.00, 800, -90)));
+			 System.out.println(" mag = 5.00 " + "r =   50.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,   50.00, 800, -90)));
+			 System.out.println(" mag = 5.00 " + "r =   75.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,   75.00, 800, -90)));
+			 System.out.println(" mag = 5.00 " + "r =  100.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,  100.00, 800, -90)));
+			 System.out.println(" mag = 5.00 " + "r =  200.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,  200.00, 800, -90)));
+			 System.out.println(" mag = 5.00 " + "r =  500.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,  500.00, 800, -90)));
+			 System.out.println(" mag = 5.00 " + "r = 1000.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00, 1000.00, 800, -90)));
+			 
+
+//			 System.out.println(ar.getStdDev(i, 5.00, StdDevTypeParam.STD_DEV_TYPE_TOTAL_MAG_DEP.toString()));
+//			 System.out.println (ar.getStdDev(i, 7.00, StdDevTypeParam.STD_DEV_TYPE_TOTAL_MAG_DEP.toString()));
+			 
 		 }
-		 return f;
-	 }
-	 /**
-	  * Compute adjustment factor for rock (vs30 = 800m/s)
-	  **/		
-	 private double[] computeSiteTerm(final int iper, final double vs30) {
-		 double[] s = new double[2];
-		 if (vs30 == Campbell2003Constants.SITE_TYPE_ROCK_UPPER_BOUND) {
-			 s[0] = Campbell2003Constants.AFrock[iper];
-			 s[1] = 0.0; 
-		 } else {
-			 s[0] = 0.0;
-			 s[1] = 0.0;
-		 }
-		 return s;
-	 }
-
-	 public double getStdDev(int iper, double mag, String stdDevType, double vs30 ) {
-		 double sigma = Double.NaN;;
-
-		 if(stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE))
-			 return 0;
-		 else {
-			 final double M1 = 7.16; 
-			 if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL_MAG_DEP) && 
-					 vs30 == Campbell2003Constants.SITE_TYPE_ROCK_UPPER_BOUND)
-				 if (mag < M1) {
-					 sigma = (Campbell2003Constants.c11[iper] - Campbell2003Constants.c12[iper] * mag) * 
-					 Campbell2003Constants.sig_AFrock[iper];
-				 } 
-				 else {
-					 sigma = Campbell2003Constants.c13[iper]*Campbell2003Constants.sig_AFrock[iper];
-				 }
-			 return (sigma);
-		 }
-	 }
-
-	 /**
-	  * Allows the user to set the default parameter values for the selected
-	  * Attenuation Relationship.
-	  */
-	 public final void setParamDefaults() {
-
-		 magParam.setValueAsDefault();
-		 rakeParam.setValueAsDefault();
-		 vs30Param.setValueAsDefault();
-		 distanceRupParam.setValueAsDefault();
-		 saPeriodParam.setValueAsDefault();
-		 saDampingParam.setValueAsDefault();
-		 saParam.setValueAsDefault();
-		 pgaParam.setValueAsDefault();
-		 stdDevTypeParam.setValueAsDefault();
-		 sigmaTruncTypeParam.setValueAsDefault();
-		 sigmaTruncLevelParam.setValueAsDefault();
-		 componentParam.setValueAsDefault();
-	 }
-	 /**
-	  * This listens for parameter changes and updates the primitive parameters
-	  * accordingly
-	  */
-	 public final void parameterChange(final ParameterChangeEvent e) {
-
-		 String pName = e.getParameterName();
-		 Object val = e.getNewValue();
-
-		 if (pName.equals(MagParam.NAME)) {
-			 mag = ((Double) val).doubleValue();
-		 } else if (pName.equals(Vs30_Param.NAME)) {
-			 vs30 = ((Double) val).doubleValue();
-		 } else if (pName.equals(DistanceRupParameter.NAME)) {
-			 rRup = ((Double) val).doubleValue();
-		 } else if (pName.equals(StdDevTypeParam.NAME)) {
-			 stdDevType = (String) val;
-		 } else if (pName.equals(FaultTypeParam.NAME)) {
-			 rake = ((Double) val).doubleValue();
-		 }
-	 }
-	 /**
-	  * Allows to reset the change listeners on the parameters
-	  */
-	 public void resetParameterEventListeners(){
-		 magParam.removeParameterChangeListener(this);
-		 rakeParam.removeParameterChangeListener(this);
-		 vs30Param.removeParameterChangeListener(this);
-		 distanceRupParam.removeParameterChangeListener(this);
-		 stdDevTypeParam.removeParameterChangeListener(this);
-		 saPeriodParam.removeParameterChangeListener(this);
-		 this.initParameterEventListeners();
-	 }
-	 /**
-	  * Adds the parameter change listeners. This allows to listen to when-ever the
-	  * parameter is changed.
-	  */
-	 protected void initParameterEventListeners() {
-
-		 magParam.addParameterChangeListener(this);
-		 rakeParam.addParameterChangeListener(this);
-		 vs30Param.addParameterChangeListener(this);
-		 distanceRupParam.addParameterChangeListener(this);
-		 stdDevTypeParam.addParameterChangeListener(this);
-		 saPeriodParam.addParameterChangeListener(this);
-	 }
-	 /**
-	  * Get the name of this IMR.
-	  */
-	 public final String getName() {
-		 return NAME;
-	 }
-
-	 /**
-	  * Returns the Short Name of each AttenuationRelationship
-	  * 
-	  */
-	 public final String getShortName() {
-		 return SHORT_NAME;
-	 }
-	 /**
-	  * This provides a URL where more info on this model can be obtained
-	  * @throws MalformedURLException if returned URL is not a valid URL.
-	  * @returns the URL to the AttenuationRelationship document on the Web.
-	  */
-	 public URL getInfoURL() throws MalformedURLException{
-		 return new URL("http://www.opensha.org/documentation/modelsImplemented/attenRel/Campbell2003.html");
-	 }
-	 /**
-	  * For testing
-	  * 
-	  */
-
-	 public static void main(String[] args) {
-
-		 Campbell2003_AttenRel ar = new Campbell2003_AttenRel(null);
-		 for (int i=13; i < 16; i++){
-//			 System.out.println("iper ="  + Campbell2003Constants.PERIOD[i]);
-//			 System.out.println("iper" + i + " mean = " + Math.exp(ar.getMean(i, 5.00, 13.3, 800, 45)));
-			 double SA2sec = Math.exp(ar.getMean(13, 5.00, 13.3, 800, 45));
-			 double SA3sec = Math.exp(ar.getMean(14, 5.00, 13.3, 800, 45));
-			 double SA4sec = Math.exp(ar.getMean(15, 5.00, 13.3, 800, 45));
-			 double ratio32sec =SA3sec/SA2sec;
-			 double ratio42sec =SA4sec/SA2sec;
-			 System.out.println("ratio32sec " + ratio32sec);
-			 System.out.println("ratio42sec " + ratio42sec);
-		 }
-	 }	
+	}	
 
 }

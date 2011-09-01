@@ -262,11 +262,14 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 		stdDevTypeConstraint.setNonEditable();
 		stdDevTypeParam = new StdDevTypeParam(stdDevTypeConstraint);
 
-		StringConstraint constraint = new StringConstraint();
-		constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
-		constraint.setNonEditable();
-		componentParam = new ComponentParam(constraint,
-				ComponentParam.COMPONENT_AVE_HORZ);
+        // the Component Parameter
+		// Geometrical Mean (COMPONENT_AVE_HORZ) = Geometrical MeanI50 (COMPONENT_GMRotI50)
+        StringConstraint constraint = new StringConstraint();
+        constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
+        constraint.addString(ComponentParam.COMPONENT_GMRotI50);
+        constraint.setNonEditable();
+        componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_GMRotI50);
+        componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_AVE_HORZ);
 
 		otherParams.clear();
 		otherParams.addParameter(sigmaTruncTypeParam);
@@ -689,9 +692,28 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 //    	public double getMean(int iper, double mag, double rRup, double hypodepth,
 //    			double rake, double vs30, String tectonicRegiontType)
 
-		for (int i= 1; i < 10; i++){
-			System.out.println("mean = " + Math.exp(ar.getMean(i, 7.00, 10, 20, 90.0, 800, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-		}
+//		for (int i= 16; i < 20; i++){
+//			System.out.println(i + " . " + ZhaoEtAl2006Constants.PERIOD[i]);
+//			System.out.println("mean = " + Math.exp(ar.getMean(i, 7.00, 10, 20, 90.0, 800, TectonicRegionType.ACTIVE_SHALLOW.toString())));
+			System.out.println("normal " + "5.00 " + "3.00 " +  Math.exp(ar.getMean(19,  5.00,   3, 20,  90.0, 800, TectonicRegionType.ACTIVE_SHALLOW.toString()))/
+                    											Math.exp(ar.getMean(17,  5.00,   3, 20, 90.0, 800, TectonicRegionType.ACTIVE_SHALLOW.toString())));
+			
+			System.out.println("normal " + "5.00 " + "3.00 " +  Math.exp(ar.getMean(19,  5.00,  15, 20,  90.0, 800, TectonicRegionType.ACTIVE_SHALLOW.toString()))/
+                    											Math.exp(ar.getMean(17,  5.00,  15, 20, 90.0, 800, TectonicRegionType.ACTIVE_SHALLOW.toString())));
+			
+			System.out.println("normal " + "5.00 " + "3.00 " + Math.exp(ar.getMean(18,   5.00,  35, 20,  90.0, 800, TectonicRegionType.ACTIVE_SHALLOW.toString()))/
+                    											Math.exp(ar.getMean(16,  5.00,  35, 20, 90.0, 800, TectonicRegionType.ACTIVE_SHALLOW.toString())));			                      
+			
+			System.out.println("normal " + "5.00 " + "3.00 " + Math.exp(ar.getMean(18,   5.00,  55.00, 20,  90.0, 800, TectonicRegionType.ACTIVE_SHALLOW.toString()))/
+																Math.exp(ar.getMean(16,  5.00,  55.00, 20, 90.0, 800, TectonicRegionType.ACTIVE_SHALLOW.toString())));
+			
+			System.out.println("normal " + "5.00 " + "3.00 " + Math.exp(ar.getMean(18,   5.00,  75, 20,  90.0, 800, TectonicRegionType.ACTIVE_SHALLOW.toString()))/
+                    											Math.exp(ar.getMean(16,  5.00,  75, 20, 90.0, 800, TectonicRegionType.ACTIVE_SHALLOW.toString())));
+			
+			System.out.println("normal " + "5.00 " + "3.00 " + Math.exp(ar.getMean(18,  5.00,  100, 20,  90.0, 800, TectonicRegionType.ACTIVE_SHALLOW.toString()))/
+                    											Math.exp(ar.getMean(16, 5.00, 100, 20, 90.0, 800, TectonicRegionType.ACTIVE_SHALLOW.toString())));
+
+//		}
 
 		}		
 

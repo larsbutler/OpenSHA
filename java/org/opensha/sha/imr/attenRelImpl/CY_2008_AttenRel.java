@@ -727,14 +727,13 @@ public class CY_2008_AttenRel extends AttenuationRelationship implements
         super.initOtherParams();
 
         // the Component Parameter
+		// Geometrical Mean (COMPONENT_AVE_HORZ) = Geometrical MeanI50 (COMPONENT_GMRotI50)
         StringConstraint constraint = new StringConstraint();
-        // modified by l.danciu for oslo meeting
-        // this is a GMrotI50
         constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
+        constraint.addString(ComponentParam.COMPONENT_GMRotI50);
         constraint.setNonEditable();
-        componentParam =
-                new ComponentParam(constraint,
-                        ComponentParam.COMPONENT_AVE_HORZ);
+        componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_GMRotI50);
+        componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_AVE_HORZ);
 
         // the stdDevType Parameter
         StringConstraint stdDevTypeConstraint = new StringConstraint();

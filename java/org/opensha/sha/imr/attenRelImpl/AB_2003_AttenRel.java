@@ -272,17 +272,13 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 		stdDevTypeParam = new StdDevTypeParam(stdDevTypeConstraint);
 
 //		// component Parameter
-//		StringConstraint constraint = new StringConstraint();
-//		constraint.addString(ComponentParam.COMPONENT_RANDOM_HORZ);
-//		constraint.setNonEditable();
-//		componentParam = new ComponentParam(constraint,
-//				ComponentParam.COMPONENT_RANDOM_HORZ);
-		// component Parameter
 		StringConstraint constraint = new StringConstraint();
+		constraint.addString(ComponentParam.COMPONENT_RANDOM_HORZ);
+		constraint.setNonEditable();
+		componentParam = new ComponentParam(constraint,ComponentParam.COMPONENT_RANDOM_HORZ);
 		constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
 		constraint.setNonEditable();
-		componentParam = new ComponentParam(constraint,
-				ComponentParam.COMPONENT_AVE_HORZ);
+		componentParam = new ComponentParam(constraint,	ComponentParam.COMPONENT_AVE_HORZ);
 
 		// add these to the list
 		otherParams.clear();

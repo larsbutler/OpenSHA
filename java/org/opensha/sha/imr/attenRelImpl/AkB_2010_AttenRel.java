@@ -257,12 +257,14 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 		stdDevTypeConstraint.setNonEditable();
 		stdDevTypeParam = new StdDevTypeParam(stdDevTypeConstraint);
 
-		// component Parameter
-		StringConstraint constraint = new StringConstraint();
-		constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
-		constraint.setNonEditable();
-		componentParam = new ComponentParam(constraint,
-				ComponentParam.COMPONENT_AVE_HORZ);
+        // the Component Parameter
+		// Geometrical Mean (COMPONENT_AVE_HORZ) = Geometrical MeanI50 (COMPONENT_GMRotI50)
+        StringConstraint constraint = new StringConstraint();
+        constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
+        constraint.addString(ComponentParam.COMPONENT_GMRotI50);
+        constraint.setNonEditable();
+        componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_GMRotI50);
+        componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_AVE_HORZ);
 
 		// add these to the list
 		otherParams.clear();
@@ -317,6 +319,8 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 		vs30Param.addParameterChangeListener(this);
 		componentParam.addParameterChangeListener(this);
 		stdDevTypeParam.addParameterChangeListener(this);
+        saPeriodParam.addParameterChangeListener(this);
+
 	}
 
 	/**
@@ -351,6 +355,7 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 		distanceJBParam.removeParameterChangeListener(this);
 		vs30Param.removeParameterChangeListener(this);
 		stdDevTypeParam.removeParameterChangeListener(this);
+        saPeriodParam.removeParameterChangeListener(this);
 		this.initParameterEventListeners();
 	}
 

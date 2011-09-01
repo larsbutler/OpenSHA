@@ -278,12 +278,14 @@ NamedObjectAPI, ParameterChangeListener {
 		stdDevTypeConstraint.setNonEditable();
 		stdDevTypeParam = new StdDevTypeParam(stdDevTypeConstraint);
 
-		// component Parameter
-		StringConstraint constraint = new StringConstraint();
-		constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
-		constraint.setNonEditable();
-		componentParam = new ComponentParam(constraint,
-				ComponentParam.COMPONENT_AVE_HORZ);
+        // the Component Parameter
+		// Geometrical Mean (COMPONENT_AVE_HORZ) = Geometrical MeanI50 (COMPONENT_GMRotI50)
+        StringConstraint constraint = new StringConstraint();
+        constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
+        constraint.addString(ComponentParam.COMPONENT_GMRotI50);
+        constraint.setNonEditable();
+        componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_GMRotI50);
+        componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_AVE_HORZ);
 
 		// add these to the list
 		otherParams.clear();

@@ -20,6 +20,7 @@ import org.opensha.sha.imr.param.EqkRuptureParams.MagParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.RakeParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.DampingParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PGA_Param;
+import org.opensha.sha.imr.param.IntensityMeasureParams.PGV_Param;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PeriodParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.SA_Param;
 import org.opensha.sha.imr.param.OtherParams.ComponentParam;
@@ -40,9 +41,9 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  * The adjustment coefficients were proposed by S. Drouet [2010];  
  * Supported Intensity-Measure Parameters:<p>
  * <UL>
- * <LI>PGA - Peak Ground Velocity
+ * <LI>PGV - Peak Ground Velocity - was obtained from PSa (0.5sec)/20 - as peoposed by Bommer (2006)
  * <LI>saParam - Response Spectral Acceleration
- * <LI>
+ * <LI>PGA - Peak Ground Acceleration
  * </UL><p>
  * Other Independent Parameters:<p>
  * <UL>
@@ -161,14 +162,21 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 		pgaParam = new PGA_Param();
 		pgaParam.setNonEditable();
 
+		// initialize peak ground velocity parameter (units: cm/sec)
+		pgvParam = new PGV_Param();
+		pgvParam.setNonEditable();
+
 		// add the warning listeners
 		saParam.addParameterChangeWarningListener(warningListener);
 		pgaParam.addParameterChangeWarningListener(warningListener);
+		pgvParam.addParameterChangeWarningListener(warningListener);
+
 
 		// put parameters in the supportedIMParams list
 		supportedIMParams.clear();
 		supportedIMParams.addParameter(saParam);
 		supportedIMParams.addParameter(pgaParam);
+		supportedIMParams.addParameter(pgvParam);
 
 	}
 
@@ -237,12 +245,14 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 		stdDevTypeConstraint.setNonEditable();
 		stdDevTypeParam = new StdDevTypeParam(stdDevTypeConstraint);
 
-		// component Parameter
-		StringConstraint constraint = new StringConstraint();
-		constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
-		constraint.setNonEditable();
-		componentParam = new ComponentParam(constraint,
-				ComponentParam.COMPONENT_AVE_HORZ);
+        // the Component Parameter
+		// Geometrical Mean (COMPONENT_AVE_HORZ) = Geometrical MeanI50 (COMPONENT_GMRotI50)
+        StringConstraint constraint = new StringConstraint();
+        constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
+        constraint.addString(ComponentParam.COMPONENT_GMRotI50);
+        constraint.setNonEditable();
+        componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_GMRotI50);
+        componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_AVE_HORZ);
 
 		// add these to the list
 		otherParams.clear();
@@ -321,16 +331,19 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 	}
 
 	/**
-	 * Set period index. PGV is missing
+	 * Set period index.
 	 */
 	protected final void setPeriodIndex() {
-		if (im.getName().equalsIgnoreCase(PGA_Param.NAME)) {
+		if (im.getName().equalsIgnoreCase(PGV_Param.NAME)) {
 			iper = 0;
+		} else if (im.getName().equalsIgnoreCase(PGA_Param.NAME)) {
+			iper = 1;
 		} else {
 			iper = ((Integer) indexFromPerHashMap.get(saPeriodParam.getValue()))
 			.intValue();
 		}
 	}
+
 
 	/**
 	 * Compute mean. Applies correction for style of faulting and 
@@ -369,37 +382,69 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 		if (rJB < 1e-3) {
 			rJB = 1;
 		}
-		
-		double lnY_adj = Double.NaN;;
+
+		double lnY_adj = Double.NaN;
+		double lnY_rock = Double.NaN;
 		double[] s = computeSiteTerm(iper, vs30);
 		double[] f = computeStyleOfFaultingTerm(iper, rake);
 		double lnY_Hrock = computeHardRockResponse(iper, mag, rJB);
-//		System.out.println(lnY_Hrock);
+		//		System.out.println(lnY_Hrock);
 
 		lnY_adj = Math.exp(lnY_Hrock) * f[2] * s[0];
-//		lnY_adj = lnY_Hrock;
-//		System.out.println (s[0]);
-//		System.out.println (f[2]);
-//		System.out.println (lnY_adj);
+		//		lnY_adj = lnY_Hrock;
+		//		System.out.println (s[0]);
+		//		System.out.println (f[2]);
+		//		System.out.println (lnY_adj);
 
+		lnY_rock = Math.exp(lnY_Hrock);
+
+		if  (iper == 0.00) {
+			lnY_adj = Math.exp(lnY_Hrock) * 981/20;
+			/**
+			 * This extends the model to SA(3sec) by multiplying the SA(2sec) with the
+			 * ratio SA(3sec)/SA(2sec) obtained as an average from the following GMPEs:
+			 * CF2008
+			 * CY2008
+			 * ZH2006
+			 * Campbell2003  
+			 * AkB2010
+			 * */
+		}else if  (ToroEtAl2002Constants.PERIOD[iper] == 3.00) {
+			lnY_adj = Math.exp(lnY_Hrock) * ToroEtAl2002Constants.T2sec_TO_T3sec_factor ;
+			//			System.out.println("sa(3sec)");
+			/**
+			 * This extends the model to SA(4sec) by multiplying the SA(3sec) with the
+			 * ratio SA(4sec)/SA(3sec) obtained as an average from the following GMPEs:
+			 * CF2008
+			 * CY2008
+			 * ZH2006
+			 * Campbell2003  
+			 * 
+			 * */
+		}else if  (ToroEtAl2002Constants.PERIOD[iper] == 4.00) {
+			lnY_adj = Math.exp(lnY_Hrock) * ToroEtAl2002Constants.T3sec_TO_T4sec_factor ;
+			//			System.out.println("sa(4sec)");
+
+		} else {
+			lnY_adj = Math.exp(lnY_Hrock);
+		}
 		return Math.log(lnY_adj);
-
-	};
+	}
 
 	private double computeHardRockResponse (int iper, double mag, double rJB){
 
 		double magDiff = mag - 6.0;
 
 		double rM = Math.sqrt(rJB * rJB + ToroEtAl2002Constants.c7[iper] * ToroEtAl2002Constants.c7[iper] *
-				    Math.pow(Math.exp(-1.25 + 0.227 * mag), 2));
+				Math.pow(Math.exp(-1.25 + 0.227 * mag), 2));
 
 		double f1 = ToroEtAl2002Constants.c1[iper] + ToroEtAl2002Constants.c2[iper]*magDiff +
-		             ToroEtAl2002Constants.c3[iper] * magDiff * magDiff;
+		ToroEtAl2002Constants.c3[iper] * magDiff * magDiff;
 
 		double f2 = ToroEtAl2002Constants.c4[iper] * Math.log (rM); 
 
 		double f3 = (ToroEtAl2002Constants.c5[iper]-ToroEtAl2002Constants.c4[iper]) * 
-		             Math.max(Math.log(rM/100), 0);
+		Math.max(Math.log(rM/100), 0);
 
 		double f4 = ToroEtAl2002Constants.c6[iper]*rM;
 
@@ -409,43 +454,43 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 	}
 	/**
 	 * Compute style-of-faulting adjustment
-	**/		
-			private double[] computeStyleOfFaultingTerm(final int iper, final double rake) {
-				double[] f = new double[3];
-				if (rake > ToroEtAl2002Constants.FLT_TYPE_NORMAL_RAKE_LOWER
-					&& rake <= ToroEtAl2002Constants.FLT_TYPE_NORMAL_RAKE_UPPER){
-					f[0] = 1.0;
-					f[1] = 0.0;
-					f[2] = f[0]*Math.pow(ToroEtAl2002Constants.Frss[iper], (1-ToroEtAl2002Constants.pR)) * 
-					            Math.pow(ToroEtAl2002Constants.Fnss, - ToroEtAl2002Constants.pN);
-				} else if (rake > ToroEtAl2002Constants.FLT_TYPE_REVERSE_RAKE_LOWER
-						&& rake <= ToroEtAl2002Constants.FLT_TYPE_REVERSE_RAKE_UPPER) {
-					f[0] = 0.0;
-					f[1] = 1.0;
-					f[2] = f[1] * Math.pow(ToroEtAl2002Constants.Frss[iper], -ToroEtAl2002Constants.pR) * 
-					              Math.pow(ToroEtAl2002Constants.Fnss, (1-ToroEtAl2002Constants.pN));;
-				} else {
-					f[0] = 0.0;
-					f[1] = 0.0;
-					f[2] = Math.pow(ToroEtAl2002Constants.Frss[iper], -ToroEtAl2002Constants.pR) * 
-					       Math.pow(ToroEtAl2002Constants.Fnss, -ToroEtAl2002Constants.pN);
-				}
-				return f;
-			}
-			/**
-			 * Compute adjustment factor for rock (vs30 = 800m/s)
-			**/		
-			private double[] computeSiteTerm(final int iper, final double vs30) {
-				double[] s = new double[2];
-				if (vs30 == ToroEtAl2002Constants.SITE_TYPE_ROCK_UPPER_BOUND) {
-					s[0] = ToroEtAl2002Constants.AFrock[iper];
-					s[1] = 0.0; 
-				} else {
-					s[0] = 0.0;
-					s[1] = 0.0;
-				}
-				return s;
-			}
+	 **/		
+	private double[] computeStyleOfFaultingTerm(final int iper, final double rake) {
+		double[] f = new double[3];
+		if (rake > ToroEtAl2002Constants.FLT_TYPE_NORMAL_RAKE_LOWER
+				&& rake <= ToroEtAl2002Constants.FLT_TYPE_NORMAL_RAKE_UPPER){
+			f[0] = 1.0;
+			f[1] = 0.0;
+			f[2] = f[0]*Math.pow(ToroEtAl2002Constants.Frss[iper], (1-ToroEtAl2002Constants.pR)) * 
+			Math.pow(ToroEtAl2002Constants.Fnss, - ToroEtAl2002Constants.pN);
+		} else if (rake > ToroEtAl2002Constants.FLT_TYPE_REVERSE_RAKE_LOWER
+				&& rake <= ToroEtAl2002Constants.FLT_TYPE_REVERSE_RAKE_UPPER) {
+			f[0] = 0.0;
+			f[1] = 1.0;
+			f[2] = f[1] * Math.pow(ToroEtAl2002Constants.Frss[iper], -ToroEtAl2002Constants.pR) * 
+			Math.pow(ToroEtAl2002Constants.Fnss, (1-ToroEtAl2002Constants.pN));;
+		} else {
+			f[0] = 0.0;
+			f[1] = 0.0;
+			f[2] = Math.pow(ToroEtAl2002Constants.Frss[iper], -ToroEtAl2002Constants.pR) * 
+			Math.pow(ToroEtAl2002Constants.Fnss, -ToroEtAl2002Constants.pN);
+		}
+		return f;
+	}
+	/**
+	 * Compute adjustment factor for rock (vs30 = 800m/s)
+	 **/		
+	private double[] computeSiteTerm(final int iper, final double vs30) {
+		double[] s = new double[2];
+		if (vs30 == ToroEtAl2002Constants.SITE_TYPE_ROCK_UPPER_BOUND) {
+			s[0] = ToroEtAl2002Constants.AFrock[iper];
+			s[1] = 0.0; 
+		} else {
+			s[0] = 0.0;
+			s[1] = 0.0;
+		}
+		return s;
+	}
 
 
 	public double getStdDev(int iper, double mag, double rJB, String stdDevType, double vs30 ) {
@@ -462,31 +507,33 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 			}
 			else if (mag <= 5.5) {
 				sigmaaM = ToroEtAl2002Constants.m50[iper] + 
-				         (ToroEtAl2002Constants.m55[iper] - ToroEtAl2002Constants.m50[iper]) / 
-				          (5.5-5.0) * (mag - 5.0);
+				(ToroEtAl2002Constants.m55[iper] - ToroEtAl2002Constants.m50[iper]) / 
+				(5.5-5.0) * (mag - 5.0);
 			}
 			else if (mag <= 8.0) {
 				sigmaaM = ToroEtAl2002Constants.m55[iper] + 
-				         (ToroEtAl2002Constants.m80[iper] - ToroEtAl2002Constants.m55[iper]) /
-				         (8.0-5.5) * (mag - 5.5);
+				(ToroEtAl2002Constants.m80[iper] - ToroEtAl2002Constants.m55[iper]) /
+				(8.0-5.5) * (mag - 5.5);
 			}
 			else {
 				sigmaaM = ToroEtAl2002Constants.m80[iper];
 			}
 
-			if (rJB <= 5.0) {
-				sigmaaR = ToroEtAl2002Constants.r05[iper]; 
+			if (rJB < 5.0) {
+				sigmaaR = ToroEtAl2002Constants.r05[iper];
+				System.out.println("<5km");
 			}
-			else if (rJB <= 20.0) {
+			else if ((rJB >= 5.0) && (rJB <= 20.0)) {
 				sigmaaR = ToroEtAl2002Constants.r05[iper] + 
 				(ToroEtAl2002Constants.r20[iper] - ToroEtAl2002Constants.r05[iper]) / 
 				(20.0-5.0) * (rJB-5.0);
+				System.out.println(">20km");
 			}
 			else {
 				sigmaaR = ToroEtAl2002Constants.r20[iper];
 			}	  
 
-			if (ToroEtAl2002Constants.PERIOD[iper] == 2.0) {
+			if (ToroEtAl2002Constants.PERIOD[iper] >= 2.0) {
 				sigmae = 0.34 + 0.06 * (mag - 6.0);
 			}
 			else {
@@ -495,13 +542,14 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 
 			sigmatot = (Math.sqrt(sigmaaM*sigmaaM+sigmaaR*sigmaaR+sigmae*sigmae));
 
-			if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL) && 
-					vs30 == ToroEtAl2002Constants.SITE_TYPE_ROCK_UPPER_BOUND) {
-				return sigmatot * ToroEtAl2002Constants.sig_AFrock[iper];
-			}
-			else {
-				return sigmatot ;
-			}	  
+//			if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL) && 
+//					vs30 == ToroEtAl2002Constants.SITE_TYPE_ROCK_UPPER_BOUND) {
+//				return sigmatot * ToroEtAl2002Constants.sig_AFrock[iper];
+//			}
+//			else {
+//			}
+			return sigmatot ;
+
 		}
 	}
 
@@ -519,6 +567,7 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 		saDampingParam.setValueAsDefault();
 		saParam.setValueAsDefault();
 		pgaParam.setValueAsDefault();
+		pgvParam.setValueAsDefault();
 		stdDevTypeParam.setValueAsDefault();
 		sigmaTruncTypeParam.setValueAsDefault();
 		sigmaTruncLevelParam.setValueAsDefault();
@@ -597,14 +646,15 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 	 * For testing
 	 * 
 	 */
-	
+
 	public static void main(String[] args) {
-		
+
 		ToroEtAl2002_AttenRel ar = new ToroEtAl2002_AttenRel(null);
 
-		System.out.println("A first test on ToroEtAl2002_AttenRel GMPE!");
-		for (int i=0; i < 8; i++){
-			System.out.println("mean = " + Math.exp(ar.getMean(i, 7.50, 10, 800, 45)));
+		for (int i=1; i < 2; i++){
+//			System.out.println(ToroEtAl2002Constants.PERIOD[i] + ".mean " + Math.exp(ar.getMean(i, 5.00, 10, 800, 45)));
+			System.out.println(ToroEtAl2002Constants.PERIOD[i] + ".dt.dev " + ar.getStdDev(i, 7.20, 21, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString(),800));
+
 		}
 	}	
 
