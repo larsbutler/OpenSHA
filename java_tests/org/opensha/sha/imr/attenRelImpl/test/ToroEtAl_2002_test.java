@@ -1,6 +1,6 @@
 package org.opensha.sha.imr.attenRelImpl.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -17,9 +17,7 @@ import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.calc.HazardCurveCalculator;
 import org.opensha.sha.earthquake.rupForecastImpl.GEM1.GEM1ERF;
 import org.opensha.sha.earthquake.rupForecastImpl.GEM1.SourceData.GEMSourceData;
-import org.opensha.sha.imr.attenRelImpl.CF_2008Constants;
-import org.opensha.sha.imr.attenRelImpl.CF_2008_AttenRel;
-import org.opensha.sha.imr.attenRelImpl.Campbell2003_AttenRel;
+import org.opensha.sha.imr.attenRelImpl.ToroEtAl2002_AttenRel;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PGA_Param;
 import org.opensha.sha.imr.param.OtherParams.StdDevTypeParam;
 import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
@@ -28,20 +26,20 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  * Class providing methods for testing {@link Campbell_2003_AttenRel}. Tables
  * provided by the original authors.
  */
-public class Campbell_2003_test implements ParameterChangeWarningListener {
+public class ToroEtAl_2002_test implements ParameterChangeWarningListener {
 
 	/** Campbell_2003_AttenRel GMPE (attenuation relationship) */
-	private Campbell2003_AttenRel ca03AttenRel = null;
+	private ToroEtAl2002_AttenRel toro2002AtenRel = null;
 
 	/**
 	 * Table for total standard deviation validation.
 	 */
-	private static final String SIGMA_TOTAL_HARD_ROCK_TABLE = "Ca03_SIGMcorr.txt";
+	private static final String SIGMA_TOTAL_HARD_ROCK_TABLE = "Toro02_SIGMAT.OUT";
 
 	/**
 	 * Table for median ground motion validation. Hard rock median.
 	 */
-	private static final String MEDIAN_HARD_ROCK_TABLE = "Ca03_MEDIAN.OUT";
+	private static final String MEDIAN_HARD_ROCK_TABLE = "Toro02_MEDIAN.OUT";
 	
 
 	/** Header for meadian tables. */
@@ -51,13 +49,13 @@ public class Campbell_2003_test implements ParameterChangeWarningListener {
 	private static String[] TABLE_HEADER_STD = new String[1];
 
 	/** Number of columns in test tables for standard deviation. */
-	private static final int TABLE_NUM_COL_STD = 20;
+	private static final int TABLE_NUM_COL_STD = 12;
 
 	/** Number of columns in test tables for median ground motion value. */
-	private static final int TABLE_NUM_COL_MEDIAN = 20;
+	private static final int TABLE_NUM_COL_MEDIAN = 12;
 
 	/** Number of rows in interface test table. */
-	private static final int TABLE_NUM_ROWS = 63;
+	private static final int TABLE_NUM_ROWS = 71;
 
 	/** Inter event standard deviation verification table. */
 	private static double[][] stdTotalTable = null;
@@ -75,8 +73,8 @@ public class Campbell_2003_test implements ParameterChangeWarningListener {
 	 */
 	@Before
 	public final void setUp() throws Exception {
-		ca03AttenRel = new Campbell2003_AttenRel(this);
-		ca03AttenRel.setParamDefaults();
+		toro2002AtenRel = new ToroEtAl2002_AttenRel(this);
+		toro2002AtenRel.setParamDefaults();
 
 		stdTotalTable = new double[TABLE_NUM_ROWS][TABLE_NUM_COL_STD];
 		AttenRelTestHelper.readNumericTableWithHeader(new File(ClassLoader
@@ -94,14 +92,14 @@ public class Campbell_2003_test implements ParameterChangeWarningListener {
 	 */
 	@After
 	public final void tearDown() {
-		ca03AttenRel = null;
+		toro2002AtenRel = null;
 		stdTotalTable = null;
 		medianHardRockTable = null;
 	}
 
 	@Test
 	public void checkStdTotal() {
-		validateStdDev(StdDevTypeParam.STD_DEV_TYPE_TOTAL_MAG_DEP, stdTotalTable);
+		validateStdDev(StdDevTypeParam.STD_DEV_TYPE_TOTAL, stdTotalTable);
 	}
 
 	@Test
@@ -120,7 +118,7 @@ public class Campbell_2003_test implements ParameterChangeWarningListener {
 	 */
 	@Test
 	public final void GEM1ERFPointRuptures() throws Exception{
-		ca03AttenRel.setIntensityMeasure(PGA_Param.NAME);
+		toro2002AtenRel.setIntensityMeasure(PGA_Param.NAME);
 		ArrayList<GEMSourceData> srcDataList = new ArrayList<GEMSourceData>();
 		srcDataList.
 		add(AttenRelTestHelper.getActiveCrustAreaSourceData());
@@ -133,7 +131,7 @@ public class Campbell_2003_test implements ParameterChangeWarningListener {
 		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper.setUpHazardCurve();
 		Site site = new Site(new Location(-0.171,-75.555));
 		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
-		hazCurveCalculator.getHazardCurve(hazCurve, site, ca03AttenRel,
+		hazCurveCalculator.getHazardCurve(hazCurve, site, toro2002AtenRel,
 				erf);
 	}
 	
@@ -145,7 +143,7 @@ public class Campbell_2003_test implements ParameterChangeWarningListener {
 	 */
 	@Test
 	public final void GEM1ERFLineRuptures() throws Exception{
-		ca03AttenRel.setIntensityMeasure(PGA_Param.NAME);
+		toro2002AtenRel.setIntensityMeasure(PGA_Param.NAME);
 		ArrayList<GEMSourceData> srcDataList = new ArrayList<GEMSourceData>();
 		srcDataList.
 		add(AttenRelTestHelper.getActiveCrustAreaSourceData());
@@ -158,7 +156,7 @@ public class Campbell_2003_test implements ParameterChangeWarningListener {
 		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper.setUpHazardCurve();
 		Site site = new Site(new Location(-0.171,-75.555));
 		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
-		hazCurveCalculator.getHazardCurve(hazCurve, site, ca03AttenRel,
+		hazCurveCalculator.getHazardCurve(hazCurve, site, toro2002AtenRel,
 				erf);
 	}
 	
@@ -169,7 +167,7 @@ public class Campbell_2003_test implements ParameterChangeWarningListener {
 	 */
 	@Test
 	public final void GEM1ERFSimpleFault() throws Exception{
-		ca03AttenRel.setIntensityMeasure(PGA_Param.NAME);
+		toro2002AtenRel.setIntensityMeasure(PGA_Param.NAME);
 		ArrayList<GEMSourceData> srcDataList = new ArrayList<GEMSourceData>();
 		srcDataList.
 		add(AttenRelTestHelper.getActiveCrustSimpleFaultSourceData());
@@ -179,7 +177,7 @@ public class Campbell_2003_test implements ParameterChangeWarningListener {
 		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper.setUpHazardCurve();
 		Site site = new Site(new Location(40.2317, 15.8577));
 		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
-		hazCurveCalculator.getHazardCurve(hazCurve, site, ca03AttenRel,
+		hazCurveCalculator.getHazardCurve(hazCurve, site, toro2002AtenRel,
 				erf);
 	}
 
@@ -192,7 +190,7 @@ public class Campbell_2003_test implements ParameterChangeWarningListener {
 				double mag = table[j][0];
 				double rJB = table[j][1];
 				double expectedMedian = table[j][i];
-				double computedMedian = Math.exp(ca03AttenRel.getMean(iper,mag, rJB, vs30, rake));
+				double computedMedian = Math.exp(toro2002AtenRel.getMean(iper,mag, rJB, vs30, rake));
 				assertEquals(expectedMedian, computedMedian, TOLERANCE);
 			}
 		}
@@ -201,7 +199,7 @@ public class Campbell_2003_test implements ParameterChangeWarningListener {
 			double mag = table[j][0];
 			double rJB = table[j][1];
 			double expectedMedian = table[j][columnDescr.length - 2];
-			double computedMedian = Math.exp(ca03AttenRel.getMean(1, mag,
+			double computedMedian = Math.exp(toro2002AtenRel.getMean(1, mag,
 					rJB, vs30, rake));
 			assertEquals(expectedMedian, computedMedian, TOLERANCE);
 		}
@@ -210,7 +208,7 @@ public class Campbell_2003_test implements ParameterChangeWarningListener {
 			double mag = table[j][0];
 			double rJB = table[j][1];
 			double expectedMedian = table[j][columnDescr.length - 1];
-			double computedMedian = Math.exp(ca03AttenRel.getMean(0, mag,
+			double computedMedian = Math.exp(toro2002AtenRel.getMean(0, mag,
 					rJB, vs30, rake));
 			assertEquals(expectedMedian, computedMedian, TOLERANCE_pgv);
 		}
@@ -222,23 +220,29 @@ public class Campbell_2003_test implements ParameterChangeWarningListener {
 		for (int i = 3; i < columnDescr.length - 2; i++) {
 			for (int j = 0; j < table.length; j++) {
 				double mag = table[j][0];
+				double rJB = table[j][1];
 				double expectedStd = table[j][i];
-				double computedStd = ca03AttenRel.getStdDev(i-1, mag, stdDevType);
+				double computedStd = toro2002AtenRel.getStdDev(i-1, mag, 
+						rJB, stdDevType);
 				assertEquals(expectedStd, computedStd, TOLERANCE);
 			}
 		}
 		// check for PGA
 		for (int j = 0; j < table.length; j++) {
 			double mag = table[j][0];
+			double rJB = table[j][1];
 			double expectedStd = table[j][columnDescr.length - 2];
-			double computedStd = ca03AttenRel.getStdDev(1, mag, stdDevType);
+			double computedStd = toro2002AtenRel.getStdDev(1, mag, 
+					rJB, stdDevType);
 			assertEquals(expectedStd, computedStd, TOLERANCE);
 		}
 		// check for PGV
 		for (int j = 0; j < table.length; j++) {
 			double mag = table[j][0];
+			double rJB = table[j][1];
 			double expectedStd = table[j][columnDescr.length - 1];
-			double computedStd = ca03AttenRel.getStdDev(0, mag, stdDevType);
+			double computedStd = toro2002AtenRel.getStdDev(0, mag, 
+					rJB, stdDevType);
 
 			assertEquals(expectedStd, computedStd, TOLERANCE_pgv);
 		}

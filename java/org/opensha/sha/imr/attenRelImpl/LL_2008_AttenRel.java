@@ -580,8 +580,9 @@ NamedObjectAPI, ParameterChangeListener {
 		LL_2008_AttenRel ar = new LL_2008_AttenRel(null);
 		ar.setParamDefaults();
 		for (int i=0; i < 29; i++){
-			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 4.00, 15, 30, 800, 
-					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
+			System.out.print("  "+ LL2008Constants.PERIOD[i]);
+//			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 7.00, 10, 30, 800, 
+//					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
 		}
 	}	
 

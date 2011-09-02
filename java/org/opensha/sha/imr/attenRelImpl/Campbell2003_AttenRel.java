@@ -397,7 +397,9 @@ NamedObjectAPI, ParameterChangeListener {
 		lnY_rock = Math.exp(lnY_Hrock);
 
 		if  (iper == 0.00) {
-			lnY_adj = Math.exp(lnY_Hrock) * 981/20;
+			
+			lnY_adj = Math.exp(lnY_Hrock) 
+			          * Campbell2003Constants.SA_g_to_PGV_cms_CONVERSION_FACTOR;
 
 		} else {
 			lnY_adj = Math.exp(lnY_Hrock);
@@ -433,12 +435,12 @@ NamedObjectAPI, ParameterChangeListener {
 		if (rRup <= Campbell2003Constants.R1) {
 			f3factor = 0.00;
 		} else if (rRup > Campbell2003Constants.R1 && rRup <= Campbell2003Constants.R2) {
-			f3factor = Campbell2003Constants.c7[iper] * (Math.log(rRup) - 
+			f3factor = Campbell2003Constants.c9[iper] * (Math.log(rRup) - 
 					Math.log(Campbell2003Constants.R1));
 		} else if (rRup > Campbell2003Constants.R2) {
-			f3factor = Campbell2003Constants.c7[iper] * (Math.log(rRup) - 
+			f3factor = Campbell2003Constants.c9[iper] * (Math.log(rRup) - 
 					Math.log(Campbell2003Constants.R1)) + 
-					Campbell2003Constants.c8[iper] * (Math.log(rRup) - 
+					Campbell2003Constants.c10[iper] * (Math.log(rRup) - 
 							Math.log(Campbell2003Constants.R2));
 		}
 		return f3factor;
@@ -593,33 +595,31 @@ NamedObjectAPI, ParameterChangeListener {
 	public URL getInfoURL() throws MalformedURLException{
 		return new URL("http://www.opensha.org/documentation/modelsImplemented/attenRel/Campbell2003.html");
 	}
-	/**
-	 * For testing
-	 * 
-	 */
-
-	public static void main(String[] args) {
-
-		Campbell2003_AttenRel ar = new Campbell2003_AttenRel(null);
-		ar.setParamDefaults();
-		ar.setIntensityMeasure(SA_Param.NAME);
-     		for (int i=2; i < 3; i++){
-			 System.out.println(i + ". T(sec) ="  + Campbell2003Constants.PERIOD[i]);
-			 System.out.println(" mag = 5.00 " + "r =    1.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,    1.00, 800, -90)));
-			 System.out.println(" mag = 5.00 " + "r =   20.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,   20.00, 800, -90)));
-			 System.out.println(" mag = 5.00 " + "r =   30.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,   30.00, 800, -90)));
-			 System.out.println(" mag = 5.00 " + "r =   50.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,   50.00, 800, -90)));
-			 System.out.println(" mag = 5.00 " + "r =   75.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,   75.00, 800, -90)));
-			 System.out.println(" mag = 5.00 " + "r =  100.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,  100.00, 800, -90)));
-			 System.out.println(" mag = 5.00 " + "r =  200.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,  200.00, 800, -90)));
-			 System.out.println(" mag = 5.00 " + "r =  500.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,  500.00, 800, -90)));
-			 System.out.println(" mag = 5.00 " + "r = 1000.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00, 1000.00, 800, -90)));
-			 
-
+//	/**
+//	 * For testing
+//	 * 
+//	 */
+//
+//	public static void main(String[] args) {
+//
+//		Campbell2003_AttenRel ar = new Campbell2003_AttenRel(null);
+//		ar.setParamDefaults();
+//		ar.setIntensityMeasure(SA_Param.NAME);
+//     		for (int i=0; i < 1; i++){
+//			 System.out.println(i + ". T(sec) ="  + Campbell2003Constants.PERIOD[i]);
+//			 System.out.println(" mag = 5.00 " + "r =    1.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,    1.00, 800, -90)));
+//			 System.out.println(" mag = 5.00 " + "r =   20.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,   20.00, 800, -90)));
+//			 System.out.println(" mag = 5.00 " + "r =   30.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,   30.00, 800, -90)));
+//			 System.out.println(" mag = 5.00 " + "r =   50.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,   50.00, 800, -90)));
+//			 System.out.println(" mag = 5.00 " + "r =   75.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,   75.00, 800, -90)));
+//			 System.out.println(" mag = 5.00 " + "r =  100.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,  100.00, 800, -90)));
+//			 System.out.println(" mag = 5.00 " + "r =  200.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,  200.00, 800, -90)));
+//			 System.out.println(" mag = 5.00 " + "r =  500.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,  500.00, 800, -90)));
+//			 System.out.println(" mag = 5.00 " + "r = 1000.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00, 1000.00, 800, -90)));
 //			 System.out.println(ar.getStdDev(i, 5.00, StdDevTypeParam.STD_DEV_TYPE_TOTAL_MAG_DEP.toString()));
 //			 System.out.println (ar.getStdDev(i, 7.00, StdDevTypeParam.STD_DEV_TYPE_TOTAL_MAG_DEP.toString()));
 			 
-		 }
-	}	
+//		 }
+//	}	
 
 }

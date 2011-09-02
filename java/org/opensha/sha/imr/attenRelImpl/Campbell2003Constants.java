@@ -176,6 +176,11 @@ public class Campbell2003Constants {
 	 * cm/s to g conversion factor.
 	 */
 	public static final double CMS_TO_G_CONVERSION_FACTOR = 1.0/981.0;
+	/**
+	 * g to cm/s/s conversion factor for SA(0.5) to PGV
+	 */
+	public static final double SA_g_to_PGV_cms_CONVERSION_FACTOR = 981.00/20.00;
+	
 	public static void main(String [] args){
 		System.out.println(PERIOD.length);
 		System.out.println(c1.length);
