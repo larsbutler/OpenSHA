@@ -6,7 +6,6 @@ import java.util.HashMap;
 
 import org.opensha.commons.data.NamedObjectAPI;
 import org.opensha.commons.data.Site;
-import org.opensha.commons.geo.Location;
 import org.opensha.commons.param.DoubleConstraint;
 import org.opensha.commons.param.DoubleDiscreteConstraint;
 import org.opensha.commons.param.StringConstraint;
@@ -493,8 +492,13 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 		logY = logY * AkB2010Constants.LOG10_2_LN;
 
 		// convert PGA and SA from cm/s2 to g
-		if (iper != 0) {
-			logY = Math.log(Math.exp(logY)
+		if (iper == 0) {
+			logY = Math.log(Math.exp(logY));
+		} else if (AkB2010Constants.PERIOD[iper] == 4.00){
+			logY = Math.log(Math.exp(logY) * AkB2010Constants.T3sec_to_T4sec_factor
+					* AkB2010Constants.CMS2_TO_G_CONVERSION_FACTOR);
+		} else {
+			logY = Math.log(Math.exp(logY) 
 					* AkB2010Constants.CMS2_TO_G_CONVERSION_FACTOR);
 		}
 
@@ -575,5 +579,23 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 	public URL getInfoURL() throws MalformedURLException {
 		return null;
 	}
+	/**
+	 * For testing
+	 * 
+	 */
+
+	public static void main(String[] args) {
+
+		AkB_2010_AttenRel ar = new AkB_2010_AttenRel(null);
+		ar.setParamDefaults();
+		ar.setIntensityMeasure(SA_Param.NAME);
+
+				 for (int i=45; i < 67; i++){
+					 System.out.println("iper ="  + AkB2010Constants.PERIOD[i]);
+					 System.out.println("iper" + i + " mean = " + Math.exp(ar.getMean(i, 7.00, 10, 800, 45)));
+				 }
+
+	}	
+
 
 }

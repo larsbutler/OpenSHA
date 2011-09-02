@@ -6,23 +6,19 @@ import java.util.HashMap;
 
 import org.opensha.commons.data.NamedObjectAPI;
 import org.opensha.commons.data.Site;
-import org.opensha.commons.exceptions.InvalidRangeException;
-import org.opensha.commons.exceptions.ParameterException;
 import org.opensha.commons.param.DoubleConstraint;
 import org.opensha.commons.param.DoubleDiscreteConstraint;
 import org.opensha.commons.param.StringConstraint;
-import org.opensha.commons.param.StringParameter;
 import org.opensha.commons.param.event.ParameterChangeEvent;
 import org.opensha.commons.param.event.ParameterChangeListener;
 import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.earthquake.EqkRupture;
-import org.opensha.sha.faultSurface.EvenlyGriddedSurfaceAPI;
 import org.opensha.sha.imr.AttenuationRelationship;
-import org.opensha.sha.imr.PropagationEffect;
 import org.opensha.sha.imr.ScalarIntensityMeasureRelationshipAPI;
 import org.opensha.sha.imr.param.EqkRuptureParams.MagParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.DampingParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PGA_Param;
+import org.opensha.sha.imr.param.IntensityMeasureParams.PGV_Param;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PeriodParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.SA_Param;
 import org.opensha.sha.imr.param.OtherParams.ComponentParam;
@@ -31,7 +27,6 @@ import org.opensha.sha.imr.param.OtherParams.SigmaTruncTypeParam;
 import org.opensha.sha.imr.param.OtherParams.StdDevTypeParam;
 import org.opensha.sha.imr.param.OtherParams.TectonicRegionTypeParam;
 import org.opensha.sha.imr.param.PropagationEffectParams.DistanceHypoParameter;
-import org.opensha.sha.imr.param.PropagationEffectParams.DistanceRupParameter;
 import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
 import org.opensha.sha.util.TectonicRegionType;
 /**
@@ -77,7 +72,7 @@ import org.opensha.sha.util.TectonicRegionType;
  * @version 1.0, December 2010
  */
 public class LL_2008_AttenRel extends AttenuationRelationship 
-							  implements ScalarIntensityMeasureRelationshipAPI,
+implements ScalarIntensityMeasureRelationshipAPI,
 
 NamedObjectAPI, ParameterChangeListener {
 
@@ -155,7 +150,7 @@ NamedObjectAPI, ParameterChangeListener {
 	}
 
 	/**
-	 * Creates the two supported IM parameters (PGA and SA), as well as the
+	 * Creates the three supported IM parameters (PGA, PGV and SA), as well as the
 	 * independenParameters of SA (periodParam and dampingParam) and adds them
 	 * to the supportedIMParams list. Makes the parameters non-editable.
 	 */
@@ -182,14 +177,21 @@ NamedObjectAPI, ParameterChangeListener {
 		pgaParam = new PGA_Param();
 		pgaParam.setNonEditable();
 
+		// initialize peak ground velocity parameter (units: cm/sec)
+		pgvParam = new PGV_Param();
+		pgvParam.setNonEditable();
+
 		// add the warning listeners
 		saParam.addParameterChangeWarningListener(warningListener);
 		pgaParam.addParameterChangeWarningListener(warningListener);
+		pgvParam.addParameterChangeWarningListener(warningListener);
 
 		// put parameters in the supportedIMParams list
 		supportedIMParams.clear();
 		supportedIMParams.addParameter(saParam);
 		supportedIMParams.addParameter(pgaParam);
+		supportedIMParams.addParameter(pgvParam);
+
 	}
 
 	/**
@@ -263,14 +265,14 @@ NamedObjectAPI, ParameterChangeListener {
 		stdDevTypeConstraint.setNonEditable();
 		stdDevTypeParam = new StdDevTypeParam(stdDevTypeConstraint);
 
-        // the Component Parameter
+		// the Component Parameter
 		// Geometrical Mean (COMPONENT_AVE_HORZ) = Geometrical MeanI50 (COMPONENT_GMRotI50)
-        StringConstraint constraint = new StringConstraint();
-        constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
-        constraint.addString(ComponentParam.COMPONENT_RANDOM_HORZ);
-        constraint.setNonEditable();
-        componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_RANDOM_HORZ);
-        componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_AVE_HORZ);
+		StringConstraint constraint = new StringConstraint();
+		constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
+		constraint.addString(ComponentParam.COMPONENT_RANDOM_HORZ);
+		constraint.setNonEditable();
+		componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_RANDOM_HORZ);
+		componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_AVE_HORZ);
 
 
 		// add these to the list
@@ -419,8 +421,10 @@ NamedObjectAPI, ParameterChangeListener {
 	 * Set period index.
 	 */
 	protected final void setPeriodIndex() {
-		if (im.getName().equalsIgnoreCase(PGA_Param.NAME)) {
+		if (im.getName().equalsIgnoreCase(PGV_Param.NAME)) {
 			iper = 0;
+		} else if (im.getName().equalsIgnoreCase(PGA_Param.NAME)) {
+			iper = 1;
 		} else {
 			if (vs30Param.getValue()>=LL2008Constants.SOIL_TYPE_SOFT_UPPER_BOUND){
 				iper = ( (Integer) indexFromPerHashMapRock.get(saPeriodParam.getValue()))
@@ -441,7 +445,7 @@ NamedObjectAPI, ParameterChangeListener {
 		}
 		else{
 			setPeriodIndex();
-			return getMean (iper, mag, rhypo, vs30, tecRegType);
+			return getMean (iper, mag, rhypo, hypoDepth, vs30, tecRegType);
 		}
 	}
 
@@ -469,6 +473,7 @@ NamedObjectAPI, ParameterChangeListener {
 		saDampingParam.setValueAsDefault();
 		saParam.setValueAsDefault();
 		pgaParam.setValueAsDefault();
+		pgvParam.setValueAsDefault();
 		stdDevTypeParam.setValueAsDefault();
 		sigmaTruncTypeParam.setValueAsDefault();
 		sigmaTruncLevelParam.setValueAsDefault();
@@ -494,10 +499,11 @@ NamedObjectAPI, ParameterChangeListener {
 	 * Compute mean (natural logarithm of median ground motion).
 	 */
 
-	private double getMean(int iper, double mag, double rhypo, final double vs30, final String tecRegType) {
+	private double getMean(int iper, double mag, double rhypo, double hypoDepth, final double vs30, final String tecRegType) {
 
 		double Zt;
 		double logY;
+		double mean; 
 
 
 		if (tecRegType.equals(TectonicRegionType.SUBDUCTION_INTERFACE.toString())) {
@@ -505,9 +511,10 @@ NamedObjectAPI, ParameterChangeListener {
 		} else {
 			Zt = 1;
 		}
+		
 		if (vs30 >= LL2008Constants.SOIL_TYPE_SOFT_UPPER_BOUND){
 			double term1 = LL2008Constants.rock_C2[iper] * mag;
-			double r = rhypo + LL2008Constants.rock_C4[iper]*Math.exp(LL2008Constants.rock_C5[iper]*mag);
+			double r = rhypo + (LL2008Constants.rock_C4[iper] * Math.exp(LL2008Constants.rock_C5[iper] * mag));
 			double term2 = LL2008Constants.rock_C3[iper] * Math.log(r);
 			double term3 = LL2008Constants.rock_C6[iper] * hypoDepth;
 			logY = LL2008Constants.rock_C1[iper] + term1 + term2 + term3 + LL2008Constants.soil_C7[iper]*Zt;
@@ -519,55 +526,63 @@ NamedObjectAPI, ParameterChangeListener {
 			double term3 = LL2008Constants.soil_C6[iper] * hypoDepth;
 			logY = LL2008Constants.soil_C1[iper] + term1 + term2 + term3 + LL2008Constants.soil_C7[iper]*Zt;
 		}
-		return Math.exp(logY) * (LL2008Constants.CMS_TO_G_CONVERSION_FACTOR);
-	}
 
-/**
- * @return The stdDev value
- */
-public final double getStdDev(int iper, String stdDevType, double vs30) {
-	double sigmaR, sigmaS;
-	if(stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE)) {
-		return 0.0;
-	}
-	else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL)) {
-		if(vs30 >= LL2008Constants.SOIL_TYPE_SOFT_UPPER_BOUND) {
-			sigmaR = LL2008Constants.ROCK_TOTAL_STD[iper];
-			return (sigmaR);
+		if (iper==0){
+			mean = Math.exp(logY) * LL2008Constants.SA_g_to_PGV_cms_CONVERSION_FACTOR;
+			System.out.println("PGV");
+
+		} else {
+			mean = Math.exp(logY);
+			System.out.println("SA");
 		}
-		else {
-			sigmaS = LL2008Constants.soil_TOTAL_STD[iper];
-			return (sigmaS);
+		return Math.log(mean);
+	}
+	/**
+	 * @return The stdDev value
+	 */
+	public final double getStdDev(int iper, String stdDevType, double vs30) {
+		double sigmaR, sigmaS;
+		if(stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE)) {
+			return 0.0;
+		}
+		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL)) {
+			if(vs30 >= LL2008Constants.SOIL_TYPE_SOFT_UPPER_BOUND) {
+				sigmaR = LL2008Constants.ROCK_TOTAL_STD[iper];
+				return (sigmaR);
+			}
+			else {
+				sigmaS = LL2008Constants.soil_TOTAL_STD[iper];
+				return (sigmaS);
+			}
+		}
+		else { 
+			return Double.NaN;
 		}
 	}
-	else { 
-		return Double.NaN;
+
+
+	/**
+	 * This provides a URL where more info on this model can be obtained
+	 * @throws MalformedURLException if returned URL is not a valid URL.
+	 * @returns the URL to the AttenuationRelationship document on the Web.
+	 */
+	// URL Info String
+	public URL getInfoURL() throws MalformedURLException{
+		return new URL("http://www.opensha.org/documentation/modelsImplemented/attenRel/LL_2008AttenRel.html");
 	}
-}
+	/**
+	 * For testing
+	 * 
+	 */
 
+	public static void main(String[] args) {
 
-/**
- * This provides a URL where more info on this model can be obtained
- * @throws MalformedURLException if returned URL is not a valid URL.
- * @returns the URL to the AttenuationRelationship document on the Web.
- */
-// URL Info String
-public URL getInfoURL() throws MalformedURLException{
-	return new URL("http://www.opensha.org/documentation/modelsImplemented/attenRel/LL_2008AttenRel.html");
-	}
-/**
- * For testing
- * 
- */
-
-public static void main(String[] args) {
-
-	LL_2008_AttenRel ar = new LL_2008_AttenRel(null);
-	ar.setParamDefaults();
-	 for (int i=0; i < 16; i++){
-		 System.out.println("iper" + i + " mean = " + Math.exp(ar.getMean(i, 7.00, 15, 800, 
-				 TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
-	 }
-}	
+		LL_2008_AttenRel ar = new LL_2008_AttenRel(null);
+		ar.setParamDefaults();
+		for (int i=0; i < 29; i++){
+			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 4.00, 15, 30, 800, 
+					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
+		}
+	}	
 
 }

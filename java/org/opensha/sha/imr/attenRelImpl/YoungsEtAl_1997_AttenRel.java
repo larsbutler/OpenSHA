@@ -20,6 +20,7 @@ import org.opensha.sha.imr.param.EqkRuptureParams.FocalDepthParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.MagParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.DampingParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PGA_Param;
+import org.opensha.sha.imr.param.IntensityMeasureParams.PGV_Param;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PeriodParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.SA_Param;
 import org.opensha.sha.imr.param.OtherParams.ComponentParam;
@@ -43,6 +44,7 @@ import org.opensha.sha.util.TectonicRegionType;
  * <p>
  * <UL>
  * <LI>pgaParam - Peak Ground Acceleration
+ * <LI>pgaParam - Peak Ground Velocity = SA(0.5)/20
  * <LI>saParam - Response Spectral Acceleration (5% damping)
  * </UL>
  * <p>
@@ -155,7 +157,7 @@ public class YoungsEtAl_1997_AttenRel extends AttenuationRelationship implements
 	}
 
 	/**
-	 * Creates the two supported IM parameters (PGA and SA), as well as the
+	 * Creates the three supported IM parameters (PGA, PGV and SA), as well as the
 	 * independenParameters of SA (periodParam and dampingParam) and adds them
 	 * to the supportedIMParams list. Makes the parameters noneditable.
 	 */
@@ -184,15 +186,21 @@ public class YoungsEtAl_1997_AttenRel extends AttenuationRelationship implements
 		// initialize peak ground acceleration parameter (units: g):
 		pgaParam = new PGA_Param();
 		pgaParam.setNonEditable();
+		// initialize peak ground velocity parameter (units: cm/sec):
+		pgvParam = new PGV_Param();
+		pgvParam.setNonEditable();
 
 		// add the warning listeners:
 		saParam.addParameterChangeWarningListener(warningListener);
 		pgaParam.addParameterChangeWarningListener(warningListener);
+		pgvParam.addParameterChangeWarningListener(warningListener);
 
 		// put parameters in the supportedIMParams list
 		supportedIMParams.clear();
 		supportedIMParams.addParameter(saParam);
 		supportedIMParams.addParameter(pgaParam);
+		supportedIMParams.addParameter(pgvParam);
+
 	}
 
 	/**
@@ -446,6 +454,7 @@ public class YoungsEtAl_1997_AttenRel extends AttenuationRelationship implements
 		saDampingParam.setValueAsDefault();
 		saParam.setValueAsDefault();
 		pgaParam.setValueAsDefault();
+		pgvParam.setValueAsDefault();
 		stdDevTypeParam.setValueAsDefault();
 		sigmaTruncTypeParam.setValueAsDefault();
 		sigmaTruncLevelParam.setValueAsDefault();
@@ -457,15 +466,15 @@ public class YoungsEtAl_1997_AttenRel extends AttenuationRelationship implements
 	 */
 	protected void setPeriodIndex() throws ParameterException {
 
-		if (im.getName().equalsIgnoreCase(PGA_Param.NAME)) {
+		if (im.getName().equalsIgnoreCase(PGV_Param.NAME)) {
 			iper = 0;
+		} else if (im.getName().equalsIgnoreCase(PGA_Param.NAME)) {
+			iper = 1;
 		} else {
 			double period = saPeriodParam.getValue();
 			// rock
 			if (vs30 > 760.0) {
-				if(period>YoungsEtAl1997Constants.
-						PERIOD_ROCK
-						[YoungsEtAl1997Constants.PERIOD_ROCK.length-1]){
+				if(period>YoungsEtAl1997Constants.PERIOD_ROCK[YoungsEtAl1997Constants.PERIOD_ROCK.length-1]){
 					throw new
 					RuntimeException(period+" not supported for vs30 > 760.0");
 				}
@@ -509,12 +518,11 @@ public class YoungsEtAl_1997_AttenRel extends AttenuationRelationship implements
 	/**
 	 * Compute mean.
 	 */
-	public double getMean(int i, double mag, double rRup, String tecRegType,
-			double vs30, double hypoDep) {
+	public double getMean(int iper, double mag, double rRup, String tecRegType, 
+			              double vs30, double hypoDep) {
 
-		double Zt, mean;
-		if (tecRegType.equals(TectonicRegionType.SUBDUCTION_INTERFACE
-				.toString())) {
+		double Zt, mean, lnY;
+		if (tecRegType.equals(TectonicRegionType.SUBDUCTION_INTERFACE.toString())) {
 			Zt = 0;
 		} else {
 			Zt = 1;
@@ -522,32 +530,50 @@ public class YoungsEtAl_1997_AttenRel extends AttenuationRelationship implements
 
 		if (vs30 > 760) {
 			// rock
-			mean = YoungsEtAl1997Constants.A1_ROCK
+			lnY = YoungsEtAl1997Constants.A1_ROCK
 					+ YoungsEtAl1997Constants.A2_ROCK
 					* mag
-					+ YoungsEtAl1997Constants.C1_ROCK[i]
-					+ YoungsEtAl1997Constants.C2_ROCK[i]
+					+ YoungsEtAl1997Constants.C1_ROCK[iper]
+					+ YoungsEtAl1997Constants.C2_ROCK[iper]
 					* (Math.pow(YoungsEtAl1997Constants.A3_ROCK - mag, 3))
-					+ YoungsEtAl1997Constants.C3_ROCK[i]
+					+ YoungsEtAl1997Constants.C3_ROCK[iper]
 					* Math.log(rRup + YoungsEtAl1997Constants.A4_ROCK
 							* Math.exp(YoungsEtAl1997Constants.A5_ROCK * mag))
 					+ YoungsEtAl1997Constants.A6_ROCK * hypoDep
 					+ YoungsEtAl1997Constants.A7_ROCK * Zt;
 		} else {
 			// soil
-			mean = YoungsEtAl1997Constants.A1_SOIL
+			lnY = YoungsEtAl1997Constants.A1_SOIL
 					+ YoungsEtAl1997Constants.A2_SOIL
 					* mag
-					+ YoungsEtAl1997Constants.C1_SOIL[i]
-					+ YoungsEtAl1997Constants.C2_SOIL[i]
+					+ YoungsEtAl1997Constants.C1_SOIL[iper]
+					+ YoungsEtAl1997Constants.C2_SOIL[iper]
 					* (Math.pow(YoungsEtAl1997Constants.A3_SOIL - mag, 3))
-					+ YoungsEtAl1997Constants.C3_SOIL[i]
+					+ YoungsEtAl1997Constants.C3_SOIL[iper]
 					* Math.log(rRup + YoungsEtAl1997Constants.A4_SOIL
 							* Math.exp(YoungsEtAl1997Constants.A5_SOIL * mag))
 					+ YoungsEtAl1997Constants.A6_SOIL * hypoDep
 					+ YoungsEtAl1997Constants.A7_SOIL * Zt;
 		}
-		return mean;
+
+		if ( iper == 0) {
+			
+			mean = Math.exp(lnY) * YoungsEtAl1997Constants.SA_g_to_PGV_cms_CONVERSION_FACTOR;
+			System.out.println("PGV");
+			System.out.println("iper" + iper);
+
+		} else if (YoungsEtAl1997Constants.PERIOD_ROCK[iper] == 4.00) {
+		
+			mean = Math.exp(lnY) * YoungsEtAl1997Constants.T3sec_TO_T4sec_factor;
+			System.out.println("SA(4sec)");
+
+		} else {
+		
+			mean = Math.exp(lnY);
+			System.out.println("SA");
+		
+		}
+		return Math.log(mean);
 	}
 
 	/** 
@@ -588,4 +614,20 @@ public class YoungsEtAl_1997_AttenRel extends AttenuationRelationship implements
 	public URL getInfoURL() throws MalformedURLException {
 		return null;
 	}
+	/**
+	 * For testing
+	 * 
+	 */
+
+	public static void main(String[] args) {
+
+		YoungsEtAl_1997_AttenRel ar = new YoungsEtAl_1997_AttenRel(null);
+		ar.setParamDefaults();
+		ar.setIntensityMeasure(SA_Param.NAME);
+
+		for (int i=0; i < 14; i++){
+			System.out.println(YoungsEtAl1997Constants.PERIOD_ROCK[i] + " mean = " + Math.exp(ar.getMean(i, 7.00, 15, 
+					TectonicRegionType.SUBDUCTION_INTERFACE.toString(), 800, 30)));
+		}
+	}	
 }

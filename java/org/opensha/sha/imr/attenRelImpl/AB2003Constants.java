@@ -1,7 +1,12 @@
 package org.opensha.sha.imr.attenRelImpl;
 
 public class AB2003Constants {
-
+	/**
+	 * PGV coeffs were added the same as those of SA(0.5sec);
+	 * SA(0.5sec) coeff were obtained from a linear interpolation
+	 * Periods were extended up to 4sec. The coefs are those of SA(3sec) and theywill be 
+	 * multiplied by the SA(4sec)/SA(3sec) ratio; 
+	 */
 	/**
 	 * Supported frequency values (Hz).
 	 */
@@ -10,108 +15,108 @@ public class AB2003Constants {
 	/**
 	 * Supported period values (s).
 	 */
-	public static final double[] PERIOD = {0.00000, 0.04000, 0.10000,
-		0.20000, 0.40000, 1.00000, 2.00000, 3.00000 };
+	public static final double[] PERIOD = {-1.00, 0.00000, 0.04000, 0.10000,
+		0.20000, 0.40000, 1.00000, 2.00000, 3.00000, 4.00 };
 	/**
 	 * Interface c1 coefficients.
 	 */
-	public static final double[] INTER_C1 = {2.99100, 2.87530, 2.77890,
-		2.66380, 2.52490, 2.14420, 2.19070, 2.30100 };
+	public static final double[] INTER_C1 = {2.4615, 2.99100, 2.87530, 2.77890,
+		2.66380, 2.52490, 2.14420, 2.19070, 2.30100, 2.30100 };
 	/**
 	 * Interface c2 coefficients.
 	 */
-	public static final double[] INTER_C2 = {0.03525, 0.07052, 0.09841,
-		0.12386, 0.14770, 0.13450, 0.07148, 0.02237 };
+	public static final double[] INTER_C2 = {0.1455, 0.03525, 0.07052, 0.09841,
+		0.12386, 0.14770, 0.13450, 0.07148, 0.02237, 0.02237};
 	/**
 	 * Interface c3 coefficients.
 	 */
-	public static final double[] INTER_C3 = {0.00759, 0.01004, 0.00974,
-		0.00884, 0.00728, 0.00521, 0.00224, 0.00012 };
+	public static final double[] INTER_C3 = {0.0069,0.00759, 0.01004, 0.00974,
+		0.00884, 0.00728, 0.00521, 0.00224, 0.00012, 0.00012};
 	/**
 	 * Interface c4 coefficients.
 	 */
-	public static final double[] INTER_C4 = {-0.00206, -0.00278, -0.00287,
-		-0.00280, -0.00235, -0.00110, 0.00000, 0.00000 };
+	public static final double[] INTER_C4 = {-0.0021,-0.00206, -0.00278, -0.00287,
+		-0.00280, -0.00235, -0.00110, 0.00000, 0.00000, 0.00000};
 	/**
 	 * Interface c5 coefficients.
 	 */
-	public static final double[] INTER_C5 = {0.19000, 0.15000, 0.15000,
-		0.15000, 0.13000, 0.10000, 0.10000, 0.10000 };
+	public static final double[] INTER_C5 = {0.12500, 0.19000, 0.15000, 0.15000,
+		0.15000, 0.13000, 0.10000, 0.10000, 0.10000, 0.10000 };
 	/**
 	 * Interface c6 coefficients.
 	 */
-	public static final double[] INTER_C6 = {0.24000, 0.20000, 0.23000,
-		0.27000, 0.37000, 0.30000, 0.25000, 0.25000 };
+	public static final double[] INTER_C6 = {0.3350, 0.24000, 0.20000, 0.23000,
+		0.27000, 0.37000, 0.30000, 0.25000, 0.25000, 0.25000 };
 	/**
 	 * Interface c7 coefficients.
 	 */
-	public static final double[] INTER_C7 = {0.29000, 0.20000, 0.20000,
-		0.25000, 0.38000, 0.55000, 0.40000, 0.36000 };
+	public static final double[] INTER_C7 = {0.3583, 0.29000, 0.20000, 0.20000,
+		0.25000, 0.38000, 0.55000, 0.40000, 0.36000, 0.36000};
 	/**
 	 * Interface total standard deviation.
 	 */
-	public static final double[] INTER_TOTAL_STD = {0.23000, 0.26000,
-		0.27000, 0.28000, 0.29000, 0.34000, 0.34000, 0.36000 };
+	public static final double[] INTER_TOTAL_STD = {0.2983, 0.23000, 0.26000,
+		0.27000, 0.28000, 0.29000, 0.34000, 0.34000, 0.36000, 0.36000};
 	/**
 	 * Interface intra-event standard deviation.
 	 */
-	public static final double[] INTER_INTRAEVENT_STD = {0.20000, 0.22000,
-		0.25000, 0.25000, 0.25000, 0.28000, 0.29000, 0.31000 };
+	public static final double[] INTER_INTRAEVENT_STD = {0.25500, 0.20000, 0.22000,
+		0.25000, 0.25000, 0.25000, 0.28000, 0.29000, 0.31000, 0.31000 };
 	/**
 	 * Interface inter-event standard deviation.
 	 */
-	public static final double[] INTER_INTEREVENT_STD = {0.11000, 0.14000,
-		0.10000, 0.13000, 0.15000, 0.19000, 0.18000, 0.18000 };
+	public static final double[] INTER_INTEREVENT_STD = {0.1567, 0.11000, 0.14000,
+		0.10000, 0.13000, 0.15000, 0.19000, 0.18000, 0.18000, 0.18000};
 	/**
 	 * Intraslab c1 coefficients.
 	 */
-	public static final double[] INTRA_C1 = {-0.04713, 0.50697, 0.43928,
-		0.51589, 0.00545, -1.02133, -2.39234, -3.70012 };
+	public static final double[] INTRA_C1 = {-0.1657, -0.04713, 0.50697, 0.43928,
+		0.51589, 0.00545, -1.02133, -2.39234, -3.70012, -3.70012};
 	/**
 	 * Intraslab c2 coefficients.
 	 */
-	public static final double[] INTRA_C2 = {0.69090, 0.63273, 0.66675,
-		0.69186, 0.77270, 0.87890, 0.99640, 1.11690 };
+	public static final double[] INTRA_C2 = {0.7904, 0.69090, 0.63273, 0.66675,
+		0.69186, 0.77270, 0.87890, 0.99640, 1.11690, 1.11690 };
 	/**
 	 * Intraslab c3 coefficients.
 	 */
-	public static final double[] INTRA_C3 = {0.01130, 0.01275, 0.01080,
-		0.00572, 0.00173, 0.00130, 0.00364, 0.00615 };
+	public static final double[] INTRA_C3 = {0.0017, 0.01130, 0.01275, 0.01080,
+		0.00572, 0.00173, 0.00130, 0.00364, 0.00615, 0.00615 };
 	/**
 	 * Intraslab c4 coefficients.
 	 */
-	public static final double[] INTRA_C4 = {-0.00202, -0.00234,
-		-0.00219, -0.00192, -0.00178, -0.00173, -0.00118, -0.00045 };
+	public static final double[] INTRA_C4 = {-0.0017, -0.00202, -0.00234, -0.00219,
+		-0.00192, -0.00178, -0.00173, -0.00118, -0.00045, -0.00045 };
 	/**
 	 * Intraslab c5 coefficients.
 	 */
-	public static final double[] INTRA_C5 = {0.19000, 0.15000, 0.15000,
-		0.15000, 0.13000, 0.10000, 0.10000, 0.10000 };
+	public static final double[] INTRA_C5 = {0.1250, 0.19000, 0.15000, 0.15000,
+		0.15000, 0.13000, 0.10000, 0.10000, 0.10000, 0.10000 };
 	/**
 	 * Intraslab c6 coefficients.
 	 */
-	public static final double[] INTRA_C6 = {0.24000, 0.20000, 0.23000,
-		0.27000, 0.37000, 0.30000, 0.25000, 0.25000 };
+	public static final double[] INTRA_C6 = {0.3583, 0.24000, 0.20000, 0.23000,
+		0.27000, 0.37000, 0.30000, 0.25000, 0.25000, 0.25000 };
 	/**
 	 * Intraslab c7 coefficients.
 	 */
-	public static final double[] INTRA_C7 = {0.29000, 0.20000, 0.20000,
-		0.25000, 0.38000, 0.55000, 0.40000, 0.36000 };
+	public static final double[] INTRA_C7 = {0.4083, 0.29000, 0.20000, 0.20000,
+		0.25000, 0.38000, 0.55000, 0.40000, 0.36000, 0.36000};
 	/**
 	 * Intraslab total standard deviation.
 	 */
-	public static final double[] INTRA_TOTAL_STD = {0.27000, 0.25000,
-		0.28000, 0.28000, 0.28000, 0.29000, 0.30000, 0.30000 };
+	public static final double[] INTRA_TOTAL_STD = {0.2817, 0.27000, 0.25000,
+		0.28000, 0.28000, 0.28000, 0.29000, 0.30000, 0.30000,0.30000 };
 	/**
 	 * Intraslab intra event standard deviation.
 	 */
-	public static final double[] INTRA_INTRAEVENT_STD = {0.23000, 0.24000,
-		0.27000, 0.26000, 0.26000, 0.27000, 0.28000, 0.29000 };
+	public static final double[] INTRA_INTRAEVENT_STD = {0.2617, 0.23000, 0.24000,
+		0.27000, 0.26000, 0.26000, 0.27000, 0.28000, 0.29000, 0.29000 };
 	/**
 	 * Intraslab inter event standard deviation.
 	 */
-	public static final double[] INTRA_INTEREVENT_STD = {0.14000, 0.07000,
-		0.07000, 0.10000, 0.10000, 0.11000, 0.11000, 0.08000 };
+	public static final double[] INTRA_INTEREVENT_STD = {0.1017, 0.14000, 0.07000,
+		0.07000, 0.10000, 0.10000, 0.11000, 0.11000, 0.08000, 0.08000};
 	/**
 	 * log10 to natural log conversion factor.
 	 */
@@ -199,4 +204,32 @@ public class AB2003Constants {
 	 */
 	public static final double[] CORRECTION_WEIGHTS =
 		new double[]{ 0.333, 0.667};
+	/**
+	 * Sa(4s)/Sa(3sec) to extend the spectral periods to 4sec
+	 */
+	public static final double T3sec_TO_T4sec_factor = 0.612;
+//	public static void main(String [] args){
+//		System.out.println(PERIOD.length);
+//		System.out.println(INTER_C1.length);
+//		System.out.println(INTER_C2.length);
+//		System.out.println(INTER_C3.length);
+//		System.out.println(INTER_C4.length);
+//		System.out.println(INTER_C5.length);
+//		System.out.println(INTER_C6.length);
+//		System.out.println(INTER_C7.length);
+//		System.out.println(INTRA_TOTAL_STD.length);
+//		System.out.println(INTER_INTRAEVENT_STD.length);
+//		System.out.println(INTER_INTEREVENT_STD.length);
+//		System.out.println(INTRA_C1.length);
+//		System.out.println(INTRA_C2.length);
+//		System.out.println(INTRA_C3.length);
+//		System.out.println(INTRA_C4.length);
+//		System.out.println(INTRA_C5.length);
+//		System.out.println(INTRA_C6.length);
+//		System.out.println(INTRA_C7.length);
+//		System.out.println(INTRA_TOTAL_STD.length);
+//		System.out.println(INTRA_INTRAEVENT_STD.length);
+//		System.out.println(INTRA_INTEREVENT_STD.length);
+//
+//		}
 }
