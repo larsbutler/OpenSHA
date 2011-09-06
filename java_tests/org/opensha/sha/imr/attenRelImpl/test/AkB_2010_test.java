@@ -50,7 +50,7 @@ public class AkB_2010_test implements ParameterChangeWarningListener {
 	/**
 	 * Table for median ground motion validation. Normal event on rock.
 	 */
-	private static final String SIGMA_MEDIAN_NM_ROCK_TABLE = "AB2010_MEDIAN_NM_ROCK.OUT";
+	private static final String MEDIAN_NM_ROCK_TABLE = "AB2010_MEDIAN_NM_ROCK.OUT";
 	
 	/**
 	 * Table for median ground motion validation. Normal event on soft soil.
@@ -168,7 +168,7 @@ public class AkB_2010_test implements ParameterChangeWarningListener {
 				stdTotalTable, TABLE_HEADER_STD);
 		medianNormalRockTable = new double[TABLE_NUM_ROWS][TABLE_NUM_COL_MEDIAN];
 		AttenRelTestHelper.readNumericTableWithHeader(new File(ClassLoader
-				.getSystemResource(SIGMA_MEDIAN_NM_ROCK_TABLE).toURI()),
+				.getSystemResource(MEDIAN_NM_ROCK_TABLE).toURI()),
 				medianNormalRockTable, TABLE_HEADER_MEDIAN);
 		medianNormalSoftSoilTable = new double[TABLE_NUM_ROWS][TABLE_NUM_COL_MEDIAN];
 		AttenRelTestHelper.readNumericTableWithHeader(new File(ClassLoader

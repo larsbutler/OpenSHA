@@ -23,12 +23,12 @@ import org.opensha.sha.imr.param.OtherParams.StdDevTypeParam;
 import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
 
 /**
- * Class providing methods for testing {@link Campbell_2003_AttenRel}. Tables
+ * Class providing methods for testing {@link ToroEtAl_2002_AttenRel}. Tables
  * provided by the original authors.
  */
 public class ToroEtAl_2002_test implements ParameterChangeWarningListener {
 
-	/** Campbell_2003_AttenRel GMPE (attenuation relationship) */
+	/** ToroEtAl_2002_AttenRel GMPE (attenuation relationship) */
 	private ToroEtAl2002_AttenRel toro2002AtenRel = null;
 
 	/**
@@ -136,7 +136,7 @@ public class ToroEtAl_2002_test implements ParameterChangeWarningListener {
 	}
 	
 	/**
-	 * Check Campbell_2003 usage for computing hazard curves using GEM1ERF constructed
+	 * Check ToroEtAl_2002 usage for computing hazard curves using GEM1ERF constructed
 	 * from area source data. Ruptures are treated as
 	 * extended.
 	 * @throws Exception 

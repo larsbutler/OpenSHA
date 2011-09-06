@@ -502,39 +502,40 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 		if(stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE))
 			return 0;
 		else {
-			if (mag <= 5.0) {
+			if (mag < 5.0) {
 				sigmaaM = ToroEtAl2002Constants.m50[iper]; 
-				System.out.println("mag 5 ");
+//				System.out.println("mag 5 sigmaaM= " + sigmaaM);
 			}
-			else if ((mag > 5.0) && (mag <=5.5)) {
+			else if ((mag >= 5.0) && (mag <=5.5)) {
 				sigmaaM = ToroEtAl2002Constants.m50[iper] + 
 				(ToroEtAl2002Constants.m55[iper] - ToroEtAl2002Constants.m50[iper]) / 
 				(5.5-5.0) * (mag - 5.0);
-				System.out.println("mag 5 to 5.5");
+//				System.out.println("mag 5 to 5.5 sigmaaM=  " + sigmaaM);
 			}
-			else if ((mag > 5.5) && (mag <= 8.0)) {
+			else if ((mag > 5.5) && (mag < 8.0)) {
 				sigmaaM = ToroEtAl2002Constants.m55[iper] + 
 				(ToroEtAl2002Constants.m80[iper] - ToroEtAl2002Constants.m55[iper]) /
 				(8.0-5.5) * (mag - 5.5);
-				System.out.println("mag 5.5 to 8");
+//				System.out.println("mag 5.5 to 8 sigmaaM=" + sigmaaM);
 			}
 			else {
 				sigmaaM = ToroEtAl2002Constants.m80[iper];
+//				System.out.println(" mg > 8 sigmaaM= " + sigmaaM);
 			}
 
 			if (rJB < 5.0) {
 				sigmaaR = ToroEtAl2002Constants.r05[iper];
-				System.out.println("<5km");
+//				System.out.println("<5km sigmaaR= " +sigmaaR);
 			}
 			else if ((rJB >= 5.0) && (rJB <= 20.0)) {
 				sigmaaR = ToroEtAl2002Constants.r05[iper] + 
 				(ToroEtAl2002Constants.r20[iper] - ToroEtAl2002Constants.r05[iper]) / 
 				(20.0-5.0) * (rJB-5.0);
-				System.out.println("5-20km");
+//				System.out.println("5-20km sigmaaR= " +sigmaaR);
 			}
 			else {
 				sigmaaR = ToroEtAl2002Constants.r20[iper];
-				System.out.println(">20km");
+//				System.out.println(">20km sigmaaR= " +sigmaaR);
 
 			}	  
 
@@ -544,7 +545,12 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 			else {
 				sigmae = 0.36 + 0.07 * (mag - 6.0);
 			}
-			sigmatot = (Math.sqrt(sigmaaM*sigmaaM+sigmaaR*sigmaaR+sigmae*sigmae));
+			double sigmaatot = Math.sqrt(sigmaaM*sigmaaM+sigmaaR*sigmaaR);
+//			System.out.println("sigmaTOT = " +sigmaatot);
+//			System.out.println("sigmaE   = " +sigmae);
+
+
+			sigmatot = (Math.sqrt(sigmaatot*sigmaatot+sigmae*sigmae));
 //			if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL) && 
 //					vs30 == ToroEtAl2002Constants.SITE_TYPE_ROCK_UPPER_BOUND) {
 //				return sigmatot * ToroEtAl2002Constants.sig_AFrock[iper];
@@ -654,13 +660,17 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 
 		ToroEtAl2002_AttenRel ar = new ToroEtAl2002_AttenRel(null);
 
-		for (int i=1; i < 2; i++){
+		for (int i=4; i < 8; i++){
 //			System.out.println(ToroEtAl2002Constants.PERIOD[i] + ".mean " + Math.exp(ar.getMean(i, 5.00,  5, 2800, 45)));
-			System.out.println(ToroEtAl2002Constants.PERIOD[i] + ".dt.dev  5km " + ar.getStdDev(i,  5.00,  10, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
-			System.out.println(ToroEtAl2002Constants.PERIOD[i] + ".dt.dev 20km  " + ar.getStdDev(i, 7.00,  10, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
-			System.out.println(ToroEtAl2002Constants.PERIOD[i] + ".dt.dev 30km  " + ar.getStdDev(i, 8.00,  10, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
-//			System.out.println(ToroEtAl2002Constants.PERIOD[i] + ".dt.dev 50km  " + ar.getStdDev(i, 5.00,  50, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
-//			System.out.println(ToroEtAl2002Constants.PERIOD[i] + ".dt.dev 75km  " + ar.getStdDev(i, 5.00,  75, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
+			System.out.println(ToroEtAl2002Constants.PERIOD[i] + "r0km sdt.dev= " + ar.getStdDev(i,  6.50,     0, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
+			System.out.println(ToroEtAl2002Constants.PERIOD[i] + "r10km sdt.dev= " + ar.getStdDev(i,  6.50,    10, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
+			System.out.println(ToroEtAl2002Constants.PERIOD[i] + "r100km sdt.dev= " + ar.getStdDev(i,  6.50,   100, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
+			System.out.println(ToroEtAl2002Constants.PERIOD[i] + "r1000km sdt.dev= " + ar.getStdDev(i,  6.50,  1000, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
+
+			System.out.println(ToroEtAl2002Constants.PERIOD[i] + "m4.5 sdt.dev= " + ar.getStdDev(i,  4.50,    20, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
+			System.out.println(ToroEtAl2002Constants.PERIOD[i] + "m5.5 sdt.dev= " + ar.getStdDev(i,  5.50,    20, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
+			System.out.println(ToroEtAl2002Constants.PERIOD[i] + "m6.5 sdt.dev= " + ar.getStdDev(i,  6.50,    20, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
+			System.out.println(ToroEtAl2002Constants.PERIOD[i] + "m7.5 sdt.dev= " + ar.getStdDev(i,  7.50,    20, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
 
 		}
 	}	

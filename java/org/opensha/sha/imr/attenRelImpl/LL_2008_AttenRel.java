@@ -499,7 +499,7 @@ NamedObjectAPI, ParameterChangeListener {
 	 * Compute mean (natural logarithm of median ground motion).
 	 */
 
-	private double getMean(int iper, double mag, double rhypo, double hypoDepth, final double vs30, final String tecRegType) {
+	public double getMean(int iper, double mag, double rhypo, double hypoDepth, final double vs30, final String tecRegType) {
 
 		double Zt;
 		double logY;
@@ -514,33 +514,50 @@ NamedObjectAPI, ParameterChangeListener {
 		
 		if (vs30 >= LL2008Constants.SOIL_TYPE_SOFT_UPPER_BOUND){
 			double term1 = LL2008Constants.rock_C2[iper] * mag;
-			double r = rhypo + (LL2008Constants.rock_C4[iper] * Math.exp(LL2008Constants.rock_C5[iper] * mag));
+//			System.out.println("term1 " + term1);
+			double r = rhypo + LL2008Constants.rock_C4[iper] * Math.exp(LL2008Constants.rock_C5[iper] * mag);
+//			System.out.println("r " + r);
 			double term2 = LL2008Constants.rock_C3[iper] * Math.log(r);
+//			System.out.println("term2 " + term2);
 			double term3 = LL2008Constants.rock_C6[iper] * hypoDepth;
-			logY = LL2008Constants.rock_C1[iper] + term1 + term2 + term3 + LL2008Constants.soil_C7[iper]*Zt;
+//			System.out.println("term3 " + term3);
+			logY = LL2008Constants.rock_C1[iper] + term1 + term2 + term3 + LL2008Constants.rock_C7[iper] * Zt;
 		}
 		else {
 			double term1 = LL2008Constants.soil_C2[iper] * mag;
-			double r = rhypo + LL2008Constants.soil_C4[iper]*Math.exp(LL2008Constants.soil_C5[iper]*mag);
+			
+			double r = rhypo + LL2008Constants.soil_C4[iper]*Math.exp(LL2008Constants.soil_C5[iper] * mag);
+			
 			double term2 = LL2008Constants.soil_C3[iper] * Math.log(r);
+			
 			double term3 = LL2008Constants.soil_C6[iper] * hypoDepth;
-			logY = LL2008Constants.soil_C1[iper] + term1 + term2 + term3 + LL2008Constants.soil_C7[iper]*Zt;
+			
+			logY = LL2008Constants.soil_C1[iper] + term1 + term2 + term3 + LL2008Constants.soil_C7[iper] * Zt;
 		}
 
-		if (iper==0){
+		if (LL2008Constants.PERIOD[iper] == -1){
 			mean = Math.exp(logY) * LL2008Constants.SA_g_to_PGV_cms_CONVERSION_FACTOR;
-			System.out.println("PGV");
+//			System.out.println("PGV");
 
 		} else {
 			mean = Math.exp(logY);
-			System.out.println("SA");
+//			System.out.println("SA");
+//
+//			System.out.println("c1 = " + LL2008Constants.soil_C1[iper]);
+//			System.out.println("c2 = " + LL2008Constants.soil_C2[iper]);
+//			System.out.println("c3 = " + LL2008Constants.soil_C3[iper]);
+//			System.out.println("c4 = " + LL2008Constants.soil_C4[iper]);
+//			System.out.println("c5 = " + LL2008Constants.soil_C5[iper]);
+//			System.out.println("c6 = " + LL2008Constants.soil_C6[iper]);
+//			System.out.println("c7 = " + LL2008Constants.soil_C7[iper]);
+
 		}
 		return Math.log(mean);
 	}
 	/**
 	 * @return The stdDev value
 	 */
-	public final double getStdDev(int iper, String stdDevType, double vs30) {
+	public  double getStdDev(int iper, String stdDevType, double vs30) {
 		double sigmaR, sigmaS;
 		if(stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE)) {
 			return 0.0;
@@ -579,10 +596,32 @@ NamedObjectAPI, ParameterChangeListener {
 
 		LL_2008_AttenRel ar = new LL_2008_AttenRel(null);
 		ar.setParamDefaults();
-		for (int i=0; i < 29; i++){
-			System.out.print("  "+ LL2008Constants.PERIOD[i]);
-//			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 7.00, 10, 30, 800, 
+		ar.setIntensityMeasure(SA_Param.NAME);
+		for (int i=2; i < 3; i++){
+//			System.out.print("  "+ LL2008Constants.PERIOD[i] + " ");
+			
+			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 7.00, 15, 30, 300, 
+					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
+			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 7.00, 20, 30, 300, 
+					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
+			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 7.00, 30, 30, 300, 
+					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
+			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 7.00, 50, 30, 300, 
+					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
+			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 7.00, 75, 30, 300, 
+					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
+			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 7.00, 100, 30, 300, 
+					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
+			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 7.00, 200, 30, 300, 
+					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
+			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 7.00, 500, 30, 300, 
+					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
+			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 7.00, 600, 30, 300, 
+					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
+//			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 7.00, 15, 30, 800, 
 //					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
+//			System.out.println(getStdDev(i, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString(), 200));
+
 		}
 	}	
 
