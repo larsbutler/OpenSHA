@@ -34,7 +34,7 @@ public class ToroEtAl_2002_test implements ParameterChangeWarningListener {
 	/**
 	 * Table for total standard deviation validation.
 	 */
-	private static final String SIGMA_TOTAL_HARD_ROCK_TABLE = "Toro02_SIGMAT.OUT";
+	private static final String SIGMA_TOTAL_HARD_ROCK_TABLE = "Toro02_SIGMAT.TXT";
 
 	/**
 	 * Table for median ground motion validation. Hard rock median.
@@ -49,13 +49,13 @@ public class ToroEtAl_2002_test implements ParameterChangeWarningListener {
 	private static String[] TABLE_HEADER_STD = new String[1];
 
 	/** Number of columns in test tables for standard deviation. */
-	private static final int TABLE_NUM_COL_STD = 12;
+	private static final int TABLE_NUM_COL_STD = 14;
 
 	/** Number of columns in test tables for median ground motion value. */
-	private static final int TABLE_NUM_COL_MEDIAN = 12;
+	private static final int TABLE_NUM_COL_MEDIAN = 14;
 
 	/** Number of rows in interface test table. */
-	private static final int TABLE_NUM_ROWS = 71;
+	private static final int TABLE_NUM_ROWS = 70;
 
 	/** Inter event standard deviation verification table. */
 	private static double[][] stdTotalTable = null;

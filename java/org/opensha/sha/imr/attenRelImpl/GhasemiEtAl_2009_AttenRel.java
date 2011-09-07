@@ -542,8 +542,8 @@ public static void main(String[] args) {
 
 	GhasemiEtAl_2009_AttenRel ar = new GhasemiEtAl_2009_AttenRel(null);
 	 for (int i=0; i < 17; i++){
-		 System.out.println("iper ="  + GhasemiEtAl2009Constants.PERIOD[i]);
-		 System.out.println("iper" + i + " mean = " + Math.exp(ar.getMean(i, 6.50, 10, 800)));
+//		 System.out.println("iper ="  + GhasemiEtAl2009Constants.PERIOD[i]);
+		 System.out.println(GhasemiEtAl2009Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 6.50, 10, 800)));
 	 }
 }	
 

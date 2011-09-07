@@ -544,8 +544,9 @@ ParameterChangeListener {
 
 		// convert PGA and SA from cm/s2 to g
 		if (iper != 0) {
-			lnY = Math.log(Math.exp(lnY)
-					* AkC2010Constants.CMS_TO_G_CONVERSION_FACTOR);
+			lnY = Math.log(Math.exp(lnY));
+//			* AkC2010Constants.CMS_TO_G_CONVERSION_FACTOR);
+
 		}
 
 		return (lnY);
@@ -693,16 +694,16 @@ ParameterChangeListener {
 	 * For testing
 	 * 
 	 */
-//
-//	public static void main(String[] args) {
-//
-//		AkC_2010_AttenRel ar = new AkC_2010_AttenRel(null);
-//		for (int i = 0; i < 10; i++) {
-//			//			System.out.println("iper =" + AkC2010Constants.PERIOD[i]);
-//			System.out.println("iper = " + AkC2010Constants.PERIOD[i] + "       mean_0.1km   =  " 
-//					+ Math.exp(ar.getMean(i, 7.00, 10, 760, 20)));
-//
-//		}
-//	}
+
+	public static void main(String[] args) {
+
+		AkC_2010_AttenRel ar = new AkC_2010_AttenRel(null);
+		for (int i = 0; i < 10; i++) {
+			//			System.out.println("iper =" + AkC2010Constants.PERIOD[i]);
+			System.out.println("iper = " + AkC2010Constants.PERIOD[i] + "       mean_0.1km   =  " 
+					+ Math.exp(ar.getMean(i, 7.00, 10, 760, 20)));
+
+		}
+	}
 
 }

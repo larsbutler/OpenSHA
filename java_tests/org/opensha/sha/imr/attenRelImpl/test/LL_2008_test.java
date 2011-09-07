@@ -43,7 +43,7 @@ public class LL_2008_test implements ParameterChangeWarningListener {
 	 * Table for median ground motion validation. Interface events - median values for rock and soft soil
 	 */
 	private static final String MEDIAN_INTERFACE_ROCK_TABLE = "LL08_MEDIAN_INTERFACE_ROCK.OUT";
-	private static final String MEDIAN_INTERFACE_SOFT_TABLE = "LL08_MEDIAN_INTERFACE_SOIL.OUT";
+	private static final String MEDIAN_INTERFACE_SOFT_TABLE = "LL08_MEDIAN_INTERFACE_SOIL.TXT";
 	
 	/** Header for standard deviation tables. */
 	private static String[] TABLE_HEADER_STD = new String[1];
@@ -160,16 +160,16 @@ public class LL_2008_test implements ParameterChangeWarningListener {
 	}
 	@Test
 	public void medianInterfaceRockTable() {
-		double hypoDepth = 0.0;
+		double hypoDepth = 30.0;
 		double vs30 = 800.0;
-		String tectRegType = TectonicRegionType.SUBDUCTION_SLAB.toString();
+		String tectRegType = TectonicRegionType.SUBDUCTION_INTERFACE.toString();
 		validateMedian(hypoDepth, vs30,  tectRegType, medianInterfaceRockTable);
 	}
 	@Test
 	public void medianInterfaceSoftTable() {
 		double hypoDepth = 30.0;
-		double vs30 = 200.0;
-		String tectRegType = TectonicRegionType.SUBDUCTION_SLAB.toString();
+		double vs30 = 300.0;
+		String tectRegType = TectonicRegionType.SUBDUCTION_INTERFACE.toString();
 		validateMedian(hypoDepth, vs30,  tectRegType, medianInterfaceSoftTable);
 	}
 
@@ -185,9 +185,9 @@ public class LL_2008_test implements ParameterChangeWarningListener {
 				double expectedMedian = table[j][i];
 				double computedMedian = Math.exp(ll08AttenRel.getMean(iper, mag, rJB, 
 						hypoDepth, vs30, tectRegType));
-				System.out.println(iper + " mag =" + mag + "r= "+rJB 
+				System.out.println(iper + " mag = " + mag + "r= "+rJB 
 						+ " expected: "+expectedMedian);
-				System.out.println(iper + " mag =" + mag + "r= "+rJB
+				System.out.println(iper + " mag = " + mag + "r= "+rJB
 						+ " computed: "+computedMedian);
 				assertEquals(expectedMedian, computedMedian, TOLERANCE);
 

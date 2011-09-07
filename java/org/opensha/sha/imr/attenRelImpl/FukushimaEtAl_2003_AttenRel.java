@@ -147,8 +147,8 @@ ParameterChangeListener {
 
 		// Create an Hash map that links the period with its index
 		indexFromPerHashMap = new HashMap<Double, Integer>();
-		for (int i = 0; i < FukushimaEtAl2009Constants.PERIOD.length; i++) { 
-			indexFromPerHashMap.put(new Double(FukushimaEtAl2009Constants.PERIOD[i]), 
+		for (int i = 0; i < FukushimaEtAl2003Constants.PERIOD.length; i++) { 
+			indexFromPerHashMap.put(new Double(FukushimaEtAl2003Constants.PERIOD[i]), 
 					new Integer(i));
 		}
 		// Initialize earthquake Rupture parameters (e.g. magnitude)
@@ -173,8 +173,8 @@ ParameterChangeListener {
 
 		// set supported periods for spectral acceleration
 		DoubleDiscreteConstraint periodConstraint = new DoubleDiscreteConstraint();
-		for (int i = 1; i < FukushimaEtAl2009Constants.PERIOD.length; i++) {
-			periodConstraint.addDouble(new Double(FukushimaEtAl2009Constants.PERIOD[i]));
+		for (int i = 1; i < FukushimaEtAl2003Constants.PERIOD.length; i++) {
+			periodConstraint.addDouble(new Double(FukushimaEtAl2003Constants.PERIOD[i]));
 		}
 		periodConstraint.setNonEditable();
 		// set period param (default is 1s, which is provided by AkB2010 GMPE)
@@ -214,8 +214,8 @@ ParameterChangeListener {
 	protected final void initEqkRuptureParams() {
 
 		// moment magnitude (default 5.0)
-		magParam = new MagParam(FukushimaEtAl2009Constants.MAG_WARN_MIN,
-				FukushimaEtAl2009Constants.MAG_WARN_MAX);
+		magParam = new MagParam(FukushimaEtAl2003Constants.MAG_WARN_MIN,
+				FukushimaEtAl2003Constants.MAG_WARN_MAX);
 		// Focal mechanism
 		rakeParam = new RakeParam(); 
 		eqkRuptureParams.clear();
@@ -244,11 +244,11 @@ ParameterChangeListener {
 	protected final void initPropagationEffectParams() {
 
 		distanceRupParam = new DistanceRupParameter(
-				FukushimaEtAl2009Constants.DISTANCE_Rup_WARN_MIN);
+				FukushimaEtAl2003Constants.DISTANCE_Rup_WARN_MIN);
 		distanceRupParam.addParameterChangeWarningListener(warningListener);
 		DoubleConstraint warn = new DoubleConstraint(
-				FukushimaEtAl2009Constants.DISTANCE_Rup_WARN_MIN,
-				FukushimaEtAl2009Constants.DISTANCE_Rup_WARN_MAX);
+				FukushimaEtAl2003Constants.DISTANCE_Rup_WARN_MIN,
+				FukushimaEtAl2003Constants.DISTANCE_Rup_WARN_MAX);
 		warn.setNonEditable();
 		distanceRupParam.setWarningConstraint(warn);
 		distanceRupParam.setNonEditable();
@@ -492,26 +492,26 @@ ParameterChangeListener {
 		
 		double[] s = computeSiteTerm(iper, vs30);
 		
-		double term1 = FukushimaEtAl2009Constants.a[iper] * mag + 
-		               FukushimaEtAl2009Constants.b[iper] * mag; 
+		double term1 = FukushimaEtAl2003Constants.a[iper] * mag + 
+		               FukushimaEtAl2003Constants.b[iper] * mag; 
 	                  
-	    double term2 = Math.log10(rRup + FukushimaEtAl2009Constants.d[iper] * 
-	    		       Math.pow(10, FukushimaEtAl2009Constants.e[iper] * mag));
+	    double term2 = Math.log10(rRup + FukushimaEtAl2003Constants.d[iper] * 
+	    		       Math.pow(10, FukushimaEtAl2003Constants.e[iper] * mag));
 		
 		logY = term1 - term2 + s[0];
 
-		logY *= FukushimaEtAl2009Constants.LOG10_2_LN;
+		logY = logY * FukushimaEtAl2003Constants.LOG10_2_LN;
 		
-		return Math.log(Math.exp(logY)*FukushimaEtAl2009Constants.CMS2_TO_G_CONVERSION_FACTOR);
+		return Math.log(Math.exp(logY)*FukushimaEtAl2003Constants.CMS2_TO_G_CONVERSION_FACTOR);
 	}
 
 	private double[] computeSiteTerm(final int iper, final double vs30) {
 		double[] s = new double[1];
-		if (vs30 >= FukushimaEtAl2009Constants.SOIL_TYPE_ROCK_UPPER_BOUND) {
-			s[0] = FukushimaEtAl2009Constants.c1[iper];
+		if (vs30 >= FukushimaEtAl2003Constants.SOIL_TYPE_ROCK_UPPER_BOUND) {
+			s[0] = FukushimaEtAl2003Constants.c1[iper];
 
-		} else if (vs30 < FukushimaEtAl2009Constants.SOIL_TYPE_ROCK_UPPER_BOUND) {
-			s[0] = FukushimaEtAl2009Constants.c2[iper];
+		} else if (vs30 < FukushimaEtAl2003Constants.SOIL_TYPE_ROCK_UPPER_BOUND) {
+			s[0] = FukushimaEtAl2003Constants.c2[iper];
 		}
 		return s;
 	}
@@ -521,7 +521,7 @@ public double getStdDev(int iper, String stdDevType) {
 	if(stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE))
 		return 0;
 	else if(stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL))
-		return FukushimaEtAl2009Constants.LOG10_2_LN*FukushimaEtAl2009Constants.TOTAL_STD[iper];
+		return FukushimaEtAl2003Constants.LOG10_2_LN*FukushimaEtAl2003Constants.TOTAL_STD[iper];
 	else 
 		return Double.NaN;
 }
@@ -539,13 +539,13 @@ public URL getInfoURL() throws MalformedURLException{
  * 
  */
 
-//public static void main(String[] args) {
-//
-//	FukushimaEtAl_2003_AttenRel ar = new FukushimaEtAl_2003_AttenRel(null);
-//	 for (int i=0; i < 11; i++){
-////		 System.out.println("iper ="  + FukushimaEtAl2009Constants.PERIOD[i]);
-//		 System.out.println("iper" + i + " mean = " + Math.exp(ar.getMean(i, 6.50, 10, 800)));
-//	 }
-//}	
+public static void main(String[] args) {
+
+	FukushimaEtAl_2003_AttenRel ar = new FukushimaEtAl_2003_AttenRel(null);
+	 for (int i=0; i < 11; i++){
+//		 System.out.println("iper ="  + FukushimaEtAl2009Constants.PERIOD[i]);
+		 System.out.println("iper" + FukushimaEtAl2003Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 5.50, 10, 800)));
+	 }
+}	
 
 }

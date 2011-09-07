@@ -597,26 +597,26 @@ NamedObjectAPI, ParameterChangeListener {
 		LL_2008_AttenRel ar = new LL_2008_AttenRel(null);
 		ar.setParamDefaults();
 		ar.setIntensityMeasure(SA_Param.NAME);
-		for (int i=2; i < 3; i++){
+		for (int i=1; i < 3; i++){
 //			System.out.print("  "+ LL2008Constants.PERIOD[i] + " ");
 			
-			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 7.00, 15, 30, 300, 
+			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 4.00, 15, 30, 200, 
 					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
-			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 7.00, 20, 30, 300, 
+			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 4.00, 20, 30, 200, 
 					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
-			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 7.00, 30, 30, 300, 
+			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 4.00, 30, 30, 200, 
 					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
-			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 7.00, 50, 30, 300, 
+			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 4.00, 50, 30, 200, 
 					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
-			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 7.00, 75, 30, 300, 
+			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 4.00, 75, 30, 200, 
 					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
-			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 7.00, 100, 30, 300, 
+			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 4.00, 100, 30, 200, 
 					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
-			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 7.00, 200, 30, 300, 
+			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 4.00, 200, 30, 200, 
 					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
-			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 7.00, 500, 30, 300, 
+			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 4.00, 500, 30, 200, 
 					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
-			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 7.00, 600, 30, 300, 
+			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 4.00, 600, 30, 200, 
 					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
 //			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 7.00, 15, 30, 800, 
 //					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
