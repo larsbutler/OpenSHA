@@ -36,6 +36,7 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  * pp 31-52, 2009.
  * 
  * Model 2 for rupture distance and geometric mean programmed
+ * This is the one recommended by the authors out of the four models they derive.
  * <p>
  * 
  * Supported Intensity-Measure Parameters:
@@ -65,7 +66,8 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  * 
  * Verification -
  * Checked against my previous Fortran implementation of this GMPE
- * 
+ *  Checked against Excel spreadsheet implementation of this GMPE provided by 
+ * Peter J. Stafford (Imperial College London)
  * 
  * </p>
  * 
@@ -433,6 +435,8 @@ ParameterChangeListener {
 
 		double lnY = Double.NaN;
 
+		/**
+		 * For geometric mean
 		double c1=-5.6618;	
 		double c2=2.5729;
 		double c3=-3.4648;
@@ -442,6 +446,19 @@ ParameterChangeListener {
 		double c7=0.2334;
 		double c8=-0.1675;
 		double c9=0.3521; 
+*/
+		/**
+		 * For arithmetic mean
+		 */
+		double c1=-5.6006;	
+		double c2=2.56526;
+		double c3=-3.4648;
+		double c4=0.4939;
+		double c5=0.06033;
+		double c6=0.50144;
+		double c7=0.22579;
+		double c8=-0.168;
+		double c9=0.35859; 
 
 		int[] soilTerms = setSoilTerms(vs30);
 
@@ -485,16 +502,29 @@ ParameterChangeListener {
 	public double getStdDev(double mag, 
 			final double vs30, String stdDevType) {
 		/**
-		 * inter-event
-		 */
+		 * inter-event (geometric mean)
 		double tau=0.2975;
+		 */
+
+		/**
+		 * inter-event (arithmetic mean)
+		 */
+		double tau=0.29447;
 
 		/** 
 		 * intra-event
 		 */
 		int[] soilTerms = setSoilTerms(vs30);
+		/** for geometric mean
 		double sigmar=1.0901;
 		double sigmas=0.9057;
+		*/
+		/** for arithmetic mean
+		 * 
+		 */
+		double sigmar=1.09905;
+		double sigmas=0.90548;
+
 		double sigma=Math.sqrt((1-soilTerms[0])*(1-soilTerms[1])*sigmar*sigmar+(soilTerms[0]+soilTerms[1])*sigmas*sigmas);
 		if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE))
 			return 0;
