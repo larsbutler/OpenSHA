@@ -46,6 +46,8 @@ import org.opensha.sha.imr.param.EqkRuptureParams.RakeParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.RupTopDepthParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.RupWidthParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.DampingParam;
+import org.opensha.sha.imr.param.IntensityMeasureParams.IA_Param;
+import org.opensha.sha.imr.param.IntensityMeasureParams.RelativeSignificantDuration_Param;
 import org.opensha.sha.imr.param.IntensityMeasureParams.MMI_Param;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PGA_Param;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PGD_Param;
@@ -286,6 +288,8 @@ public abstract class AttenuationRelationship extends
     protected PeriodParam saPeriodParam = null;
     protected DampingParam saDampingParam = null;
     protected MMI_Param mmiParam = null;
+    protected IA_Param aiParam = null;
+    protected RelativeSignificantDuration_Param rsdParam = null;
     /**
      * Other Parameters (see classes for exact definitions)
      * 
