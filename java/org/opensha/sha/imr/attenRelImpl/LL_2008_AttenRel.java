@@ -240,7 +240,7 @@ NamedObjectAPI, ParameterChangeListener {
 				LL2008Constants.DISTANCE_HYPO_WARN_MIN);
 		distanceHypoParam.addParameterChangeWarningListener(warningListener);
 		DoubleConstraint warn = new DoubleConstraint(
-				LL2008Constants.DISTANCE_HYPO_WARN_MIN,
+				new Double(0.0),
 				LL2008Constants.DISTANCE_HYPO_WARN_MAX);
 		warn.setNonEditable();
 		distanceHypoParam.setWarningConstraint(warn);

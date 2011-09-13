@@ -6,20 +6,25 @@ import java.util.HashMap;
 
 import org.opensha.commons.data.NamedObjectAPI;
 import org.opensha.commons.data.Site;
+import org.opensha.commons.exceptions.InvalidRangeException;
+import org.opensha.commons.exceptions.ParameterException;
 import org.opensha.commons.param.DoubleConstraint;
 import org.opensha.commons.param.DoubleDiscreteConstraint;
 import org.opensha.commons.param.StringConstraint;
+import org.opensha.commons.param.StringParameter;
 import org.opensha.commons.param.event.ParameterChangeEvent;
 import org.opensha.commons.param.event.ParameterChangeListener;
 import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.earthquake.EqkRupture;
+import org.opensha.sha.earthquake.FocalMechanism;
+import org.opensha.sha.faultSurface.EvenlyGriddedSurfaceAPI;
 import org.opensha.sha.imr.AttenuationRelationship;
+import org.opensha.sha.imr.PropagationEffect;
 import org.opensha.sha.imr.ScalarIntensityMeasureRelationshipAPI;
 import org.opensha.sha.imr.param.EqkRuptureParams.FocalDepthParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.MagParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.DampingParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PGA_Param;
-import org.opensha.sha.imr.param.IntensityMeasureParams.PGV_Param;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PeriodParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.SA_Param;
 import org.opensha.sha.imr.param.OtherParams.ComponentParam;
@@ -48,7 +53,6 @@ import org.opensha.sha.util.TectonicRegionType;
  * Supported Intensity-Measure Parameters:
  * <p>
  * <UL>
- * <LI>PGV - Peak Ground Velocity - was obtained from PSa (0.5sec)/20 - as proposed by Bommer (2006)
  * <LI>pgaParam - Peak Ground Acceleration
  * <LI>saParam - Response Spectral Acceleration
  * </UL>
@@ -85,8 +89,8 @@ import org.opensha.sha.util.TectonicRegionType;
  * @version 1.0, December 2010
  */
 public class AB_2003_AttenRel extends AttenuationRelationship implements
-ScalarIntensityMeasureRelationshipAPI, NamedObjectAPI,
-ParameterChangeListener {
+		ScalarIntensityMeasureRelationshipAPI, NamedObjectAPI,
+		ParameterChangeListener {
 
 	/** Short name. */
 	public static final String SHORT_NAME = "AB2003";
@@ -179,22 +183,14 @@ ParameterChangeListener {
 		pgaParam = new PGA_Param();
 		pgaParam.setNonEditable();
 
-		// initialize peak ground acceleration parameter (units: g)
-		pgvParam = new PGV_Param();
-		pgvParam.setNonEditable();
-
 		// add the warning listeners
 		saParam.addParameterChangeWarningListener(warningListener);
 		pgaParam.addParameterChangeWarningListener(warningListener);
-		pgvParam.addParameterChangeWarningListener(warningListener);
-
 
 		// put parameters in the supportedIMParams list
 		supportedIMParams.clear();
 		supportedIMParams.addParameter(saParam);
 		supportedIMParams.addParameter(pgaParam);
-		supportedIMParams.addParameter(pgvParam);
-
 	}
 
 	/**
@@ -263,8 +259,8 @@ ParameterChangeListener {
 	 */
 	protected final void initOtherParams() {
 
-		sigmaTruncTypeParam = new SigmaTruncTypeParam();
-		sigmaTruncLevelParam = new SigmaTruncLevelParam();
+        sigmaTruncTypeParam = new SigmaTruncTypeParam();
+        sigmaTruncLevelParam = new SigmaTruncLevelParam();
 
 		// stdDevType Parameter
 		StringConstraint stdDevTypeConstraint = new StringConstraint();
@@ -275,18 +271,17 @@ ParameterChangeListener {
 		stdDevTypeConstraint.setNonEditable();
 		stdDevTypeParam = new StdDevTypeParam(stdDevTypeConstraint);
 
-		//		// component Parameter
+		// component Parameter
 		StringConstraint constraint = new StringConstraint();
 		constraint.addString(ComponentParam.COMPONENT_RANDOM_HORZ);
-		constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
 		constraint.setNonEditable();
-		componentParam = new ComponentParam(constraint,ComponentParam.COMPONENT_RANDOM_HORZ);
-
+		componentParam = new ComponentParam(constraint,
+				ComponentParam.COMPONENT_RANDOM_HORZ);
 
 		// add these to the list
 		otherParams.clear();
-		otherParams.addParameter(sigmaTruncTypeParam);
-		otherParams.addParameter(sigmaTruncLevelParam);
+        otherParams.addParameter(sigmaTruncTypeParam);
+        otherParams.addParameter(sigmaTruncLevelParam);
 		otherParams.addParameter(stdDevTypeParam);
 		otherParams.addParameter(componentParam);
 	}
@@ -322,7 +317,7 @@ ParameterChangeListener {
 
 		// params that the IML at exceed. prob. depends upon
 		imlAtExceedProbIndependentParams
-		.addParameterList(exceedProbIndependentParams);
+				.addParameterList(exceedProbIndependentParams);
 		imlAtExceedProbIndependentParams.addParameter(exceedProbParam);
 	}
 
@@ -400,7 +395,7 @@ ParameterChangeListener {
 		}
 		else{
 			throw new RuntimeException("Tectonic region type not set in " +
-			" earthquake rupture");
+					" earthquake rupture");
 		}
 
 		if(eqkRupture.getHypocenterLocation()!=null){
@@ -409,7 +404,7 @@ ParameterChangeListener {
 		}
 		else{
 			throw new RuntimeException("Hypocenter location not set in"+
-			" earthquake rupture");
+					" earthquake rupture");
 		}
 
 		this.eqkRupture = eqkRupture;
@@ -443,15 +438,14 @@ ParameterChangeListener {
 	 * Set period index.
 	 */
 	protected final void setPeriodIndex() {
-		if (im.getName().equalsIgnoreCase(PGV_Param.NAME)) {
+		if (im.getName().equalsIgnoreCase(PGA_Param.NAME)) {
 			iper = 0;
-		} else if (im.getName().equalsIgnoreCase(PGA_Param.NAME)) {
-			iper = 1;
 		} else {
 			iper = ((Integer) indexFromPerHashMap.get(saPeriodParam.getValue()))
-			.intValue();
+					.intValue();
 		}
 	}
+
 	/**
 	 * Compute mean. Applies correction for periods = 2.5 and 5 Hz 
 	 * (for interface) as for Atkinson and Boore 2008 Erratum.
@@ -461,9 +455,9 @@ ParameterChangeListener {
 		if (rRup > USER_MAX_DISTANCE) {
 			return VERY_SMALL_MEAN;
 		}
-
+		
 		double mean = Double.NaN;
-
+		
 		// if period corresponds to 5 Hz (PERIOD[3]) or 2.5 (PERIOD[4]) Hz
 		// and tectonic region type is interface applies correction.
 		if((saPeriodParam.getValue()==AB2003Constants.PERIOD[3] ||
@@ -522,7 +516,6 @@ ParameterChangeListener {
 		saDampingParam.setValueAsDefault();
 		saParam.setValueAsDefault();
 		pgaParam.setValueAsDefault();
-		pgvParam.setValueAsDefault();
 		stdDevTypeParam.setValueAsDefault();
 		sigmaTruncTypeParam.setValueAsDefault();
 		sigmaTruncLevelParam.setValueAsDefault();
@@ -553,26 +546,18 @@ ParameterChangeListener {
 		hypoDep = capHypocentralDepth(hypoDep);
 
 		mag = capMagnitude(mag, tecRegType);
-
+		
 		double rockResponse = 
 			computeRockResponse(tecRegType, iper, mag, hypoDep, rRup);
-
+		
 		double soilResponse = computeSoilResponse(tecRegType, iper, mag,
 				hypoDep, rRup, vs30);
 
 		double logY = rockResponse + soilResponse;
-		double lnY = logY*AB2003Constants.LOG10_2_LN;
+		logY *= AB2003Constants.LOG10_2_LN;
 
-		if (iper == 0.00){
-			
-			Math.log(Math.exp(lnY)/20);
-			
-		} else if (AB2003Constants.PERIOD[iper] == 4){
-		    Math.log(Math.exp(lnY) * AB2003Constants.T3sec_TO_T4sec_factor 
+		return Math.log(Math.exp(logY)
 				* AB2003Constants.CMS_TO_G_CONVERSION_FACTOR);
-		}
-		
-		return Math.log(Math.exp(lnY));
 	}
 
 	private double capHypocentralDepth(double hypoDep) {
@@ -600,25 +585,25 @@ ParameterChangeListener {
 	private double computeRockResponse(String tecRegType, int periodIndex,
 			double mag, double hypoDep, double rRup) {
 		double delta = AB2003Constants.NEAR_SOURCE_SATURATION_FACTOR1
-		* Math.pow(10, AB2003Constants.NEAR_SOURCE_SATURATION_FACTOR2
-				* mag);
+				* Math.pow(10, AB2003Constants.NEAR_SOURCE_SATURATION_FACTOR2
+						* mag);
 		double R = Math.sqrt(rRup * rRup + delta * delta);
 		double g = computedGeometricSpreadingFactor(tecRegType, mag);
 		double rockResponse = Double.NaN;
 		if (tecRegType.equalsIgnoreCase(TectonicRegionType.SUBDUCTION_INTERFACE
 				.toString())) {
 			rockResponse = AB2003Constants.INTER_C1[periodIndex]
-			                                        + AB2003Constants.INTER_C2[periodIndex] * mag
-			                                        + AB2003Constants.INTER_C3[periodIndex] * hypoDep
-			                                        + AB2003Constants.INTER_C4[periodIndex] * R - g
-			                                        * Math.log10(R);
+					+ AB2003Constants.INTER_C2[periodIndex] * mag
+					+ AB2003Constants.INTER_C3[periodIndex] * hypoDep
+					+ AB2003Constants.INTER_C4[periodIndex] * R - g
+					* Math.log10(R);
 		} else if (tecRegType
 				.equalsIgnoreCase(TectonicRegionType.SUBDUCTION_SLAB.toString())) {
 			rockResponse = AB2003Constants.INTRA_C1[periodIndex]
-			                                        + AB2003Constants.INTRA_C2[periodIndex] * mag
-			                                        + AB2003Constants.INTRA_C3[periodIndex] * hypoDep
-			                                        + AB2003Constants.INTRA_C4[periodIndex] * R - g
-			                                        * Math.log10(R);
+					+ AB2003Constants.INTRA_C2[periodIndex] * mag
+					+ AB2003Constants.INTRA_C3[periodIndex] * hypoDep
+					+ AB2003Constants.INTRA_C4[periodIndex] * R - g
+					* Math.log10(R);
 		}
 		return rockResponse;
 	}
@@ -653,13 +638,13 @@ ParameterChangeListener {
 		if (tecRegType.equalsIgnoreCase(TectonicRegionType.SUBDUCTION_INTERFACE
 				.toString())) {
 			soilResponse = s[0] * AB2003Constants.INTER_C5[periodIndex] * sl
-			+ s[1] * AB2003Constants.INTER_C6[periodIndex] * sl + s[2]
-			                                                        * AB2003Constants.INTER_C7[periodIndex] * sl;
+					+ s[1] * AB2003Constants.INTER_C6[periodIndex] * sl + s[2]
+					* AB2003Constants.INTER_C7[periodIndex] * sl;
 		} else if (tecRegType
 				.equalsIgnoreCase(TectonicRegionType.SUBDUCTION_SLAB.toString())) {
 			soilResponse = s[0] * AB2003Constants.INTRA_C5[periodIndex] * sl
-			+ s[1] * AB2003Constants.INTRA_C6[periodIndex] * sl + s[2]
-			                                                        * AB2003Constants.INTRA_C7[periodIndex] * sl;
+					+ s[1] * AB2003Constants.INTRA_C6[periodIndex] * sl + s[2]
+					* AB2003Constants.INTRA_C7[periodIndex] * sl;
 		}
 		return soilResponse;
 	}
@@ -725,30 +710,30 @@ ParameterChangeListener {
 				.toString())) {
 			if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL)) {
 				return AB2003Constants.LOG10_2_LN
-				* AB2003Constants.INTER_TOTAL_STD[iper];
+						* AB2003Constants.INTER_TOTAL_STD[iper];
 			} else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE)) {
 				return 0;
 			} else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTER)) {
 				return AB2003Constants.LOG10_2_LN
-				* AB2003Constants.INTER_INTEREVENT_STD[iper];
+						* AB2003Constants.INTER_INTEREVENT_STD[iper];
 			} else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTRA)) {
 				return AB2003Constants.LOG10_2_LN
-				* AB2003Constants.INTER_INTRAEVENT_STD[iper];
+						* AB2003Constants.INTER_INTRAEVENT_STD[iper];
 			} else {
 				return Double.NaN;
 			}
 		} else {
 			if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL)) {
 				return AB2003Constants.LOG10_2_LN
-				* AB2003Constants.INTRA_TOTAL_STD[iper];
+						* AB2003Constants.INTRA_TOTAL_STD[iper];
 			} else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE)) {
 				return 0;
 			} else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTER)) {
 				return AB2003Constants.LOG10_2_LN
-				* AB2003Constants.INTRA_INTEREVENT_STD[iper];
+						* AB2003Constants.INTRA_INTEREVENT_STD[iper];
 			} else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTRA)) {
 				return AB2003Constants.LOG10_2_LN
-				* AB2003Constants.INTRA_INTRAEVENT_STD[iper];
+						* AB2003Constants.INTRA_INTRAEVENT_STD[iper];
 			} else {
 				return Double.NaN;
 			}

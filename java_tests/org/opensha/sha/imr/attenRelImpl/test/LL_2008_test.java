@@ -294,26 +294,26 @@ public class LL_2008_test implements ParameterChangeWarningListener {
 				erf);
 	}
 	
-	/**
-	 * Check LL_2008_AttenRel usage for computing hazard curves using GEM1ERF constructed
-	 * from area source data for shallow crust events.
-	 * @throws Exception 
-	 */
-	@Test
-	public final void ll2008WithGEM1ERFShallowCrustAreaSource() throws Exception{
-		ll08AttenRel.setIntensityMeasure(PGA_Param.NAME);
-		ArrayList<GEMSourceData> srcDataList = new ArrayList<GEMSourceData>();
-		srcDataList.
-		add(AttenRelTestHelper.getActiveCrustAreaSourceData());
-		double timeSpan = 50.0;
-		GEM1ERF erf = GEM1ERF.getGEM1ERF(srcDataList, timeSpan);
-		HazardCurveCalculator hazCurveCalculator = new HazardCurveCalculator();
-		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper.setUpHazardCurve();
-		Site site = new Site(new Location(-3.78,-81.18));
-		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
-		hazCurveCalculator.getHazardCurve(hazCurve, site, ll08AttenRel,
-				erf);
-	}
+//	/**
+//	 * Check LL_2008_AttenRel usage for computing hazard curves using GEM1ERF constructed
+//	 * from area source data for shallow crust events.
+//	 * @throws Exception 
+//	 */
+//	@Test
+//	public final void ll2008WithGEM1ERFShallowCrustAreaSource() throws Exception{
+//		ll08AttenRel.setIntensityMeasure(PGA_Param.NAME);
+//		ArrayList<GEMSourceData> srcDataList = new ArrayList<GEMSourceData>();
+//		srcDataList.
+//		add(AttenRelTestHelper.getActiveCrustAreaSourceData());
+//		double timeSpan = 50.0;
+//		GEM1ERF erf = GEM1ERF.getGEM1ERF(srcDataList, timeSpan);
+//		HazardCurveCalculator hazCurveCalculator = new HazardCurveCalculator();
+//		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper.setUpHazardCurve();
+//		Site site = new Site(new Location(-3.78,-81.18));
+//		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
+//		hazCurveCalculator.getHazardCurve(hazCurve, site, ll08AttenRel,
+//				erf);
+//	}
 	/**
 	 * Check LL_2008_AttenRel usage for computing hazard curves using
 	 * GEM1ERF constructed from area source data for intraslab events. Ruptures

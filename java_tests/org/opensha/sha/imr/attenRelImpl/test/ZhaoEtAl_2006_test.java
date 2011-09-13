@@ -345,7 +345,7 @@ public class ZhaoEtAl_2006_test implements ParameterChangeWarningListener {
 			double rake, double vs30, String tectRegType,
 			double[][] verificationTable) {
 		for (int i = 0; i < verificationTable.length; i++) {
-			int periodIndex = i;
+			int periodIndex = i+1;
 			double computedMedian = Math
 					.exp(zhaoEtAlAttenRel.getMean(periodIndex, mag, rRup,
 							hypodepth, rake, vs30, tectRegType));

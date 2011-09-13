@@ -137,13 +137,13 @@ public class YoungsEtAl_1997_AttenRel extends AttenuationRelationship implements
 
 		// init period index - period value map for rock
 		indexFromPerHashMapRock = new HashMap<Double, Integer>();
-		for (int i = 1; i < YoungsEtAl1997Constants.PERIOD_ROCK.length; i++) {
+		for (int i = 2; i < YoungsEtAl1997Constants.PERIOD_ROCK.length; i++) {
 			indexFromPerHashMapRock.put(new Double(
 					YoungsEtAl1997Constants.PERIOD_ROCK[i]), new Integer(i));
 		}
 		// init period index - period value map for soil
 		indexFromPerHashMapSoil = new HashMap<Double, Integer>();
-		for (int i = 1; i < YoungsEtAl1997Constants.PERIOD_SOIL.length; i++) {
+		for (int i = 2; i < YoungsEtAl1997Constants.PERIOD_SOIL.length; i++) {
 			indexFromPerHashMapSoil.put(new Double(
 					YoungsEtAl1997Constants.PERIOD_SOIL[i]), new Integer(i));
 		}
@@ -559,18 +559,14 @@ public class YoungsEtAl_1997_AttenRel extends AttenuationRelationship implements
 		if ( iper == 0) {
 			
 			mean = Math.exp(lnY) * YoungsEtAl1997Constants.SA_g_to_PGV_cms_CONVERSION_FACTOR;
-			System.out.println("PGV");
-			System.out.println("iper" + iper);
 
 		} else if (YoungsEtAl1997Constants.PERIOD_ROCK[iper] == 4.00) {
 		
 			mean = Math.exp(lnY) * YoungsEtAl1997Constants.T3sec_TO_T4sec_factor;
-			System.out.println("SA(4sec)");
 
 		} else {
 		
 			mean = Math.exp(lnY);
-			System.out.println("SA");
 		
 		}
 		return Math.log(mean);

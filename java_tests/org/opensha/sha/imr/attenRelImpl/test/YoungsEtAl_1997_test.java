@@ -171,7 +171,7 @@ public class YoungsEtAl_1997_test implements ParameterChangeWarningListener {
 	 */
 	@Test
 	public void pgaInterfaceM88HypoDepth25(){
-		int iper = 0;
+		int iper = 1;
 		double mag = INTERFACE_MAGNITUDE_VALUES[0];
 		String tecRegType = TectonicRegionType.SUBDUCTION_INTERFACE.toString();
 		String siteTypeParam = "Rock";
@@ -191,7 +191,7 @@ public class YoungsEtAl_1997_test implements ParameterChangeWarningListener {
 	 */
 	@Test
 	public void pgaInterfaceM8HypoDepth25(){
-		int iper = 0;
+		int iper = 1;
 		double mag = INTERFACE_MAGNITUDE_VALUES[1];
 		String tecRegType = TectonicRegionType.SUBDUCTION_INTERFACE.toString();
 		String siteTypeParam = "Rock";
@@ -211,7 +211,7 @@ public class YoungsEtAl_1997_test implements ParameterChangeWarningListener {
 	 */
 	@Test
 	public void pgaInterfaceM7HypoDepth25(){
-		int iper = 0;
+		int iper = 1;
 		double mag = INTERFACE_MAGNITUDE_VALUES[2];
 		String tecRegType = TectonicRegionType.SUBDUCTION_INTERFACE.toString();
 		String siteTypeParam = "Rock";
@@ -231,7 +231,7 @@ public class YoungsEtAl_1997_test implements ParameterChangeWarningListener {
 	 */
 	@Test
 	public void saInterfaceM88HypoDepth25(){
-		int iper = 8;
+		int iper = 9;
 		double mag = INTERFACE_MAGNITUDE_VALUES[0];
 		String tecRegType = TectonicRegionType.SUBDUCTION_INTERFACE.toString();
 		String siteTypeParam = "Rock";
@@ -251,7 +251,7 @@ public class YoungsEtAl_1997_test implements ParameterChangeWarningListener {
 	 */
 	@Test
 	public void saInterfaceM8HypoDepth25(){
-		int iper = 8;
+		int iper = 9;
 		double mag = INTERFACE_MAGNITUDE_VALUES[1];
 		String tecRegType = TectonicRegionType.SUBDUCTION_INTERFACE.toString();
 		String siteTypeParam = "Rock";
@@ -271,7 +271,7 @@ public class YoungsEtAl_1997_test implements ParameterChangeWarningListener {
 	 */
 	@Test
 	public void saInterfaceM7HypoDepth25(){
-		int iper = 8;
+		int iper = 9;
 		double mag = INTERFACE_MAGNITUDE_VALUES[2];
 		String tecRegType = TectonicRegionType.SUBDUCTION_INTERFACE.toString();
 		String siteTypeParam = "Rock";
@@ -291,7 +291,7 @@ public class YoungsEtAl_1997_test implements ParameterChangeWarningListener {
 	 */
 	@Test
 	public void pgaIntraslabM8HypoDepth60(){
-		int iper = 0;
+		int iper = 1;
 		double mag = INTRASLAB_MAGNITUDE_VALUES[0];
 		String tecRegType = TectonicRegionType.SUBDUCTION_SLAB.toString();
 		String siteTypeParam = "Rock";
@@ -311,7 +311,7 @@ public class YoungsEtAl_1997_test implements ParameterChangeWarningListener {
 	 */
 	@Test
 	public void pgaIntraslabM75HypoDepth60(){
-		int iper = 0;
+		int iper = 1;
 		double mag = INTRASLAB_MAGNITUDE_VALUES[1];
 		String tecRegType = TectonicRegionType.SUBDUCTION_SLAB.toString();
 		String siteTypeParam = "Rock";
@@ -331,7 +331,7 @@ public class YoungsEtAl_1997_test implements ParameterChangeWarningListener {
 	 */
 	@Test
 	public void pgaIntraslabM7HypoDepth60(){
-		int iper = 0;
+		int iper = 1;
 		double mag = INTRASLAB_MAGNITUDE_VALUES[2];
 		String tecRegType = TectonicRegionType.SUBDUCTION_SLAB.toString();
 		String siteTypeParam = "Rock";
@@ -351,7 +351,7 @@ public class YoungsEtAl_1997_test implements ParameterChangeWarningListener {
 	 */
 	@Test
 	public void saIntraslabM8HypoDepth60(){
-		int iper = 8;
+		int iper = 9;
 		double mag = INTRASLAB_MAGNITUDE_VALUES[0];
 		String tecRegType = TectonicRegionType.SUBDUCTION_SLAB.toString();
 		String siteTypeParam = "Rock";
@@ -371,7 +371,7 @@ public class YoungsEtAl_1997_test implements ParameterChangeWarningListener {
 	 */
 	@Test
 	public void saIntraslabM75HypoDepth60(){
-		int iper = 8;
+		int iper = 9;
 		double mag = INTRASLAB_MAGNITUDE_VALUES[1];
 		String tecRegType = TectonicRegionType.SUBDUCTION_SLAB.toString();
 		String siteTypeParam = "Rock";
@@ -391,7 +391,7 @@ public class YoungsEtAl_1997_test implements ParameterChangeWarningListener {
 	 */
 	@Test
 	public void saIntraslabM7HypoDepth60(){
-		int iper = 8;
+		int iper = 9;
 		double mag = INTRASLAB_MAGNITUDE_VALUES[2];
 		String tecRegType = TectonicRegionType.SUBDUCTION_SLAB.toString();
 		String siteTypeParam = "Rock";
