@@ -487,19 +487,54 @@ NamedObjectAPI, ParameterChangeListener {
 	public URL getInfoURL() throws MalformedURLException {
 		return null;
 	}
-	/**
-	 * For testing
-	 * 
-	 */
+//	/**
+//	 * For testing
+//	 * 
+//	 */
 	public static void main(String[] args) {
 
 		KG_2004_AttenRel ar = new KG_2004_AttenRel(null);
 		ar.setParamDefaults();
 		ar.setIntensityMeasure(SA_Param.NAME);
 
-				 for (int i=0; i < 44; i++){
+				 for (int i=0; i < 1; i++){
 					 System.out.println("iper ="  + KG_2004Constants.PERIOD[i]);
-					 System.out.println("iper" + i + " mean = " + Math.exp(ar.getMean(i, 7.00, 10, 800, 45)));
+//					 System.out.println("iper" + i + " mean = " + Math.exp(ar.getMean(i, 7.00, 10, 800, 45)));
+					 System.out.println(5.00 + " " + 5.00 + " " + Math.exp(ar.getMean(i, 5.00, 5.00, 800, 15)));
+					 System.out.println(6.00 + " " + 5.00 + " " + Math.exp(ar.getMean(i, 6.00, 5.00, 800, 15)));
+					 System.out.println(6.50 + " " + 5.00 + " " + Math.exp(ar.getMean(i, 6.50, 5.00, 800, 15)));
+					 System.out.println(7.00 + " " + 5.00 + " " + Math.exp(ar.getMean(i, 7.00, 5.00, 800, 15)));
+					 System.out.println(7.50 + " " + 5.00 + " " + Math.exp(ar.getMean(i, 7.50, 5.00, 800, 15)));
+					 System.out.println(5.00 + " " + 10.0 + " " + Math.exp(ar.getMean(i, 5.00, 10.0, 800, 15)));
+					 System.out.println(6.00 + " " + 10.0 + " " + Math.exp(ar.getMean(i, 6.00, 10.0, 800, 15)));
+					 System.out.println(6.50 + " " + 10.0 + " " + Math.exp(ar.getMean(i, 6.50, 10.0, 800, 15)));
+					 System.out.println(7.00 + " " + 10.0 + " " + Math.exp(ar.getMean(i, 7.00, 10.0, 800, 15)));
+					 System.out.println(7.50 + " " + 10.0 + " " + Math.exp(ar.getMean(i, 7.50, 10.0, 800, 15)));
+					 System.out.println(5.00 + " " + 15.0 + " " + Math.exp(ar.getMean(i, 5.00, 15.0, 800, 15)));
+					 System.out.println(6.00 + " " + 15.0 + " " + Math.exp(ar.getMean(i, 6.00, 15.0, 800, 15)));
+					 System.out.println(6.50 + " " + 15.0 + " " + Math.exp(ar.getMean(i, 6.50, 15.0, 800, 15)));
+					 System.out.println(7.00 + " " + 15.0 + " " + Math.exp(ar.getMean(i, 7.00, 15.0, 800, 15)));
+					 System.out.println(7.50 + " " + 15.0 + " " + Math.exp(ar.getMean(i, 7.50, 15.0, 800, 15)));
+					 System.out.println(5.00 + " " + 25.0 + " " + Math.exp(ar.getMean(i, 5.00, 25.0, 800, 15)));
+					 System.out.println(6.00 + " " + 25.0 + " " + Math.exp(ar.getMean(i, 6.00, 25.0, 800, 15)));
+					 System.out.println(6.50 + " " + 25.0 + " " + Math.exp(ar.getMean(i, 6.50, 25.0, 800, 15)));
+					 System.out.println(7.00 + " " + 25.0 + " " + Math.exp(ar.getMean(i, 7.00, 25.0, 800, 15)));
+					 System.out.println(7.50 + " " + 25.0 + " " + Math.exp(ar.getMean(i, 7.50, 25.0, 800, 15)));
+					 System.out.println(5.00 + " " + 50.0 + " " + Math.exp(ar.getMean(i, 5.00, 50.0, 800, 15)));
+					 System.out.println(6.00 + " " + 50.0 + " " + Math.exp(ar.getMean(i, 6.00, 50.0, 800, 15)));
+					 System.out.println(6.50 + " " + 50.0 + " " + Math.exp(ar.getMean(i, 6.50, 50.0, 800, 15)));
+					 System.out.println(7.00 + " " + 50.0 + " " + Math.exp(ar.getMean(i, 7.00, 50.0, 800, 15)));
+					 System.out.println(7.50 + " " + 50.0 + " " + Math.exp(ar.getMean(i, 7.50, 50.0, 800, 15)));
+					 System.out.println(5.00 + " " + 75.0 + " " + Math.exp(ar.getMean(i, 5.00, 75.0, 800, 15)));
+					 System.out.println(6.00 + " " + 75.0 + " " + Math.exp(ar.getMean(i, 6.00, 75.0, 800, 15)));
+					 System.out.println(6.50 + " " + 75.0 + " " + Math.exp(ar.getMean(i, 6.50, 75.0, 800, 15)));
+					 System.out.println(7.00 + " " + 75.0 + " " + Math.exp(ar.getMean(i, 7.00, 75.0, 800, 15)));
+					 System.out.println(7.50 + " " + 75.0 + " " + Math.exp(ar.getMean(i, 7.50, 75.0, 800, 15)));
+					 System.out.println(5.00 + " " + 100. + " " + Math.exp(ar.getMean(i, 5.00, 100., 800, 15)));
+					 System.out.println(6.00 + " " + 100. + " " + Math.exp(ar.getMean(i, 6.00, 100., 800, 15)));
+					 System.out.println(6.50 + " " + 100. + " " + Math.exp(ar.getMean(i, 6.50, 100., 800, 15)));
+					 System.out.println(7.00 + " " + 100. + " " + Math.exp(ar.getMean(i, 7.00, 100., 800, 15))); 
+					 System.out.println(7.50 + " " + 100. + " " + Math.exp(ar.getMean(i, 7.50, 100., 800, 15))); 
 				 }
 
 	}	

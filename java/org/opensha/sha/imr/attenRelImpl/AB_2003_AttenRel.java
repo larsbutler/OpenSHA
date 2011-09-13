@@ -278,11 +278,10 @@ ParameterChangeListener {
 		//		// component Parameter
 		StringConstraint constraint = new StringConstraint();
 		constraint.addString(ComponentParam.COMPONENT_RANDOM_HORZ);
-		constraint.setNonEditable();
-		componentParam = new ComponentParam(constraint,ComponentParam.COMPONENT_RANDOM_HORZ);
 		constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
 		constraint.setNonEditable();
-		componentParam = new ComponentParam(constraint,	ComponentParam.COMPONENT_AVE_HORZ);
+		componentParam = new ComponentParam(constraint,ComponentParam.COMPONENT_RANDOM_HORZ);
+
 
 		// add these to the list
 		otherParams.clear();

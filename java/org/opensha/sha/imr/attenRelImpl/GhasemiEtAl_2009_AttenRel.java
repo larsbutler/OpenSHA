@@ -25,19 +25,14 @@ import java.util.HashMap;
 
 import org.opensha.commons.data.NamedObjectAPI;
 import org.opensha.commons.data.Site;
-import org.opensha.commons.exceptions.InvalidRangeException;
-import org.opensha.commons.exceptions.ParameterException;
 import org.opensha.commons.param.DoubleConstraint;
 import org.opensha.commons.param.DoubleDiscreteConstraint;
 import org.opensha.commons.param.StringConstraint;
-import org.opensha.commons.param.StringParameter;
 import org.opensha.commons.param.event.ParameterChangeEvent;
 import org.opensha.commons.param.event.ParameterChangeListener;
 import org.opensha.commons.param.event.ParameterChangeWarningListener;
-import org.opensha.commons.util.FaultUtils;
 import org.opensha.sha.earthquake.EqkRupture;
 import org.opensha.sha.imr.AttenuationRelationship;
-import org.opensha.sha.imr.PropagationEffect;
 import org.opensha.sha.imr.ScalarIntensityMeasureRelationshipAPI;
 import org.opensha.sha.imr.param.EqkRuptureParams.FaultTypeParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.MagParam;
@@ -51,10 +46,8 @@ import org.opensha.sha.imr.param.OtherParams.ComponentParam;
 import org.opensha.sha.imr.param.OtherParams.SigmaTruncLevelParam;
 import org.opensha.sha.imr.param.OtherParams.SigmaTruncTypeParam;
 import org.opensha.sha.imr.param.OtherParams.StdDevTypeParam;
-import org.opensha.sha.imr.param.OtherParams.TectonicRegionTypeParam;
 import org.opensha.sha.imr.param.PropagationEffectParams.DistanceRupParameter;
 import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
-import org.opensha.sha.util.TectonicRegionType;
 
 
 /**
@@ -280,7 +273,7 @@ ParameterChangeListener {
         constraint.addString(ComponentParam.COMPONENT_GMRotI50);
         constraint.setNonEditable();
         componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_GMRotI50);
-        componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_AVE_HORZ);
+//        componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_AVE_HORZ);
 
 		// add these to the list
 		otherParams.clear();
@@ -371,15 +364,29 @@ ParameterChangeListener {
 		this.initParameterEventListeners();
 	}
 
+//	/**
+//	 * This sets the eqkRupture related parameters (moment magnitude, tectonic
+//	 * region type, focal depth) based on the eqkRupture passed in. The
+//	 * internally held eqkRupture object is also set as that passed in. Warning
+//	 * constrains on magnitude and focal depth are ignored.
+//	 */
+//	public final void setEqkRupture(final EqkRupture eqkRupture) {
+//
+//		magParam.setValueIgnoreWarning(new Double(eqkRupture.getMag()));
+//		this.eqkRupture = eqkRupture;
+//		setPropagationEffectParams();
+//	}
 	/**
-	 * This sets the eqkRupture related parameters (moment magnitude, tectonic
-	 * region type, focal depth) based on the eqkRupture passed in. The
-	 * internally held eqkRupture object is also set as that passed in. Warning
-	 * constrains on magnitude and focal depth are ignored.
+	 * This sets the eqkRupture related parameters (moment magnitude, rake
+	 * angle) based on the eqkRupture passed in. The internally held eqkRupture
+	 * object is also set as that passed in.
 	 */
 	public final void setEqkRupture(final EqkRupture eqkRupture) {
 
 		magParam.setValueIgnoreWarning(new Double(eqkRupture.getMag()));
+		if (!Double.isNaN(eqkRupture.getAveRake())) {
+			rakeParam.setValue(eqkRupture.getAveRake());
+		}
 		this.eqkRupture = eqkRupture;
 		setPropagationEffectParams();
 	}
@@ -499,7 +506,7 @@ ParameterChangeListener {
 		
 		logY = term1 + term2 + s[0];
 
-		logY *= GhasemiEtAl2009Constants.LOG10_2_LN;
+		logY = logY * GhasemiEtAl2009Constants.LOG10_2_LN;
 		
 		return Math.log(Math.exp(logY)*GhasemiEtAl2009Constants.CMS2_TO_G_CONVERSION_FACTOR);
 	}
@@ -541,9 +548,44 @@ public URL getInfoURL() throws MalformedURLException{
 public static void main(String[] args) {
 
 	GhasemiEtAl_2009_AttenRel ar = new GhasemiEtAl_2009_AttenRel(null);
-	 for (int i=0; i < 17; i++){
-//		 System.out.println("iper ="  + GhasemiEtAl2009Constants.PERIOD[i]);
-		 System.out.println(GhasemiEtAl2009Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 6.50, 10, 800)));
+	 for (int i=0; i < 1; i++){
+		 System.out.println("iper ="  + GhasemiEtAl2009Constants.PERIOD[i]);
+//		 System.out.println(GhasemiEtAl2009Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 6.50, 10, 800)));
+		 System.out.println(5.00 + " " + 8.81   + " " + Math.exp(ar.getMean(i, 5.00, 8.81  , 800)));
+		 System.out.println(6.00 + " " + 7.49   + " " + Math.exp(ar.getMean(i, 6.00, 7.49  , 800)));
+		 System.out.println(6.50 + " " + 6.57   + " " + Math.exp(ar.getMean(i, 6.50, 6.57  , 800)));
+		 System.out.println(7.00 + " " + 5.57   + " " + Math.exp(ar.getMean(i, 7.00, 5.57  , 800)));
+		 System.out.println(7.50 + " " + 5.00   + " " + Math.exp(ar.getMean(i, 7.50, 5.00  , 800)));
+		 System.out.println(5.00 + " " + 12.35  + " " + Math.exp(ar.getMean(i, 5.00, 12.35 , 800)));
+		 System.out.println(6.00 + " " + 11.45  + " " + Math.exp(ar.getMean(i, 6.00, 11.45 , 800)));
+		 System.out.println(6.50 + " " + 10.87  + " " + Math.exp(ar.getMean(i, 6.50, 10.87 , 800)));
+		 System.out.println(7.00 + " " + 10.30  + " " + Math.exp(ar.getMean(i, 7.00, 10.30 , 800))); 
+		 System.out.println(7.50 + " " + 10.00  + " " + Math.exp(ar.getMean(i, 7.50, 10.00 , 800)));
+		 System.out.println(5.00 + " " + 16.66  + " " + Math.exp(ar.getMean(i, 5.00, 16.66 , 800)));
+		 System.out.println(6.00 + " " + 16.00  + " " + Math.exp(ar.getMean(i, 6.00, 16.00 , 800))); 
+		 System.out.println(6.50 + " " + 15.59  + " " + Math.exp(ar.getMean(i, 6.50, 15.59 , 800)));
+		 System.out.println(7.00 + " " + 15.20  + " " + Math.exp(ar.getMean(i, 7.00, 15.20 , 800)));
+		 System.out.println(7.50 + " " + 15.00  + " " + Math.exp(ar.getMean(i, 7.50, 15.00 , 800)));
+		 System.out.println(5.00 + " " + 26.03  + " " + Math.exp(ar.getMean(i, 5.00, 26.03 , 800)));
+		 System.out.println(6.00 + " " + 25.61  + " " + Math.exp(ar.getMean(i, 6.00, 25.61 , 800)));
+		 System.out.println(6.50 + " " + 25.36  + " " + Math.exp(ar.getMean(i, 6.50, 25.36 , 800)));
+		 System.out.println(7.00 + " " + 25.12  + " " + Math.exp(ar.getMean(i, 7.00, 25.12 , 800)));
+		 System.out.println(7.50 + " " + 25.00  + " " + Math.exp(ar.getMean(i, 7.50, 25.00 , 800)));
+		 System.out.println(5.00 + " " + 50.52  + " " + Math.exp(ar.getMean(i, 5.00, 50.52 , 800)));
+		 System.out.println(6.00 + " " + 50.31  + " " + Math.exp(ar.getMean(i, 6.00, 50.31 , 800)));
+		 System.out.println(6.50 + " " + 50.18  + " " + Math.exp(ar.getMean(i, 6.50, 50.18 , 800)));
+		 System.out.println(7.00 + " " + 50.06  + " " + Math.exp(ar.getMean(i, 7.00, 50.06 , 800)));
+		 System.out.println(7.50 + " " + 50.00  + " " + Math.exp(ar.getMean(i, 7.50, 50.00 , 800)));
+		 System.out.println(5.00 + " " + 75.35  + " " + Math.exp(ar.getMean(i, 5.00, 75.35 , 800)));
+		 System.out.println(6.00 + " " + 75.21  + " " + Math.exp(ar.getMean(i, 6.00, 75.21 , 800)));
+		 System.out.println(6.50 + " " + 75.12  + " " + Math.exp(ar.getMean(i, 6.50, 75.12 , 800)));
+		 System.out.println(7.00 + " " + 75.04  + " " + Math.exp(ar.getMean(i, 7.00, 75.04 , 800)));
+		 System.out.println(7.50 + " " + 75.00  + " " + Math.exp(ar.getMean(i, 7.50, 75.00 , 800)));
+		 System.out.println(5.00 + " " + 100.26 + " " + Math.exp(ar.getMean(i, 5.00, 100.26, 800)));
+		 System.out.println(6.00 + " " + 100.16 + " " + Math.exp(ar.getMean(i, 6.00, 100.16, 800)));
+		 System.out.println(6.50 + " " + 100.09 + " " + Math.exp(ar.getMean(i, 6.50, 100.09, 800)));
+		 System.out.println(7.00 + " " + 100.03 + " " + Math.exp(ar.getMean(i, 7.00, 100.03, 800))); 
+		 System.out.println(7.50 + " " + 100.00 + " " + Math.exp(ar.getMean(i, 7.50, 100.00, 800))); 
 	 }
 }	
 

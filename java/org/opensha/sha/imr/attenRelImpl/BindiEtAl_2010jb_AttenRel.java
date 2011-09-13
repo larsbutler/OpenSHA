@@ -569,7 +569,43 @@ public class BindiEtAl_2010jb_AttenRel extends AttenuationRelationship implement
 
 		for (int i= 1; i < 2; i++){
 			System.out.println("Rock ="  + BindiEtAl2010Constants.PERIOD[i]);
-			System.out.println("meanRjb =" + Math.exp(ar.getMean(i, 6.0, 3, 800)));
+//			System.out.println("meanRjb =" + Math.exp(ar.getMean(i, 6.0, 3, 800)));
+			System.out.println(5.00 + " " + 5.00 + " " + Math.exp(ar.getMean(i, 5.00, 5.00, 800)));
+			System.out.println(6.00 + " " + 5.00 + " " + Math.exp(ar.getMean(i, 6.00, 5.00, 800)));
+			System.out.println(6.50 + " " + 5.00 + " " + Math.exp(ar.getMean(i, 6.50, 5.00, 800)));
+			System.out.println(7.00 + " " + 5.00 + " " + Math.exp(ar.getMean(i, 7.00, 5.00, 800)));
+			System.out.println(7.50 + " " + 5.00 + " " + Math.exp(ar.getMean(i, 7.50, 5.00, 800)));
+			System.out.println(5.00 + " " + 10.0 + " " + Math.exp(ar.getMean(i, 5.00, 10.0, 800)));
+			System.out.println(6.00 + " " + 10.0 + " " + Math.exp(ar.getMean(i, 6.00, 10.0, 800)));
+			System.out.println(6.50 + " " + 10.0 + " " + Math.exp(ar.getMean(i, 6.50, 10.0, 800)));
+			System.out.println(7.00 + " " + 10.0 + " " + Math.exp(ar.getMean(i, 7.00, 10.0, 800)));
+			System.out.println(7.50 + " " + 10.0 + " " + Math.exp(ar.getMean(i, 7.50, 10.0, 800)));
+			System.out.println(5.00 + " " + 15.0 + " " + Math.exp(ar.getMean(i, 5.00, 15.0, 800)));
+			System.out.println(6.00 + " " + 15.0 + " " + Math.exp(ar.getMean(i, 6.00, 15.0, 800)));
+			System.out.println(6.50 + " " + 15.0 + " " + Math.exp(ar.getMean(i, 6.50, 15.0, 800)));
+			System.out.println(7.00 + " " + 15.0 + " " + Math.exp(ar.getMean(i, 7.00, 15.0, 800)));
+			System.out.println(7.50 + " " + 15.0 + " " + Math.exp(ar.getMean(i, 7.50, 15.0, 800)));
+			System.out.println(5.00 + " " + 25.0 + " " + Math.exp(ar.getMean(i, 5.00, 25.0, 800)));
+			System.out.println(6.00 + " " + 25.0 + " " + Math.exp(ar.getMean(i, 6.00, 25.0, 800)));
+			System.out.println(6.50 + " " + 25.0 + " " + Math.exp(ar.getMean(i, 6.50, 25.0, 800)));
+			System.out.println(7.00 + " " + 25.0 + " " + Math.exp(ar.getMean(i, 7.00, 25.0, 800)));
+			System.out.println(7.50 + " " + 25.0 + " " + Math.exp(ar.getMean(i, 7.50, 25.0, 800)));
+			System.out.println(5.00 + " " + 50.0 + " " + Math.exp(ar.getMean(i, 5.00, 50.0, 800)));
+			System.out.println(6.00 + " " + 50.0 + " " + Math.exp(ar.getMean(i, 6.00, 50.0, 800)));
+			System.out.println(6.50 + " " + 50.0 + " " + Math.exp(ar.getMean(i, 6.50, 50.0, 800)));
+			System.out.println(7.00 + " " + 50.0 + " " + Math.exp(ar.getMean(i, 7.00, 50.0, 800)));
+			System.out.println(7.50 + " " + 50.0 + " " + Math.exp(ar.getMean(i, 7.50, 50.0, 800)));
+			System.out.println(5.00 + " " + 75.0 + " " + Math.exp(ar.getMean(i, 5.00, 75.0, 800)));
+			System.out.println(6.00 + " " + 75.0 + " " + Math.exp(ar.getMean(i, 6.00, 75.0, 800)));
+			System.out.println(6.50 + " " + 75.0 + " " + Math.exp(ar.getMean(i, 6.50, 75.0, 800)));
+			System.out.println(7.00 + " " + 75.0 + " " + Math.exp(ar.getMean(i, 7.00, 75.0, 800)));
+			System.out.println(7.50 + " " + 75.0 + " " + Math.exp(ar.getMean(i, 7.50, 75.0, 800)));
+			System.out.println(5.00 + " " + 100. + " " + Math.exp(ar.getMean(i, 5.00, 100., 800)));
+			System.out.println(6.00 + " " + 100. + " " + Math.exp(ar.getMean(i, 6.00, 100., 800)));
+			System.out.println(6.50 + " " + 100. + " " + Math.exp(ar.getMean(i, 6.50, 100., 800)));
+			System.out.println(7.00 + " " + 100. + " " + Math.exp(ar.getMean(i, 7.00, 100., 800))); 
+			System.out.println(7.50 + " " + 100. + " " + Math.exp(ar.getMean(i, 7.50, 100., 800))); 
+			
 
 		}
 	}	
