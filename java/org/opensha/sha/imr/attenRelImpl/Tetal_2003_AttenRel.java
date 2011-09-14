@@ -28,10 +28,9 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  * <p>
  * 
  * <b>Description:</b> Class implementing attenuation relationship described in:
- * "Empirical attenuation relationship for Arias intensity",
- * Travasarou, T., Bray, J. D. & Abrahamson, N. A., 
- * Earthquake Engineering & Structural Dynamics, Vol. 32,
- * pp 1133-1155, 2003.
+ * "Empirical attenuation relationship for Arias intensity", Travasarou, T.,
+ * Bray, J. D. & Abrahamson, N. A., Earthquake Engineering & Structural
+ * Dynamics, Vol. 32, pp 1133-1155, 2003.
  * <p>
  * 
  * Supported Intensity-Measure Parameters:
@@ -44,14 +43,14 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  * <p>
  * <UL>
  * <LI>magParam - moment magnitude
- * <LI>rakeParam - rake angle. Used to establish if event is normal 
- * (-112.5<rake<-67.5), reverse/reverse oblique (22.5 < rake < 112.5) 
- * or strike-slip.
+ * <LI>rakeParam - rake angle. Used to establish if event is normal
+ * (-112.5<rake<-67.5), reverse/reverse oblique (22.5 < rake < 112.5) or
+ * strike-slip.
  * <LI>distanceRupParam - rupture distance
  * <LI>vs30Param - shear wave velocity (m/s) averaged over the top 30 m of the
  * soil profile; The model assumes the following classification: vs30 < 360 m/s
- * -> NEHRP D (soft soil), 360 <= vs30 <= 760 -> NEHRP C (stiff soil), 
- * vs30 > 760 -> NEHRP A/B (rock).
+ * -> NEHRP D (soft soil), 360 <= vs30 <= 760 -> NEHRP C (stiff soil), vs30 >
+ * 760 -> NEHRP A/B (rock).
  * <LI>componentParam - average horizontal
  * <LI>stdDevTypeParam - total, inter-event, intra-event, none
  * </UL>
@@ -59,8 +58,9 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  * 
  * <p>
  * 
- * Verification -
- * Checked against my previous Fortran implementation of this GMPE
+ * Verification - Checked against my previous Fortran implementation of this
+ * GMPE Checked against Excel spreadsheet implementation of this GMPE provided
+ * by Peter J. Stafford (Imperial College London)
  * 
  * 
  * </p>
@@ -68,12 +68,12 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  ** 
  * @author J. Douglas
  * @created August 30, 2011
- * @version 1.0
+ * @version 1.1
  */
 
 public class Tetal_2003_AttenRel extends AttenuationRelationship implements
-ScalarIntensityMeasureRelationshipAPI, NamedObjectAPI,
-ParameterChangeListener {
+		ScalarIntensityMeasureRelationshipAPI, NamedObjectAPI,
+		ParameterChangeListener {
 
 	/** Short name. */
 	public final static String SHORT_NAME = "Tetal2003";
@@ -125,8 +125,8 @@ ParameterChangeListener {
 	}
 
 	/**
-	 * Creates the supported IM parameter (IA) and adds
-	 * them to the supportedIMParams list. Makes the parameters non-editable.
+	 * Creates the supported IM parameter (IA) and adds them to the
+	 * supportedIMParams list. Makes the parameters non-editable.
 	 */
 	protected final void initSupportedIntensityMeasureParams() {
 
@@ -173,9 +173,8 @@ ParameterChangeListener {
 	}
 
 	/**
-	 * Initialize Propagation Effect parameters (rupture distance) and adds
-	 * them to the propagationEffectParams list. Makes the parameters
-	 * non-editable.
+	 * Initialize Propagation Effect parameters (rupture distance) and adds them
+	 * to the propagationEffectParams list. Makes the parameters non-editable.
 	 */
 	protected final void initPropagationEffectParams() {
 
@@ -254,7 +253,7 @@ ParameterChangeListener {
 
 		// params that the IML at exceed. prob. depends upon
 		imlAtExceedProbIndependentParams
-		.addParameterList(exceedProbIndependentParams);
+				.addParameterList(exceedProbIndependentParams);
 		imlAtExceedProbIndependentParams.addParameter(exceedProbParam);
 	}
 
@@ -336,8 +335,8 @@ ParameterChangeListener {
 	}
 
 	/**
-	 * This calculates the rupture Distance propagation effect parameter based on the
-	 * current site and eqkRupture.
+	 * This calculates the rupture Distance propagation effect parameter based
+	 * on the current site and eqkRupture.
 	 */
 	protected void setPropagationEffectParams() {
 
@@ -355,7 +354,7 @@ ParameterChangeListener {
 			return VERY_SMALL_MEAN;
 		} else {
 			/**
-			setPeriodIndex();
+			 * setPeriodIndex();
 			 */
 			return getMean(mag, rrup, vs30, rake);
 		}
@@ -366,9 +365,9 @@ ParameterChangeListener {
 	 */
 	public final double getStdDev() {
 		/**
-		setPeriodIndex();
+		 * setPeriodIndex();
 		 */
-		return getStdDev(mag,rrup,vs30,rake,stdDevType);
+		return getStdDev(mag, rrup, vs30, rake, stdDevType);
 	}
 
 	/**
@@ -406,31 +405,32 @@ ParameterChangeListener {
 	/**
 	 * Compute mean (natural logarithm of median ground motion).
 	 */
-	public double getMean( double mag, final double rrup,
-			final double vs30, final double rake) {
+	public double getMean(double mag, final double rrup, final double vs30,
+			final double rake) {
 
 		double lnY = Double.NaN;
 
-		double c1=2.800;	
-		double c2=-1.981;
-		double c3=20.72;
-		double c4=-1.703;
-		double h=8.78;
-		double s11=0.454;
-		double s12=0.101;
-		double s21=0.479;
-		double s22=0.334;
-		double f1=-0.166; 
-		double f2=0.512; 
+		double c1 = 2.800;
+		double c2 = -1.981;
+		double c3 = 20.72;
+		double c4 = -1.703;
+		double h = 8.78;
+		double s11 = 0.454;
+		double s12 = 0.101;
+		double s21 = 0.479;
+		double s22 = 0.334;
+		double f1 = -0.166;
+		double f2 = 0.512;
 
 		int[] soilTerms = setSoilTerms(vs30);
 
 		int[] faultStyleTerms = setFaultStyleTerms(rake);
 
-		lnY = c1 + c2 * (mag-6.0) + c3 * Math.log(mag/6.0) + 
-				c4*Math.log(Math.sqrt(rrup*rrup+h*h))+ 
-				(s11+s12*(mag-6.0))* soilTerms[0] + (s21+s22*(mag-6.0)) * soilTerms[1] +
-				+f1*faultStyleTerms[0] + f2 * faultStyleTerms[1];
+		lnY = c1 + c2 * (mag - 6.0) + c3 * Math.log(mag / 6.0) + c4
+				* Math.log(Math.sqrt(rrup * rrup + h * h))
+				+ (s11 + s12 * (mag - 6.0)) * soilTerms[0]
+				+ (s21 + s22 * (mag - 6.0)) * soilTerms[1] + +f1
+				* faultStyleTerms[0] + f2 * faultStyleTerms[1];
 
 		return lnY;
 	}
@@ -449,10 +449,10 @@ ParameterChangeListener {
 	}
 
 	private int[] setSoilTerms(final double vs30) {
-		int[] soilTerms = new int[] { 0, 0, 0};
+		int[] soilTerms = new int[] { 0, 0, 0 };
 
 		if (vs30 < Tetal2003Constants.SOFT_SOIL_UPPER_BOUND) {
-			/** 
+			/**
 			 * Class D
 			 */
 			soilTerms[1] = 1;
@@ -473,41 +473,42 @@ ParameterChangeListener {
 		return soilTerms;
 	}
 
-
-	public double getStdDev(double mag, final double rrup,
-			final double vs30, final double rake, String stdDevType) {
+	public double getStdDev(double mag, final double rrup, final double vs30,
+			final double rake, String stdDevType) {
 		/**
 		 * inter-event
 		 */
 		double tau;
-		if(mag<4.7)
-			tau=0.611;
-		else if(mag>=4.7 && mag<=7.6) 
-			tau=0.611-0.047*(mag-4.7);
+		if (mag < 4.7)
+			tau = 0.611;
+		else if (mag >= 4.7 && mag <= 7.6)
+			tau = 0.611 - 0.047 * (mag - 4.7);
 		else
-			tau=0.475;
+			tau = 0.475;
 		/**
 		 * the intra-event standard deviation sigma1 for different site classes.
 		 */
-		final double[] sigma1 = 
-			{1.17,0.96,1.18}; 
+		final double[] sigma1 = { 1.17, 0.96, 1.18 };
 		/**
 		 * the intra-event standard deviation sigma2 for different site classes.
 		 */
-		final double[] sigma2 = 
-			{0.93,0.73,0.94}; 
-		/** 
+		final double[] sigma2 = { 0.93, 0.73, 0.94 };
+		/**
 		 * intra-event
 		 */
 		double y = Math.exp(getMean(mag, rrup, vs30, rake));
 		int[] soilTerms = setSoilTerms(vs30);
 		double sigmas;
-		if(y<=0.013)
-			sigmas=sigma1[0]*soilTerms[0]+sigma1[1]*soilTerms[1]+sigma1[2]*soilTerms[2];
-		else if(y>0.013 && y<0.125) 
-			sigmas=sigma1[0]*soilTerms[0]+sigma1[1]*soilTerms[1]+sigma1[2]*soilTerms[2]-0.106*(Math.log(y)-Math.log(0.0132));
+		if (y <= 0.013)
+			sigmas = sigma1[0] * soilTerms[0] + sigma1[1] * soilTerms[1]
+					+ sigma1[2] * soilTerms[2];
+		else if (y > 0.013 && y < 0.125)
+			sigmas = sigma1[0] * soilTerms[0] + sigma1[1] * soilTerms[1]
+					+ sigma1[2] * soilTerms[2] - 0.106
+					* (Math.log(y) - Math.log(0.0132));
 		else
-			sigmas=sigma2[0]*soilTerms[0]+sigma2[1]*soilTerms[1]+sigma2[2]*soilTerms[2];
+			sigmas = sigma2[0] * soilTerms[0] + sigma2[1] * soilTerms[1]
+					+ sigma2[2] * soilTerms[2];
 		if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE))
 			return 0;
 		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTER))
@@ -515,7 +516,7 @@ ParameterChangeListener {
 		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTRA))
 			return sigmas;
 		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL))
-			return Math.sqrt(tau*tau+sigmas*sigmas);
+			return Math.sqrt(tau * tau + sigmas * sigmas);
 		else
 			return Double.NaN;
 	}
@@ -527,6 +528,7 @@ ParameterChangeListener {
 	public URL getInfoURL() throws MalformedURLException {
 		return null;
 	}
+
 	/**
 	 * For testing
 	 * 
@@ -535,17 +537,27 @@ ParameterChangeListener {
 
 		Tetal_2003_AttenRel ar = new Tetal_2003_AttenRel(null);
 
-		System.out.println("mean = " + Math.exp(ar.getMean(7.00, 10, 800, -90.0)));
-		System.out.println("mean = " + Math.exp(ar.getMean(7.00, 10, 800, 60.0)));
-		System.out.println("mean = " + Math.exp(ar.getMean(7.00, 10, 800, 0.0)));
-		System.out.println("mean = " + Math.exp(ar.getMean(7.00, 100, 800, 0.0)));
-		System.out.println("mean = " + Math.exp(ar.getMean(7.00, 10, 100, 0.0)));
+		System.out.println("mean = "
+				+ Math.exp(ar.getMean(7.00, 10, 800, -90.0)));
+		System.out.println("mean = "
+				+ Math.exp(ar.getMean(7.00, 10, 800, 60.0)));
+		System.out
+				.println("mean = " + Math.exp(ar.getMean(7.00, 10, 800, 0.0)));
+		System.out.println("mean = "
+				+ Math.exp(ar.getMean(7.00, 100, 800, 0.0)));
+		System.out
+				.println("mean = " + Math.exp(ar.getMean(7.00, 10, 100, 0.0)));
 
-		System.out.println("s.d. (inter) = " + ar.getStdDev(7.00, 10, 100, -90.0,"Inter-Event"));
-		System.out.println("s.d. (intra) = " + ar.getStdDev(7.00, 10, 100, -90.0,"Intra-Event"));
-		System.out.println("s.d. (total) = " + ar.getStdDev(7.00, 10, 100, -90.0,"Total"));
-		System.out.println("s.d. (total) = " + ar.getStdDev(9.00, 10, 100, -90.0,"Total"));
-		System.out.println("s.d. (total) = " + ar.getStdDev(4.00, 10, 100, -90.0,"Total"));
+		System.out.println("s.d. (inter) = "
+				+ ar.getStdDev(7.00, 10, 100, -90.0, "Inter-Event"));
+		System.out.println("s.d. (intra) = "
+				+ ar.getStdDev(7.00, 10, 100, -90.0, "Intra-Event"));
+		System.out.println("s.d. (total) = "
+				+ ar.getStdDev(7.00, 10, 100, -90.0, "Total"));
+		System.out.println("s.d. (total) = "
+				+ ar.getStdDev(9.00, 10, 100, -90.0, "Total"));
+		System.out.println("s.d. (total) = "
+				+ ar.getStdDev(4.00, 10, 100, -90.0, "Total"));
 
-	}	
+	}
 }

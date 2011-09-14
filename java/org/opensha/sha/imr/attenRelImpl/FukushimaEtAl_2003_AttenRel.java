@@ -147,7 +147,7 @@ ParameterChangeListener {
 
 		// Create an Hash map that links the period with its index
 		indexFromPerHashMap = new HashMap<Double, Integer>();
-		for (int i = 0; i < FukushimaEtAl2003Constants.PERIOD.length; i++) { 
+		for (int i = 1; i < FukushimaEtAl2003Constants.PERIOD.length; i++) { 
 			indexFromPerHashMap.put(new Double(FukushimaEtAl2003Constants.PERIOD[i]), 
 					new Integer(i));
 		}
@@ -558,7 +558,7 @@ public static void main(String[] args) {
 	FukushimaEtAl_2003_AttenRel ar = new FukushimaEtAl_2003_AttenRel(null);
 	 for (int i=0; i < 1; i++){
 		 System.out.println("iper ="  + FukushimaEtAl2003Constants.PERIOD[i]);
-//		 System.out.println("iper" + FukushimaEtAl2003Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 5.50, 10, 800)));
+		 System.out.println("iper" + FukushimaEtAl2003Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 7.5, 10, 800)));
 		 System.out.println(5.00 + " " + 8.81   + " " + Math.exp(ar.getMean(i, 5.00, 8.81  , 800)));
 		 System.out.println(6.00 + " " + 7.49   + " " + Math.exp(ar.getMean(i, 6.00, 7.49  , 800)));
 		 System.out.println(6.50 + " " + 6.57   + " " + Math.exp(ar.getMean(i, 6.50, 6.57  , 800)));

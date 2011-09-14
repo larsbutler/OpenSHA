@@ -62,14 +62,14 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  * 
  * Verification -
  * Checked against my previous Fortran implementation of this GMPE
- * 
+ * and against Excel spreadsheet provided by Jonathan P. Stewart
  * 
  * </p>
  * 
  ** 
  * @author J. Douglas
  * @created August 31, 2011
- * @version 1.0
+ * @version 1.1
  */
 
 public class AS_1996_AttenRel extends AttenuationRelationship implements
@@ -407,11 +407,11 @@ ParameterChangeListener {
 
 		int soilTerms = setSoilTerms(vs30);
 
-		
+
 		if (rrup>=rc)
-			lnY=Math.log(Math.pow(Math.exp(b1+b2*(mag-6))/Math.pow(10,1.5*mag+16.05),-0.3333)/(4.9E6*beta)+soilTerms*c1+c2*(rrup-rc))+Drat;
+			lnY=Math.log(Math.pow(Math.exp(b1+b2*(mag-6))/Math.pow(10,1.5*mag+16.05),-0.333333333333333)/(4.9E6*beta)+soilTerms*c1+c2*(rrup-rc))+Drat;
 		else 
-			lnY=Math.log(Math.pow(Math.exp(b1+b2*(mag-6))/Math.pow(10,1.5*mag+16.05),-0.3333)/(4.9E6*beta)+soilTerms*c1)+Drat;
+			lnY=Math.log(Math.pow(Math.exp(b1+b2*(mag-6))/Math.pow(10,1.5*mag+16.05),-0.333333333333333)/(4.9E6*beta)+soilTerms*c1)+Drat;
 
 		return lnY;
 	}
@@ -433,7 +433,7 @@ ParameterChangeListener {
 		/**
 		 * total
 		 */
-		double sigma=0.49;
+		double sigma=0.493;
 		if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE))
 			return 0;
 		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTER))

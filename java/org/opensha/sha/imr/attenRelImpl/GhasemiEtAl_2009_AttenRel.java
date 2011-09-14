@@ -140,7 +140,7 @@ ParameterChangeListener {
 
 		// Create an Hash map that links the period with its index
 		indexFromPerHashMap = new HashMap<Double, Integer>();
-		for (int i = 0; i < GhasemiEtAl2009Constants.PERIOD.length; i++) { 
+		for (int i = 1; i < GhasemiEtAl2009Constants.PERIOD.length; i++) { 
 			indexFromPerHashMap.put(new Double(GhasemiEtAl2009Constants.PERIOD[i]), 
 					new Integer(i));
 		}

@@ -130,7 +130,7 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 
 		// Create an Hash map that links the period with its index
 		indexFromPerHashMap = new HashMap<Double, Integer>();
-		for (int i = 0; i < AkB2010Constants.PERIOD.length; i++) {
+		for (int i = 2; i < AkB2010Constants.PERIOD.length; i++) {
 			indexFromPerHashMap.put(new Double(AkB2010Constants.PERIOD[i]),
 					new Integer(i));
 		}
@@ -152,7 +152,7 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 
 		// set supported periods for spectral acceleration
 		DoubleDiscreteConstraint periodConstraint = new DoubleDiscreteConstraint();
-		for (int i = 1; i < AkB2010Constants.PERIOD.length; i++) {
+		for (int i = 2; i < AkB2010Constants.PERIOD.length; i++) {
 			periodConstraint.addDouble(new Double(AkB2010Constants.PERIOD[i]));
 		}
 		periodConstraint.setNonEditable();

@@ -60,6 +60,8 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  * 
  * Verification -
  * Checked against my previous Fortran implementation of this GMPE
+ * and against results of StaffordGMPEs.jar provided by Peter J.
+ * Stafford
  * 
  * 
  * </p>
@@ -67,7 +69,7 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  ** 
  * @author J. Douglas
  * @created August 31, 2011
- * @version 1.0
+ * @version 1.1
  */
 
 public class FS_2011_AttenRel extends AttenuationRelationship implements
@@ -91,8 +93,8 @@ ParameterChangeListener {
 
 	/** Rupture distance. */
 	private double rrup;
-	
-	/** Vs 30. */
+
+	/** Vs30. */
 	private double vs30;
 
 	/** Standard deviation type. */
@@ -422,7 +424,7 @@ ParameterChangeListener {
 		double v4=0.0818;
 		double vref=1100.0;
 		double vel1=280.0;
-		
+
 		int faultStyleTerms = setFaultStyleTerms(rake);
 
 		double iaref=Math.exp(c1+c2*(8.5-mag)*(8.5-mag)+(c3+c4*mag)*Math.log(Math.sqrt(rrup*rrup+c5*c5))+c6*faultStyleTerms);
@@ -466,14 +468,14 @@ ParameterChangeListener {
 		double vref=1100.0;
 		double vel1=280.0;
 		double sigmaa=0.5978;
-				
+
 		int faultStyleTerms = setFaultStyleTerms(rake);
 		double iaref=Math.exp(c1+c2*(8.5-mag)*(8.5-mag)+(c3+c4*mag)*Math.log(Math.sqrt(rrup*rrup+c5*c5))+c6*faultStyleTerms);
 		double b=v2*(Math.exp(v3*(Math.min(vs30, 1100.)-vel1))-Math.exp(v3*(vref-vel1)));
 		double c=v4;
 		double nl=b*iaref/(iaref+c);
 		double sigma=sigmaa*Math.pow(Math.max(mag, 5.), delta1)*(delta2+Math.pow(Math.abs(1+nl),delta3));
-		
+
 		if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE))
 			return 0;
 		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTER))

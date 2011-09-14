@@ -61,9 +61,12 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  * 
  * Verification -
  * Checked against my previous Fortran implementation of this GMPE
+ * and against results of StaffordGMPEs.jar provided by Peter J.
+ * Stafford
  * 
- * N.B. There seems to be an error in equation 6 of the paper. I do not think that 
- * the sigma_c^2 should be added to get the arbitrary component
+ * N.B. There is an error in equation 6 of the paper.  
+ * The sigma_c^2 should be added to get the arbitrary component.
+ * This was confirmed by Peter J. Stafford
  * 
  * 
  * </p>
@@ -71,7 +74,7 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  ** 
  * @author J. Douglas
  * @created September 1, 2011
- * @version 1.0
+ * @version 1.1
  */
 
 public class Betal_2009_AttenRel extends AttenuationRelationship implements
@@ -442,7 +445,7 @@ ParameterChangeListener {
 		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTER))
 			return tau;
 		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTRA))
-			return sigma;
+			return Math.sqrt(sigma*sigma-sigmac*sigmac);
 		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL))
 			return Math.sqrt(tau*tau+sigma*sigma-sigmac*sigmac);
 		else

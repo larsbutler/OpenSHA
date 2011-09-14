@@ -114,7 +114,7 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 
 		initSupportedIntensityMeasureParams();
 		indexFromPerHashMap = new HashMap<Double, Integer>();
-		for (int i = 0; i < ToroEtAl2002Constants.PERIOD.length ; i++) {
+		for (int i = 2; i < ToroEtAl2002Constants.PERIOD.length ; i++) {
 			indexFromPerHashMap.put(new Double(ToroEtAl2002Constants.PERIOD[i]), 
 					new Integer(i));
 		}
@@ -143,7 +143,7 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 
 		// set supported periods for spectral acceleration
 		DoubleDiscreteConstraint periodConstraint = new DoubleDiscreteConstraint();
-		for (int i = 0; i < ToroEtAl2002Constants.PERIOD.length; i++) {
+		for (int i = 2; i < ToroEtAl2002Constants.PERIOD.length; i++) {
 			periodConstraint.addDouble(new Double(ToroEtAl2002Constants.PERIOD[i]));
 		}
 		periodConstraint.setNonEditable();

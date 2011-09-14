@@ -131,7 +131,7 @@ NamedObjectAPI, ParameterChangeListener {
 
 		// Create an Hash map that links the period with its index
 		indexFromPerHashMap = new HashMap<Double, Integer>();
-		for (int i = 0; i < KG_2004Constants.PERIOD.length; i++) {
+		for (int i = 1; i < KG_2004Constants.PERIOD.length; i++) {
 			indexFromPerHashMap.put(new Double(KG_2004Constants.PERIOD[i]),
 					new Integer(i));
 		}

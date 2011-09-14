@@ -140,7 +140,7 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 		initSupportedIntensityMeasureParams();
 
 		indexFromPerHashMap = new HashMap<Double, Integer>();
-		for (int i = 0; i < ZhaoEtAl2006Constants.PERIOD.length; i++) {
+		for (int i = 2; i < ZhaoEtAl2006Constants.PERIOD.length; i++) {
 			indexFromPerHashMap
 					.put(new Double(ZhaoEtAl2006Constants.PERIOD[i]),
 							new Integer(i));
@@ -162,7 +162,7 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 	protected void initSupportedIntensityMeasureParams() {
 
 		DoubleDiscreteConstraint periodConstraint = new DoubleDiscreteConstraint();
-		for (int i = 1; i < ZhaoEtAl2006Constants.PERIOD.length; i++) {
+		for (int i = 2; i < ZhaoEtAl2006Constants.PERIOD.length; i++) {
 			periodConstraint.addDouble(new Double(
 					ZhaoEtAl2006Constants.PERIOD[i]));
 		}

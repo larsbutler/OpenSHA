@@ -57,14 +57,14 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  * 
  * Verification -
  * Checked against my previous Fortran implementation of this GMPE
- * 
+ * and against Excel spreadsheet provided by Jonathan P. Stewart
  * 
  * </p>
  * 
  ** 
  * @author J. Douglas
  * @created September 1, 2011
- * @version 1.0
+ * @version 1.1
  */
 
 public class KS_2006_AttenRel extends AttenuationRelationship implements
@@ -395,14 +395,13 @@ ParameterChangeListener {
 		double b1=2.79;
 		double b2=0.82;
 		double beta=3.2;
-		double c2=0.063;
+		double c2=0.15;
 		double c4=3.00;
 		double c5=-0.0041;
 		double c10=0.015;
-		double nsource=0.0;
 
-		if (rrup<20) nsource=c10*(rrup-20.0);
-		lnY=Math.log(Math.pow(Math.exp(b1+b2*(mag-6))/Math.pow(10,1.5*mag+16.05),-0.3333)/(4.9E6*beta)+rrup*c2+c4+c5*vs30+nsource);
+		lnY=Math.log(Math.pow(Math.exp(b1+b2*(mag-6))/Math.pow(10,1.5*mag+16.05),-0.333333333333)/(4.9E6*beta)+rrup*c2+c4+c5*vs30);
+		if (rrup<20) lnY=lnY+c10*(rrup-20.0);
 
 		return lnY;
 	}

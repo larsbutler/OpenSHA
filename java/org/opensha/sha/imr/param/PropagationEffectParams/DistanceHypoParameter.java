@@ -112,23 +112,27 @@ public class DistanceHypoParameter extends
      */
     protected void calcValueFromSiteAndEqkRup() {
         if ((this.site != null) && (this.eqkRupture != null)) {
+        	
+        	System.out.println("both site and eqkRupture are not null.");
 
             double horzDist, vertDist, totalDist;
 
             // site location
             Location loc1 = site.getLocation();
 
-            // extract hypocenter location as middle of the rupture
-            EvenlyGriddedSurfaceAPI rupSurf = eqkRupture.getRuptureSurface();
-            int numRows = rupSurf.getNumRows();
-            int numCol = rupSurf.getNumCols();
-            Location hypo = rupSurf.get((numRows - 1) / 2, (numCol - 1) / 2);
+//            // extract hypocenter location as middle of the rupture
+//            EvenlyGriddedSurfaceAPI rupSurf = eqkRupture.getRuptureSurface();
+//            int numRows = rupSurf.getNumRows();
+//            int numCol = rupSurf.getNumCols();
+//            Location hypo = rupSurf.get((numRows - 1) / 2, (numCol - 1) / 2);
+            Location hypo = eqkRupture.getHypocenterLocation();
 
             // calculate hypocentral distance
             horzDist = LocationUtils.horzDistance(loc1, hypo);
             vertDist = LocationUtils.vertDistance(loc1, hypo);
             totalDist = horzDist * horzDist + vertDist * vertDist;
-            this.setValue(new Double(Math.pow(totalDist, 0.5)));
+        	System.out.println("Hypocentral distance: "+new Double(Math.pow(totalDist, 0.5)));
+            this.setValueIgnoreWarning(new Double(Math.pow(totalDist, 0.5)));
 
         } else
             this.setValue(null);

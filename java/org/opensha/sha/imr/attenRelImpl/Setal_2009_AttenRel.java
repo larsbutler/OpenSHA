@@ -74,7 +74,7 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  ** 
  * @author J. Douglas
  * @created August 31, 2011
- * @version 1.0
+ * @version 1.1
  */
 
 public class Setal_2009_AttenRel extends AttenuationRelationship implements
@@ -98,7 +98,7 @@ ParameterChangeListener {
 
 	/** Rupture distance. */
 	private double rrup;
-	
+
 	/** Focal depth. */
 	private double focaldepth;
 
@@ -446,7 +446,7 @@ ParameterChangeListener {
 		double c7=0.2334;
 		double c8=-0.1675;
 		double c9=0.3521; 
-*/
+		 */
 		/**
 		 * For arithmetic mean
 		 */
@@ -518,7 +518,7 @@ ParameterChangeListener {
 		/** for geometric mean
 		double sigmar=1.0901;
 		double sigmas=0.9057;
-		*/
+		 */
 		/** for arithmetic mean
 		 * 
 		 */

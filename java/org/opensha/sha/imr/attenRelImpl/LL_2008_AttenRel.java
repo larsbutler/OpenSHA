@@ -130,13 +130,13 @@ NamedObjectAPI, ParameterChangeListener {
 
 		// Init the hashmap for rock
 		indexFromPerHashMapRock = new HashMap<Double, Integer>();
-		for (int i = 1; i < LL2008Constants.PERIOD.length; i++) {
+		for (int i = 2; i < LL2008Constants.PERIOD.length; i++) {
 			indexFromPerHashMapRock.put(new Double(LL2008Constants.PERIOD[i]), 
 					new Integer(i));
 		}
 		// Init the hashmap for soil
 		indexFromPerHashMapSoil = new HashMap<Double, Integer>();
-		for (int i = 1; i < LL2008Constants.PERIOD.length; i++) {
+		for (int i = 2; i < LL2008Constants.PERIOD.length; i++) {
 			indexFromPerHashMapSoil.put(new Double(LL2008Constants.PERIOD[i]), 
 					new Integer(i));
 		}
@@ -158,7 +158,7 @@ NamedObjectAPI, ParameterChangeListener {
 
 		// set supported periods for spectral acceleration
 		DoubleDiscreteConstraint periodConstraint = new DoubleDiscreteConstraint();
-		for (int i = 1; i < LL2008Constants.PERIOD.length; i++) {
+		for (int i = 2; i < LL2008Constants.PERIOD.length; i++) {
 			periodConstraint.addDouble(new Double(LL2008Constants.PERIOD[i]));
 		}
 		periodConstraint.setNonEditable();

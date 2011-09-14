@@ -512,7 +512,12 @@ public class YoungsEtAl_1997_AttenRel extends AttenuationRelationship implements
 
 		setPeriodIndex();
 		
-		return getStdDev(iper, stdDevType);
+		double magnitude = mag;
+		if(magnitude>8.0){
+			magnitude = 8.0;
+		}
+		
+		return getStdDev(iper, magnitude, stdDevType);
 	}
 
 	/**
@@ -575,16 +580,12 @@ public class YoungsEtAl_1997_AttenRel extends AttenuationRelationship implements
 	/** 
 	 * Compute standard deviation.
 	 */
-	private double getStdDev(int iper, String stdDevType) {
+	private double getStdDev(int iper, double mag, String stdDevType) {
 		if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE)) {
 			return 0;
 		} else {
-			double magnitude = Double.NaN;
-			if(mag>8.0){
-				magnitude = 8.0;
-			}
 			double sigmaTotal = YoungsEtAl1997Constants.C4_SOIL[iper]
-					+ YoungsEtAl1997Constants.C5_SOIL[iper] * magnitude;
+					+ YoungsEtAl1997Constants.C5_SOIL[iper] * mag;
 			return (sigmaTotal);
 		}
 	}
@@ -624,6 +625,7 @@ public class YoungsEtAl_1997_AttenRel extends AttenuationRelationship implements
 		for (int i=0; i < 14; i++){
 			System.out.println(YoungsEtAl1997Constants.PERIOD_ROCK[i] + " mean = " + Math.exp(ar.getMean(i, 7.00, 15, 
 					TectonicRegionType.SUBDUCTION_INTERFACE.toString(), 800, 30)));
+			System.out.println("st.dev" + ar.getStdDev(i, 7, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
 		}
 	}	
 }
