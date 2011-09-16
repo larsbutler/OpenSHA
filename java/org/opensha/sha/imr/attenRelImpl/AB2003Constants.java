@@ -123,12 +123,12 @@ public class AB2003Constants {
 	/**
 	 * Maximum magnitude.
 	 */
-	public static final Double MAG_WARN_MAX = new Double(8.5);
+	public static final Double MAG_WARN_MAX = new Double(8.3);
 
 	/**
 	 * Minimum rupture distance.
 	 */
-	public static final Double DISTANCE_RUP_WARN_MIN = new Double(0.0);
+	public static final Double DISTANCE_RUP_WARN_MIN = new Double(11.0);
 	/**
 	 * Maximum rupture distance.
 	 */

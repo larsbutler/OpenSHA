@@ -73,6 +73,7 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  * 
  ** 
  * @author J. Douglas
+ * @reviewed l. danciu
  * @created September 1, 2011
  * @version 1.1
  */
@@ -459,25 +460,25 @@ ParameterChangeListener {
 	public URL getInfoURL() throws MalformedURLException {
 		return null;
 	}
-	/**
-	 * For testing
-	 * 
-	 */
-	public static void main(String[] args) {
-
-		Betal_2009_AttenRel ar = new Betal_2009_AttenRel(null);
-
-		System.out.println("mean = " + Math.exp(ar.getMean(7.00, 10, 800,5)));
-		System.out.println("mean = " + Math.exp(ar.getMean(4.00, 10, 800,5)));
-		System.out.println("mean = " + Math.exp(ar.getMean(9.00, 10, 800,5)));
-		System.out.println("mean = " + Math.exp(ar.getMean(7.00, 100, 800,5)));
-		System.out.println("mean = " + Math.exp(ar.getMean(7.00, 10, 100,5)));
-
-		System.out.println("s.d. (inter) = " + ar.getStdDev("Inter-Event"));
-		System.out.println("s.d. (intra) = " + ar.getStdDev("Intra-Event"));
-		System.out.println("s.d. (total) = " + ar.getStdDev("Total"));
-		System.out.println("s.d. (total) = " + ar.getStdDev("Total"));
-		System.out.println("s.d. (total) = " + ar.getStdDev("Total"));
-
-	}	
+//	/**
+//	 * For testing
+//	 * 
+//	 */
+//	public static void main(String[] args) {
+//
+//		Betal_2009_AttenRel ar = new Betal_2009_AttenRel(null);
+//
+//		System.out.println("mean = " + Math.exp(ar.getMean(7.00, 10, 800,5)));
+//		System.out.println("mean = " + Math.exp(ar.getMean(4.00, 10, 800,5)));
+//		System.out.println("mean = " + Math.exp(ar.getMean(9.00, 10, 800,5)));
+//		System.out.println("mean = " + Math.exp(ar.getMean(7.00, 100, 800,5)));
+//		System.out.println("mean = " + Math.exp(ar.getMean(7.00, 10, 100,5)));
+//
+//		System.out.println("s.d. (inter) = " + ar.getStdDev("Inter-Event"));
+//		System.out.println("s.d. (intra) = " + ar.getStdDev("Intra-Event"));
+//		System.out.println("s.d. (total) = " + ar.getStdDev("Total"));
+//		System.out.println("s.d. (total) = " + ar.getStdDev("Total"));
+//		System.out.println("s.d. (total) = " + ar.getStdDev("Total"));
+//
+//	}	
 }

@@ -494,9 +494,6 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 		// convert PGA and SA from cm/s2 to g
 		if (iper == 0) {
 			logY = Math.log(Math.exp(logY));
-		} else if (AkB2010Constants.PERIOD[iper] == 4.00){
-			logY = Math.log(Math.exp(logY) * AkB2010Constants.T3sec_to_T4sec_factor
-					* AkB2010Constants.CMS2_TO_G_CONVERSION_FACTOR);
 		} else {
 			logY = Math.log(Math.exp(logY) 
 					* AkB2010Constants.CMS2_TO_G_CONVERSION_FACTOR);

@@ -160,7 +160,6 @@ public class Betal_2009_test implements ParameterChangeWarningListener {
 			double rrup = 10;
 			double expectedMedian = table[j][1];
 			double computedMedian = Math.exp(Betal2009AttenRel.getMean(mag,rrup, vs30,ztor));
-			System.out.println("RSD");
 			assertEquals(expectedMedian, computedMedian, TOLERANCE);
 		}
 	}
@@ -174,7 +173,6 @@ public class Betal_2009_test implements ParameterChangeWarningListener {
 			double computedStd_Intra = Betal2009AttenRel.getStdDev("Intra-Event");
 			double expectedStd_Total = table[j][5];
 			double computedStd_Total = Betal2009AttenRel.getStdDev("Total");
-			System.out.println("RSD");	
 			assertEquals(expectedStd_Inter, computedStd_Inter, TOLERANCE);
 			assertEquals(expectedStd_Intra, computedStd_Intra, TOLERANCE);
 			assertEquals(expectedStd_Total, computedStd_Total, TOLERANCE);

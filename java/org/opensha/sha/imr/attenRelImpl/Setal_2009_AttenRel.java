@@ -73,6 +73,7 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  * 
  ** 
  * @author J. Douglas
+ * @reviewed l. danciu
  * @created August 31, 2011
  * @version 1.1
  */
@@ -545,25 +546,25 @@ ParameterChangeListener {
 	public URL getInfoURL() throws MalformedURLException {
 		return null;
 	}
-	/**
-	 * For testing
-	 * 
-	 */
-	public static void main(String[] args) {
-
-		Setal_2009_AttenRel ar = new Setal_2009_AttenRel(null);
-
-		System.out.println("mean = " + Math.exp(ar.getMean(7.00, 10, 800, -90.0,20.0)));
-		System.out.println("mean = " + Math.exp(ar.getMean(7.00, 10, 800, 60.0,20.0)));
-		System.out.println("mean = " + Math.exp(ar.getMean(7.00, 10, 800, 0.0,20.0)));
-		System.out.println("mean = " + Math.exp(ar.getMean(7.00, 100, 800, 0.0,20.0)));
-		System.out.println("mean = " + Math.exp(ar.getMean(7.00, 10, 100, 0.0,20.0)));
-
-		System.out.println("s.d. (inter) = " + ar.getStdDev(7.00, 100, "Inter-Event"));
-		System.out.println("s.d. (intra) = " + ar.getStdDev(7.00, 100, "Intra-Event"));
-		System.out.println("s.d. (total) = " + ar.getStdDev(7.00, 100, "Total"));
-		System.out.println("s.d. (total) = " + ar.getStdDev(7.00, 300, "Total"));
-		System.out.println("s.d. (total) = " + ar.getStdDev(7.00, 1000, "Total"));
-
-	}	
+//	/**
+//	 * For testing
+//	 * 
+//	 */
+//	public static void main(String[] args) {
+//
+//		Setal_2009_AttenRel ar = new Setal_2009_AttenRel(null);
+//
+//		System.out.println("mean = " + Math.exp(ar.getMean(7.00, 10, 800, -90.0,20.0)));
+//		System.out.println("mean = " + Math.exp(ar.getMean(7.00, 10, 800, 60.0,20.0)));
+//		System.out.println("mean = " + Math.exp(ar.getMean(7.00, 10, 800, 0.0,20.0)));
+//		System.out.println("mean = " + Math.exp(ar.getMean(7.00, 100, 800, 0.0,20.0)));
+//		System.out.println("mean = " + Math.exp(ar.getMean(7.00, 10, 100, 0.0,20.0)));
+//
+//		System.out.println("s.d. (inter) = " + ar.getStdDev(7.00, 100, "Inter-Event"));
+//		System.out.println("s.d. (intra) = " + ar.getStdDev(7.00, 100, "Intra-Event"));
+//		System.out.println("s.d. (total) = " + ar.getStdDev(7.00, 100, "Total"));
+//		System.out.println("s.d. (total) = " + ar.getStdDev(7.00, 300, "Total"));
+//		System.out.println("s.d. (total) = " + ar.getStdDev(7.00, 1000, "Total"));
+//
+//	}	
 }

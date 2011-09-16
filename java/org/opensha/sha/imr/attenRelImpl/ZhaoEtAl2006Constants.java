@@ -192,7 +192,7 @@ public class ZhaoEtAl2006Constants {
 	public static final Double MAG_WARN_MAX = new Double(8.3);
 
 	public static final Double DISTANCE_RUP_WARN_MIN = new Double(0.0);
-	public static final Double DISTANCE_RUP_WARN_MAX = new Double(500.0);
+	public static final Double DISTANCE_RUP_WARN_MAX = new Double(300.0);
 
 	// depth hypocentre
 	protected final static Double DEPTH_HYPO_WARN_MIN = new Double(0.0);

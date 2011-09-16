@@ -49,10 +49,10 @@ public class ToroEtAl_2002_test implements ParameterChangeWarningListener {
 	private static String[] TABLE_HEADER_STD = new String[1];
 
 	/** Number of columns in test tables for standard deviation. */
-	private static final int TABLE_NUM_COL_STD = 14;
+	private static final int TABLE_NUM_COL_STD = 12;
 
 	/** Number of columns in test tables for median ground motion value. */
-	private static final int TABLE_NUM_COL_MEDIAN = 14;
+	private static final int TABLE_NUM_COL_MEDIAN = 12;
 
 	/** Number of rows in interface test table. */
 	private static final int TABLE_NUM_ROWS = 70;
@@ -64,7 +64,6 @@ public class ToroEtAl_2002_test implements ParameterChangeWarningListener {
 	private static double[][] medianHardRockTable = null;
 
 	private static final double TOLERANCE = 1e-3;
-	private static final double TOLERANCE_pgv = 1e-1;
 
 	/**
 	 * Set up attenuation relationship object, and tables for tests.
@@ -93,20 +92,18 @@ public class ToroEtAl_2002_test implements ParameterChangeWarningListener {
 	@After
 	public final void tearDown() {
 		toro2002AtenRel = null;
-		stdTotalTable = null;
 		medianHardRockTable = null;
+		stdTotalTable = null;
+	}
+
+	@Test
+	public void checkMedianEventOnHardRock() {
+		validateMedian(medianHardRockTable);
 	}
 
 	@Test
 	public void checkStdTotal() {
 		validateStdDev(StdDevTypeParam.STD_DEV_TYPE_TOTAL, stdTotalTable);
-	}
-
-	@Test
-	public void checkMedianEventOnHardRock() {
-		double vs30 = 800.0;
-		double rake = -90.0;
-		validateMedian(vs30, rake, medianHardRockTable);
 	}
 	
 
@@ -181,16 +178,19 @@ public class ToroEtAl_2002_test implements ParameterChangeWarningListener {
 				erf);
 	}
 
-	private void validateMedian(double vs30, double rake, double[][] table) {
+	private void validateMedian(double[][] table) {
 		String[] columnDescr = TABLE_HEADER_MEDIAN[0].trim().split("\\s+");
 		// check for SA
-		for (int i = 3; i < columnDescr.length - 2; i++) {
+		for (int i = 3; i < columnDescr.length - 1; i++) {
 			for (int j = 0; j < table.length; j++) {
-				int iper = i-1;
+				int iper = i-2;
 				double mag = table[j][0];
 				double rJB = table[j][1];
 				double expectedMedian = table[j][i];
-				double computedMedian = Math.exp(toro2002AtenRel.getMean(iper,mag, rJB, vs30, rake));
+				double computedMedian = Math.exp(toro2002AtenRel.getMean(iper, mag, rJB));
+//				System.out.println(i);
+//				System.out.println(expectedMedian);
+//				System.out.println(computedMedian);
 				assertEquals(expectedMedian, computedMedian, TOLERANCE);
 			}
 		}
@@ -198,32 +198,26 @@ public class ToroEtAl_2002_test implements ParameterChangeWarningListener {
 		for (int j = 0; j < table.length; j++) {
 			double mag = table[j][0];
 			double rJB = table[j][1];
-			double expectedMedian = table[j][columnDescr.length - 2];
-			double computedMedian = Math.exp(toro2002AtenRel.getMean(1, mag,
-					rJB, vs30, rake));
-			assertEquals(expectedMedian, computedMedian, TOLERANCE);
-		}
-		// check for PGV
-		for (int j = 0; j < table.length; j++) {
-			double mag = table[j][0];
-			double rJB = table[j][1];
 			double expectedMedian = table[j][columnDescr.length - 1];
-			double computedMedian = Math.exp(toro2002AtenRel.getMean(0, mag,
-					rJB, vs30, rake));
-			assertEquals(expectedMedian, computedMedian, TOLERANCE_pgv);
+			double computedMedian = Math.exp(toro2002AtenRel.getMean(0, mag, rJB));
+			assertEquals(expectedMedian, computedMedian, TOLERANCE);
 		}
 	}
 
 	private void validateStdDev(String stdDevType, double[][] table) {
 		String[] columnDescr = TABLE_HEADER_STD[0].trim().split("\\s+");
 		// check for SA
-		for (int i = 3; i < columnDescr.length - 2; i++) {
+		for (int i = 3; i < columnDescr.length - 1; i++) {
 			for (int j = 0; j < table.length; j++) {
 				double mag = table[j][0];
 				double rJB = table[j][1];
 				double expectedStd = table[j][i];
-				double computedStd = toro2002AtenRel.getStdDev(i-1, mag, 
+				double computedStd = toro2002AtenRel.getStdDev(i-2, mag, 
 						rJB, stdDevType);
+				System.out.println(i + " = "+ j);
+				System.out.println(expectedStd);
+				System.out.println(mag + " + " + rJB);
+				System.out.println(computedStd);
 				assertEquals(expectedStd, computedStd, TOLERANCE);
 			}
 		}
@@ -231,20 +225,10 @@ public class ToroEtAl_2002_test implements ParameterChangeWarningListener {
 		for (int j = 0; j < table.length; j++) {
 			double mag = table[j][0];
 			double rJB = table[j][1];
-			double expectedStd = table[j][columnDescr.length - 2];
-			double computedStd = toro2002AtenRel.getStdDev(1, mag, 
-					rJB, stdDevType);
-			assertEquals(expectedStd, computedStd, TOLERANCE);
-		}
-		// check for PGV
-		for (int j = 0; j < table.length; j++) {
-			double mag = table[j][0];
-			double rJB = table[j][1];
 			double expectedStd = table[j][columnDescr.length - 1];
 			double computedStd = toro2002AtenRel.getStdDev(0, mag, 
 					rJB, stdDevType);
-
-			assertEquals(expectedStd, computedStd, TOLERANCE_pgv);
+			assertEquals(expectedStd, computedStd, TOLERANCE);
 		}
 	}
 

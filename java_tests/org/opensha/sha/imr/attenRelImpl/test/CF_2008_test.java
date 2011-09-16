@@ -181,6 +181,7 @@ public class CF_2008_test implements ParameterChangeWarningListener {
 		AttenRelTestHelper.readNumericTableWithHeader(new File(ClassLoader
 				.getSystemResource(MEDIAN_REVERSE_SOFT_TABLE).toURI()),
 				medianReverseSoftTable, TABLE_HEADER_MEDIAN);
+		
 		medianReverseStiffTable = new double[TABLE_NUM_ROWS][TABLE_NUM_COL_MEDIAN];
 		AttenRelTestHelper.readNumericTableWithHeader(new File(ClassLoader
 				.getSystemResource(MEDIAN_REVERSE_STIFF_TABLE).toURI()),

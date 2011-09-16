@@ -67,6 +67,7 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  * 
  ** 
  * @author J. Douglas
+ * @reviewed l. danciu
  * @created August 30, 2011
  * @version 1.1
  */
@@ -529,35 +530,35 @@ public class Tetal_2003_AttenRel extends AttenuationRelationship implements
 		return null;
 	}
 
-	/**
-	 * For testing
-	 * 
-	 */
-	public static void main(String[] args) {
-
-		Tetal_2003_AttenRel ar = new Tetal_2003_AttenRel(null);
-
-		System.out.println("mean = "
-				+ Math.exp(ar.getMean(7.00, 10, 800, -90.0)));
-		System.out.println("mean = "
-				+ Math.exp(ar.getMean(7.00, 10, 800, 60.0)));
-		System.out
-				.println("mean = " + Math.exp(ar.getMean(7.00, 10, 800, 0.0)));
-		System.out.println("mean = "
-				+ Math.exp(ar.getMean(7.00, 100, 800, 0.0)));
-		System.out
-				.println("mean = " + Math.exp(ar.getMean(7.00, 10, 100, 0.0)));
-
-		System.out.println("s.d. (inter) = "
-				+ ar.getStdDev(7.00, 10, 100, -90.0, "Inter-Event"));
-		System.out.println("s.d. (intra) = "
-				+ ar.getStdDev(7.00, 10, 100, -90.0, "Intra-Event"));
-		System.out.println("s.d. (total) = "
-				+ ar.getStdDev(7.00, 10, 100, -90.0, "Total"));
-		System.out.println("s.d. (total) = "
-				+ ar.getStdDev(9.00, 10, 100, -90.0, "Total"));
-		System.out.println("s.d. (total) = "
-				+ ar.getStdDev(4.00, 10, 100, -90.0, "Total"));
-
-	}
+//	/**
+//	 * For testing
+//	 * 
+//	 */
+//	public static void main(String[] args) {
+//
+//		Tetal_2003_AttenRel ar = new Tetal_2003_AttenRel(null);
+//
+//		System.out.println("mean = "
+//				+ Math.exp(ar.getMean(7.00, 10, 800, -90.0)));
+//		System.out.println("mean = "
+//				+ Math.exp(ar.getMean(7.00, 10, 800, 60.0)));
+//		System.out
+//				.println("mean = " + Math.exp(ar.getMean(7.00, 10, 800, 0.0)));
+//		System.out.println("mean = "
+//				+ Math.exp(ar.getMean(7.00, 100, 800, 0.0)));
+//		System.out
+//				.println("mean = " + Math.exp(ar.getMean(7.00, 10, 100, 0.0)));
+//
+//		System.out.println("s.d. (inter) = "
+//				+ ar.getStdDev(7.00, 10, 100, -90.0, "Inter-Event"));
+//		System.out.println("s.d. (intra) = "
+//				+ ar.getStdDev(7.00, 10, 100, -90.0, "Intra-Event"));
+//		System.out.println("s.d. (total) = "
+//				+ ar.getStdDev(7.00, 10, 100, -90.0, "Total"));
+//		System.out.println("s.d. (total) = "
+//				+ ar.getStdDev(9.00, 10, 100, -90.0, "Total"));
+//		System.out.println("s.d. (total) = "
+//				+ ar.getStdDev(4.00, 10, 100, -90.0, "Total"));
+//
+//	}
 }

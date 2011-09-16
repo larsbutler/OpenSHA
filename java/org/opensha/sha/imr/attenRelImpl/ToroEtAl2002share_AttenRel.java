@@ -20,7 +20,6 @@ import org.opensha.sha.imr.param.EqkRuptureParams.MagParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.RakeParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.DampingParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PGA_Param;
-import org.opensha.sha.imr.param.IntensityMeasureParams.PGV_Param;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PeriodParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.SA_Param;
 import org.opensha.sha.imr.param.OtherParams.ComponentParam;
@@ -29,16 +28,23 @@ import org.opensha.sha.imr.param.OtherParams.SigmaTruncTypeParam;
 import org.opensha.sha.imr.param.OtherParams.StdDevTypeParam;
 import org.opensha.sha.imr.param.PropagationEffectParams.DistanceJBParameter;
 import org.opensha.sha.imr.param.PropagationEffectParams.DistanceRupParameter;
-import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
 
 
 /**
  * <b>Title:</b> Toro_2002_AttenRel<p>
  *
- * <b>Description:</b> This implements the  updated GMPE developed by Toro et al (1997) with the 
- * distance term proposed by Toro (2002) 
+ * <b>Description:</b> This implements the  updated GMPE developed by Toro et al - 2002, 
  *  (www.riskeng.com/PDF/atten_toro_extended.pdf)
+ * The GMPE is adjusted to account the style -of faulting and a default rock soil (Vs30 >=800m/sec)
+ * The adjustment coefficients were proposed by S. Drouet [2010];  
+ * Supported period values (s). Period 0.5s was obtained as a linear interpolation between 0.4 and 1.0s;
+ * Warning:
+ * The coefficients for periods 3.00 and 4.00sec were obrained as a function of SA(2sec) and ratios between SA(3)/SA(4sec)
+ * and SA(2)/SA(4sec)
  * Disclaimer:
+ * The adjustment of the SA(3sec) and SA(4sec) are obtained in the framework of 
+ * SHARE project and the coefficents presented hereunder are not advised for use.
+ * Supported Intensity-Measure Parameters:<p>
  * <UL>
  * <LI>saParam - Response Spectral Acceleration
  * <LI>PGA - Peak Ground Acceleration
@@ -48,6 +54,8 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  * <LI>magParam - moment Magnitude
  * <LI>distanceJBParam - JB distance
  * <LI>componentParam - Component of shaking
+ * <LI>siteType - adjusted rock
+ * <LI>fltType - adjuste to account for style-of-faulting 
  * <LI> stdDevTypeParam - The type of standard deviation (magnitude dependent)
  * </UL><p>
  *
@@ -57,7 +65,7 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  */
 
 
-public class ToroEtAl2002_AttenRel extends AttenuationRelationship implements
+public class ToroEtAl2002share_AttenRel extends AttenuationRelationship implements
 ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 
 	// Debugging stuff
@@ -75,6 +83,12 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 
 	/** Moment magnitude. */
 	private double mag;
+
+//	/** Vs 30. */
+//	private double vs30;
+
+	/** rake angle. */
+	private double rake;
 
 	/** Rupture distance. */
 	private double rJB;
@@ -95,7 +109,7 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 	 * Construct attenuation relationship. Initialize parameters and parameter
 	 * lists.
 	 */
-	public ToroEtAl2002_AttenRel(ParameterChangeWarningListener
+	public ToroEtAl2002share_AttenRel(ParameterChangeWarningListener
 			warningListener) {
 
 		super();
@@ -174,8 +188,11 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 		// moment magnitude (default 5.0)
 		magParam = new MagParam(ToroEtAl2002Constants.MAG_WARN_MIN,
 				ToroEtAl2002Constants.MAG_WARN_MAX);
+		// Focal mechanism
+		rakeParam = new RakeParam(); 
 		eqkRuptureParams.clear();
 		eqkRuptureParams.addParameter(magParam);
+		eqkRuptureParams.addParameter(rakeParam);
 
 	}
 
@@ -289,6 +306,7 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 	 * passed in.
 	 */
 	public final void setSite(final Site site) {
+
 	}
 
 	/**
@@ -316,8 +334,8 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 
 
 	/**
-	 * Compute mean. 
-	 * 
+	 * Compute mean. Applies correction for style of faulting and 
+	 * generic rock - Vs30 >= 800m/s .
 	 */
 	public double getMean(){
 		if (rJB > USER_MAX_DISTANCE) {
@@ -325,7 +343,7 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 		}
 		else{
 			setPeriodIndex();
-			return getMean (iper, mag, rJB);
+			return getMean (iper, mag, rJB, rake);
 		}
 	}
 
@@ -341,10 +359,9 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 	 * @param iper
 	 * @param rJB
 	 * @param mag
-	 * @param vs30
 	 * @param rake
 	 */
-	public double getMean(final int iper, double mag, double rJB){
+	public double getMean(final int iper, double mag, double rJB, double rake){
 		/**
 		 * This is to avoid very small values for rJB 
 		 * 
@@ -352,6 +369,52 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 		if (rJB < 1e-3) {
 			rJB = 1;
 		}
+
+		double lnY_rock_adj = Double.NaN;
+		double lnY_adj = Double.NaN;
+		double[] f = computeStyleOfFaultingTerm(iper, rake);
+		double lnY_Hrock = computeHardRockResponse(iper, mag, rJB);
+
+		/**
+		 * adjustment of the median
+		 */
+//		System.out.println ("adj=  "  + f[2] * ToroEtAl2002Constants.AFrock[iper]);
+
+			/**
+			 * This extends the model to SA(3sec) by multiplying the SA(2sec) with the
+			 * ratio SA(3sec)/SA(2sec) obtained as an average from the following GMPEs:
+			 * CF2008
+			 * CY2008
+			 * ZH2006
+			 * Campbell2003  
+			 * AkB2010
+			 * */
+		if  (ToroEtAl2002Constants.PERIOD[iper] == 3.00) {
+			lnY_rock_adj = Math.exp(lnY_Hrock) * 
+			ToroEtAl2002Constants.T2sec_TO_T3sec_factor
+			* f[2] * ToroEtAl2002Constants.AFrock[iper];;
+			/**
+			 * This extends the model to SA(4sec) by multiplying the SA(3sec) with the
+			 * ratio SA(4sec)/SA(3sec) obtained as an average from the following GMPEs:
+			 * CF2008
+			 * CY2008
+			 * ZH2006
+			 * Campbell2003  
+			 * 
+			 * */
+		}else if  (ToroEtAl2002Constants.PERIOD[iper] == 4.00) {
+			lnY_rock_adj = Math.exp(lnY_Hrock) * 
+			ToroEtAl2002Constants.T3sec_TO_T4sec_factor 
+			* f[2] * ToroEtAl2002Constants.AFrock[iper];;
+
+		} else {
+			lnY_rock_adj = Math.exp(lnY_Hrock) * f[2] * ToroEtAl2002Constants.AFrock[iper];;
+		}
+		
+		return Math.log(lnY_rock_adj);
+	}
+
+	private double computeHardRockResponse (int iper, double mag, double rJB){
 
 		double magDiff = mag - 6.0;
 
@@ -371,7 +434,31 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 		double lnY = f1 - f2 - f3 - f4;
 
 		return lnY;
-
+	}
+	/**
+	 * Compute style-of-faulting adjustment
+	 **/		
+	public double[] computeStyleOfFaultingTerm(final int iper, final double rake) {
+		double[] f = new double[3];
+		if (rake > ToroEtAl2002Constants.FLT_TYPE_NORMAL_RAKE_LOWER
+				&& rake <= ToroEtAl2002Constants.FLT_TYPE_NORMAL_RAKE_UPPER){
+			f[0] = 1.0;
+			f[1] = 0.0;
+			f[2] = f[0]*Math.pow(ToroEtAl2002Constants.Frss[iper], (1-ToroEtAl2002Constants.pR)) * 
+			Math.pow(ToroEtAl2002Constants.Fnss, - ToroEtAl2002Constants.pN);
+		} else if (rake > ToroEtAl2002Constants.FLT_TYPE_REVERSE_RAKE_LOWER
+				&& rake <= ToroEtAl2002Constants.FLT_TYPE_REVERSE_RAKE_UPPER) {
+			f[0] = 0.0;
+			f[1] = 1.0;
+			f[2] = f[1] * Math.pow(ToroEtAl2002Constants.Frss[iper], -ToroEtAl2002Constants.pR) * 
+			Math.pow(ToroEtAl2002Constants.Fnss, (1-ToroEtAl2002Constants.pN));;
+		} else {
+			f[0] = 0.0;
+			f[1] = 0.0;
+			f[2] = Math.pow(ToroEtAl2002Constants.Frss[iper], -ToroEtAl2002Constants.pR) * 
+			Math.pow(ToroEtAl2002Constants.Fnss, -ToroEtAl2002Constants.pN);
+		}
+		return f;
 	}
 
 
@@ -429,8 +516,8 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 			}
 			double sigmaatot = Math.sqrt(sigmaaM*sigmaaM+sigmaaR*sigmaaR);
 
-
-			sigmatot = (Math.sqrt(sigmaatot*sigmaatot+sigmae*sigmae));
+			sigmatot = (Math.sqrt(sigmaatot*sigmaatot+sigmae*sigmae)) 
+			           * ToroEtAl2002Constants.sig_AFrock[iper];
 
 			return sigmatot;
 
@@ -444,6 +531,7 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 	public final void setParamDefaults() {
 
 		magParam.setValueAsDefault();
+		rakeParam.setValueAsDefault();
 		distanceJBParam.setValueAsDefault();
 		saPeriodParam.setValueAsDefault();
 		saDampingParam.setValueAsDefault();
@@ -469,6 +557,8 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 			rJB = ((Double) val).doubleValue();
 		} else if (pName.equals(StdDevTypeParam.NAME)) {
 			stdDevType = (String) val;
+		} else if (pName.equals(FaultTypeParam.NAME)) {
+			rake = ((Double) val).doubleValue();
 		}
 	}
 	/**
@@ -476,6 +566,7 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 	 */
 	public void resetParameterEventListeners(){
 		magParam.removeParameterChangeListener(this);
+		rakeParam.removeParameterChangeListener(this);
 		distanceJBParam.removeParameterChangeListener(this);
 		stdDevTypeParam.removeParameterChangeListener(this);
 		saPeriodParam.removeParameterChangeListener(this);
@@ -488,6 +579,7 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 	protected void initParameterEventListeners() {
 
 		magParam.addParameterChangeListener(this);
+		rakeParam.addParameterChangeListener(this);
 		distanceJBParam.addParameterChangeListener(this);
 		stdDevTypeParam.addParameterChangeListener(this);
 		saPeriodParam.addParameterChangeListener(this);
@@ -515,24 +607,28 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 		return new URL("http://www.opensha.org/documentation/modelsImplemented/attenRel/ToroEtAl_2002.html");
 	}
 
-//	/**
-//	 * For testing
-//	 * 
-//	 */
-//
-//	public static void main(String[] args) {
-//
-//		ToroEtAl2002_AttenRel ar = new ToroEtAl2002_AttenRel(null);
-//
-//		for (int i=0; i < 1; i++){
-//			System.out.println(ToroEtAl2002Constants.PERIOD[i] + ".PGA= " + Math.exp(ar.getMean(i, 5.00,  5)));
-			//			System.out.println(ToroEtAl2002Constants.PERIOD[i] + "r0km sdt.dev= " + ar.getStdDev(i,  6.50,     0, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
-			//			System.out.println(ToroEtAl2002Constants.PERIOD[i] + "r10km sdt.dev= " + ar.getStdDev(i,  6.50,    10, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
-			//			System.out.println(ToroEtAl2002Constants.PERIOD[i] + "r100km sdt.dev= " + ar.getStdDev(i,  6.50,   100, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
-			//			System.out.println(ToroEtAl2002Constants.PERIOD[i] + "r1000km sdt.dev= " + ar.getStdDev(i,  6.50,  1000, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
-			//			System.out.println(ToroEtAl2002Constants.PERIOD[i] + "m4.5 sdt.dev= " + ar.getStdDev(i,  4.50,    20, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
-			//			System.out.println(ToroEtAl2002Constants.PERIOD[i] + "m5.5 sdt.dev= " + ar.getStdDev(i,  5.50,    20, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
-			//			System.out.println(ToroEtAl2002Constants.PERIOD[i] + "m6.5 sdt.dev= " + ar.getStdDev(i,  6.50,    20, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
-//		}
-//	}	
+	/**
+	 * For testing
+	 * 
+	 */
+
+	public static void main(String[] args) {
+
+		ToroEtAl2002share_AttenRel ar = new ToroEtAl2002share_AttenRel(null);
+
+		for (int i=0; i < 1; i++){
+			System.out.println(ToroEtAl2002Constants.PERIOD[i] + ".PGA= " + Math.exp(ar.getMean(i, 6.00,  5, 45)));
+						System.out.println(ToroEtAl2002Constants.PERIOD[i] + "r0km sdt.dev= " + ar.getStdDev(i,  6.50,     0, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
+						System.out.println(ToroEtAl2002Constants.PERIOD[i] + "r10km sdt.dev= " + ar.getStdDev(i,  6.50,    10, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
+						System.out.println(ToroEtAl2002Constants.PERIOD[i] + "r100km sdt.dev= " + ar.getStdDev(i,  6.50,   100, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
+						System.out.println(ToroEtAl2002Constants.PERIOD[i] + "r1000km sdt.dev= " + ar.getStdDev(i,  6.50,  1000, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
+			
+						System.out.println(ToroEtAl2002Constants.PERIOD[i] + "m4.5 sdt.dev= " + ar.getStdDev(i,  4.50,    20, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
+						System.out.println(ToroEtAl2002Constants.PERIOD[i] + "m5.5 sdt.dev= " + ar.getStdDev(i,  5.50,    20, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
+						System.out.println(ToroEtAl2002Constants.PERIOD[i] + "m6.5 sdt.dev= " + ar.getStdDev(i,  6.50,    20, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
+						System.out.println(ToroEtAl2002Constants.PERIOD[i] + "m7.5 sdt.dev= " + ar.getStdDev(i,  7.50,    20, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
+
+		}
+	}	
+
 }

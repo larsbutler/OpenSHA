@@ -471,7 +471,7 @@ public class CF_2008Constants {
 		/**
 		 * Maximum magnitude.
 		 */
-		public static final Double MAG_WARN_MAX = new Double(7.6);
+		public static final Double MAG_WARN_MAX = new Double(7.2);
 		/**
 		 * Minimum hypocenter distance.
 		 */

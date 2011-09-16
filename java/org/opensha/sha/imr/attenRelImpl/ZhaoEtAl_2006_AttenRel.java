@@ -21,7 +21,6 @@ import org.opensha.sha.imr.param.EqkRuptureParams.MagParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.RakeParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.DampingParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PGA_Param;
-import org.opensha.sha.imr.param.IntensityMeasureParams.PGV_Param;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PeriodParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.SA_Param;
 import org.opensha.sha.imr.param.OtherParams.ComponentParam;
@@ -45,7 +44,6 @@ import org.opensha.sha.util.TectonicRegionType;
  * <p>
  * <UL>
  * <LI>pgaParam - Peak Ground Acceleration
- * <LI>pgvParam - Peak Ground Velocity - SA(0.5s -in cm/sec/sec)/20
  * <LI>saParam - Response Spectral Acceleration (5 % damping)
  * </UL>
  * <p>
@@ -140,7 +138,7 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 		initSupportedIntensityMeasureParams();
 
 		indexFromPerHashMap = new HashMap<Double, Integer>();
-		for (int i = 2; i < ZhaoEtAl2006Constants.PERIOD.length; i++) {
+		for (int i = 0; i < ZhaoEtAl2006Constants.PERIOD.length; i++) {
 			indexFromPerHashMap
 					.put(new Double(ZhaoEtAl2006Constants.PERIOD[i]),
 							new Integer(i));
@@ -162,7 +160,7 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 	protected void initSupportedIntensityMeasureParams() {
 
 		DoubleDiscreteConstraint periodConstraint = new DoubleDiscreteConstraint();
-		for (int i = 2; i < ZhaoEtAl2006Constants.PERIOD.length; i++) {
+		for (int i = 1; i < ZhaoEtAl2006Constants.PERIOD.length; i++) {
 			periodConstraint.addDouble(new Double(
 					ZhaoEtAl2006Constants.PERIOD[i]));
 		}
@@ -177,19 +175,12 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 		pgaParam = new PGA_Param();
 		pgaParam.setNonEditable();
 
-		pgvParam = new PGV_Param();
-		pgvParam.setNonEditable();
-
-
 		saParam.addParameterChangeWarningListener(warningListener);
 		pgaParam.addParameterChangeWarningListener(warningListener);
-		pgvParam.addParameterChangeWarningListener(warningListener);
 
 		supportedIMParams.clear();
 		supportedIMParams.addParameter(saParam);
 		supportedIMParams.addParameter(pgaParam);
-		supportedIMParams.addParameter(pgvParam);
-
 	}
 
 	/**
@@ -271,14 +262,11 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 		stdDevTypeConstraint.setNonEditable();
 		stdDevTypeParam = new StdDevTypeParam(stdDevTypeConstraint);
 
-        // the Component Parameter
-		// Geometrical Mean (COMPONENT_AVE_HORZ) = Geometrical MeanI50 (COMPONENT_GMRotI50)
-        StringConstraint constraint = new StringConstraint();
-        constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
-        constraint.addString(ComponentParam.COMPONENT_GMRotI50);
-        constraint.setNonEditable();
-        componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_GMRotI50);
-        componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_AVE_HORZ);
+		StringConstraint constraint = new StringConstraint();
+		constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
+		constraint.setNonEditable();
+		componentParam = new ComponentParam(constraint,
+				ComponentParam.COMPONENT_AVE_HORZ);
 
 		otherParams.clear();
 		otherParams.addParameter(sigmaTruncTypeParam);
@@ -407,11 +395,8 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 	 * Set period index.
 	 */
 	protected final void setPeriodIndex() {
-		if (im.getName().equalsIgnoreCase(PGV_Param.NAME)) {
+		if (im.getName().equalsIgnoreCase(PGA_Param.NAME)) {
 			iper = 0;
-		} 
-		else if (im.getName().equalsIgnoreCase(PGA_Param.NAME)) {
-			iper = 1;
 		} else {
 			iper = ((Integer) indexFromPerHashMap.get(saPeriodParam.getValue()))
 					.intValue();
@@ -455,7 +440,6 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 		saDampingParam.setValueAsDefault();
 		saParam.setValueAsDefault();
 		pgaParam.setValueAsDefault();
-		pgvParam.setValueAsDefault();
 		stdDevTypeParam.setValueAsDefault();
 		sigmaTruncTypeParam.setValueAsDefault();
 		sigmaTruncLevelParam.setValueAsDefault();
@@ -507,7 +491,8 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 
 		// Setting the flags in order to account for tectonic region and focal
 		// mechanism
-		if (rake > 30 && rake < 150 
+		if (rake > 30
+				&& rake < 150
 				&& tectonicRegiontType
 						.equalsIgnoreCase(TectonicRegionType.ACTIVE_SHALLOW
 								.toString())) {
@@ -568,21 +553,12 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 				* ZhaoEtAl2006Constants.Si[iper] + flag_Ss
 				* ZhaoEtAl2006Constants.Ss[iper] + flag_Ssl
 				* ZhaoEtAl2006Constants.Ssl[iper] * Math.log(rRup) + soilCoeff;
+
 		// Return the computed mean value
 		lnGm += m2CorrFact;
-		double mean = Double.NaN;
 
-		if (iper == 0){
-			
-			mean = Math.exp(lnGm)/20;
-			
-		} else{
-			
-			mean = Math.exp(lnGm)*ZhaoEtAl2006Constants.CMS_TO_G_CONVERSION_FACTOR ;
-			
-		}
-
-		return Math.log(mean);
+		// Convert form cm/s2 to g
+		return Math.log(Math.exp(lnGm) / 981);
 	}
 
 	private double setSiteTermCorrection(int iper, double vs30) {
@@ -704,52 +680,21 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 	public URL getInfoURL() throws MalformedURLException {
 		return null;
 	}
+	/**
+	 * For testing
+	 * 
+	 */
+
 	public static void main(String[] args) {
-		
-		ZhaoEtAl_2006_AttenRel  ar = new ZhaoEtAl_2006_AttenRel(null);
-		
+
+		ZhaoEtAl_2006_AttenRel ar = new ZhaoEtAl_2006_AttenRel(null);
 		ar.setParamDefaults();
-        ar.setIntensityMeasure(SA_Param.NAME);
-		for (int i= 1; i < 2; i++){
-			System.out.println(i + " . " + ZhaoEtAl2006Constants.PERIOD[i]);
-//			System.out.println("mean = " + Math.exp(ar.getMean(i, 7.00, 10, 20, 90.0, 800, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(5.00 + " " + 8.81   + " " + Math.exp(ar.getMean(i, 5.00, 8.81  ,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(6.00 + " " + 7.49   + " " + Math.exp(ar.getMean(i, 6.00, 7.49  ,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(6.50 + " " + 6.57   + " " + Math.exp(ar.getMean(i, 6.50, 6.57  ,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(7.00 + " " + 5.57   + " " + Math.exp(ar.getMean(i, 7.00, 5.57  ,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(7.50 + " " + 5.00   + " " + Math.exp(ar.getMean(i, 7.50, 5.00  ,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(5.00 + " " + 12.35  + " " + Math.exp(ar.getMean(i, 5.00, 12.35 ,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(6.00 + " " + 11.45  + " " + Math.exp(ar.getMean(i, 6.00, 11.45 ,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(6.50 + " " + 10.87  + " " + Math.exp(ar.getMean(i, 6.50, 10.87 ,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(7.00 + " " + 10.30  + " " + Math.exp(ar.getMean(i, 7.00, 10.30 ,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));  
-//			System.out.println(7.50 + " " + 10.00  + " " + Math.exp(ar.getMean(i, 7.50, 10.00 ,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(5.00 + " " + 16.66  + " " + Math.exp(ar.getMean(i, 5.00, 16.66 ,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(6.00 + " " + 16.00  + " " + Math.exp(ar.getMean(i, 6.00, 16.00 ,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));  
-//			System.out.println(6.50 + " " + 15.59  + " " + Math.exp(ar.getMean(i, 6.50, 15.59 ,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(7.00 + " " + 15.20  + " " + Math.exp(ar.getMean(i, 7.00, 15.20 ,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(7.50 + " " + 15.00  + " " + Math.exp(ar.getMean(i, 7.50, 15.00 ,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(5.00 + " " + 26.03  + " " + Math.exp(ar.getMean(i, 5.00, 26.03 ,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(6.00 + " " + 25.61  + " " + Math.exp(ar.getMean(i, 6.00, 25.61 ,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(6.50 + " " + 25.36  + " " + Math.exp(ar.getMean(i, 6.50, 25.36 ,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(7.00 + " " + 25.12  + " " + Math.exp(ar.getMean(i, 7.00, 25.12 ,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(7.50 + " " + 25.00  + " " + Math.exp(ar.getMean(i, 7.50, 25.00 ,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(5.00 + " " + 50.52  + " " + Math.exp(ar.getMean(i, 5.00, 50.52 ,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(6.00 + " " + 50.31  + " " + Math.exp(ar.getMean(i, 6.00, 50.31 ,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(6.50 + " " + 50.18  + " " + Math.exp(ar.getMean(i, 6.50, 50.18 ,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(7.00 + " " + 50.06  + " " + Math.exp(ar.getMean(i, 7.00, 50.06 ,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(7.50 + " " + 50.00  + " " + Math.exp(ar.getMean(i, 7.50, 50.00 ,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(5.00 + " " + 75.35  + " " + Math.exp(ar.getMean(i, 5.00, 75.35 ,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(6.00 + " " + 75.21  + " " + Math.exp(ar.getMean(i, 6.00, 75.21 ,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(6.50 + " " + 75.12  + " " + Math.exp(ar.getMean(i, 6.50, 75.12 ,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(7.00 + " " + 75.04  + " " + Math.exp(ar.getMean(i, 7.00, 75.04 ,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(7.50 + " " + 75.00  + " " + Math.exp(ar.getMean(i, 7.50, 75.00 ,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(5.00 + " " + 100.26 + " " + Math.exp(ar.getMean(i, 5.00, 100.26,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(6.00 + " " + 100.16 + " " + Math.exp(ar.getMean(i, 6.00, 100.16,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(6.50 + " " + 100.09 + " " + Math.exp(ar.getMean(i, 6.50, 100.09,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));
-//			System.out.println(7.00 + " " + 100.03 + " " + Math.exp(ar.getMean(i, 7.00, 100.03,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString()))); 
-//			System.out.println(7.50 + " " + 100.00 + " " + Math.exp(ar.getMean(i, 7.50, 100.00,20, 800, 15, TectonicRegionType.ACTIVE_SHALLOW.toString())));  
+		ar.setIntensityMeasure(SA_Param.NAME);
+
+		for (int i=0; i < 13; i++){
+			System.out.println(ZhaoEtAl2006Constants.PERIOD[i] + " mean = " + 
+					Math.exp(ar.getMean(i, 7.00, 15, 20, -90, 800, TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
+			System.out.println("st.dev" + ar.getStdDev(i, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString(), TectonicRegionType.ACTIVE_SHALLOW.toString()));
 		}
-		}		
-
-
+	}	
 }

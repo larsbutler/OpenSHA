@@ -20,7 +20,6 @@ import org.opensha.sha.imr.param.EqkRuptureParams.MagParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.RakeParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.DampingParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PGA_Param;
-import org.opensha.sha.imr.param.IntensityMeasureParams.PGV_Param;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PeriodParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.SA_Param;
 import org.opensha.sha.imr.param.OtherParams.ComponentParam;
@@ -28,7 +27,6 @@ import org.opensha.sha.imr.param.OtherParams.SigmaTruncLevelParam;
 import org.opensha.sha.imr.param.OtherParams.SigmaTruncTypeParam;
 import org.opensha.sha.imr.param.OtherParams.StdDevTypeParam;
 import org.opensha.sha.imr.param.PropagationEffectParams.DistanceRupParameter;
-import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
 
 
 /**
@@ -36,14 +34,11 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  *
  * <b>Description:</b> This implements the  GMPE developed by K. W. Campbell (2003, BSSA, vol
  * 93, no 3, pp 1012-1033) <p>
- * The GMPE is adjusted to account the style -of faulting and a default rock soil (Vs30 >=800m/sec)
- * The adjustment coefficients were proposed by S. Drouet [2010] - internal SHARE WP4 report;  
+ * 
  * Supported Intensity-Measure Parameters:<p>
  * <UL>
  * <LI>PGA - Peak Ground Acceleration
  * <LI>saParam - Response Spectral Acceleration
- * <LI>PGV - The original GMPE does not have a PGV parameter. Peak Ground Velocity was obtained from PSA (0.5) divided by 20 
- * <LI> as proposed by Bommer (2006); The coeficients for PGV identical with those of the PSA(0.5s) - the median is obtained
  * <LI> PSA (in cm/sec)/20;
  * <LI>
  * </UL><p>
@@ -52,8 +47,6 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  * <LI>magParam - moment Magnitude
  * <LI>distanceRupParam - closest distance to surface projection of fault
  * <LI>componentParam - Component of shaking
- * <LI>siteType - adjusted rock
- * <LI>fltType - adjuste to account for style-of-faulting 
  * <LI> stdDevTypeParam - The type of standard deviation (distance dependent)
  * </UL><p>
  *
@@ -81,12 +74,6 @@ NamedObjectAPI, ParameterChangeListener {
 
 	/** Moment magnitude. */
 	private double mag;
-
-	/** Vs 30. */
-	private double vs30;
-
-	/** rake angle. */
-	private double rake;
 
 	/** Rupture distance. */
 	private double rRup;
@@ -165,10 +152,6 @@ NamedObjectAPI, ParameterChangeListener {
 		pgaParam = new PGA_Param();
 		pgaParam.setNonEditable();
 
-		// initialize peak ground velocity parameter (units: cm/sec)
-		pgvParam = new PGV_Param();
-		pgvParam.setNonEditable();
-
 		// add the warning listeners
 		saParam.addParameterChangeWarningListener(warningListener);
 		pgaParam.addParameterChangeWarningListener(warningListener);
@@ -177,7 +160,6 @@ NamedObjectAPI, ParameterChangeListener {
 		supportedIMParams.clear();
 		supportedIMParams.addParameter(saParam);
 		supportedIMParams.addParameter(pgaParam);
-		supportedIMParams.addParameter(pgvParam);
 
 
 	}
@@ -191,12 +173,8 @@ NamedObjectAPI, ParameterChangeListener {
 		// moment magnitude (default 5.0)
 		magParam = new MagParam(Campbell2003Constants.MAG_WARN_MIN,
 				Campbell2003Constants.MAG_WARN_MAX);
-		// Focal mechanism
-		rakeParam = new RakeParam(); 
 		eqkRuptureParams.clear();
 		eqkRuptureParams.addParameter(magParam);
-		eqkRuptureParams.addParameter(rakeParam);
-
 	}
 
 	/**
@@ -204,12 +182,6 @@ NamedObjectAPI, ParameterChangeListener {
 	 * @param rake                      ave. rake of rupture (degrees)
 	 */
 	protected final void initSiteParams() {
-
-		// vs30 parameters (constrains are not set, default value to 760 m/s)
-		vs30Param = new Vs30_Param();
-
-		siteParams.clear();
-		siteParams.addParameter(vs30Param);
 	}
 	/**
 	 * Initialize Propagation Effect parameters (closest distance to rupture)
@@ -222,7 +194,7 @@ NamedObjectAPI, ParameterChangeListener {
 				Campbell2003Constants.DISTANCE_RUP_WARN_MIN);
 		distanceRupParam.addParameterChangeWarningListener(warningListener);
 		DoubleConstraint warn = new DoubleConstraint(
-				Campbell2003Constants.DISTANCE_RUP_WARN_MIN,
+				new Double(0.00),
 				Campbell2003Constants.DISTANCE_RUP_WARN_MAX);
 		warn.setNonEditable();
 		distanceRupParam.setWarningConstraint(warn);
@@ -255,7 +227,7 @@ NamedObjectAPI, ParameterChangeListener {
         constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
         constraint.addString(ComponentParam.COMPONENT_GMRotI50);
         constraint.setNonEditable();
-        componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_GMRotI50);
+//        componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_GMRotI50);
         componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_AVE_HORZ);
 
 		// add these to the list
@@ -278,7 +250,6 @@ NamedObjectAPI, ParameterChangeListener {
 		// params that the mean depends upon
 		meanIndependentParams.clear();
 		meanIndependentParams.addParameter(magParam);
-		meanIndependentParams.addParameter(vs30Param);
 		meanIndependentParams.addParameter(distanceRupParam);
 
 		// params that the stdDev depends upon
@@ -317,10 +288,6 @@ NamedObjectAPI, ParameterChangeListener {
 	 * passed in.
 	 */
 	public final void setSite(final Site site) {
-		vs30Param.setValueIgnoreWarning((Double) site.getParameter(
-				Vs30_Param.NAME).getValue());
-		this.site = site;
-		setPropagationEffectParams();
 	}
 
 	/**
@@ -338,10 +305,8 @@ NamedObjectAPI, ParameterChangeListener {
 	 * Set period index.
 	 */
 	protected final void setPeriodIndex() {
-		if (im.getName().equalsIgnoreCase(PGV_Param.NAME)) {
+		if (im.getName().equalsIgnoreCase(PGA_Param.NAME)) {
 			iper = 0;
-		} else if (im.getName().equalsIgnoreCase(PGA_Param.NAME)) {
-			iper = 1;
 		} else {
 			iper = ((Integer) indexFromPerHashMap.get(saPeriodParam.getValue()))
 			.intValue();
@@ -359,7 +324,7 @@ NamedObjectAPI, ParameterChangeListener {
 		}
 		else{
 			setPeriodIndex();
-			return getMean (iper, mag, rRup, vs30, rake);
+			return getMean (iper, mag, rRup);
 		}
 	}
 
@@ -375,10 +340,16 @@ NamedObjectAPI, ParameterChangeListener {
 	 * @param iper
 	 * @param rRup
 	 * @param mag
-	 * @param vs30
-	 * @param rake
 	 */
-	public double getMean(int iper, double mag, double rRup, double vs30, double rake){
+	public double getMean(int iper, double mag, double rRup){
+
+
+		double f1 = Double.NaN;
+		double f2 = Double.NaN;
+		double f3 = Double.NaN;
+		double tmp = Double.NaN;
+		double R = Double.NaN;
+		double lnY = Double.NaN;
 
 		/**
 		 * This is to avoid very small values for Rup 
@@ -387,37 +358,8 @@ NamedObjectAPI, ParameterChangeListener {
 		if (rRup < 1e-3) {
 			rRup = 1;
 		}
-		double lnY_adj = Double.NaN;
-		double lnY_rock = Double.NaN;
-		double[] s = computeSiteTerm(iper, vs30);
-		double[] f = computeStyleOfFaultingTerm(iper, rake);
-		double lnY_Hrock = computeHardRockResponse(iper, mag, rRup);
-
-//		lnY_rock = Math.exp(lnY_Hrock) * f[2] * s[0];
-		lnY_rock = Math.exp(lnY_Hrock);
-
-		if  (iper == 0.00) {
-			
-			lnY_adj = Math.exp(lnY_Hrock) 
-			          * Campbell2003Constants.SA_g_to_PGV_cms_CONVERSION_FACTOR;
-
-		} else {
-			lnY_adj = Math.exp(lnY_Hrock);
-
-		}
-		return Math.log(lnY_adj);
-	}
-
 
 		
-	private double computeHardRockResponse (int iper, double mag, double rRup){
-		double f1 = Double.NaN;
-		double f2 = Double.NaN;
-		double f3 = Double.NaN;
-		double tmp = Double.NaN;
-		double R = Double.NaN;
-		double lnY = Double.NaN;
-
 		tmp = Campbell2003Constants.c7[iper] * Math.exp(Campbell2003Constants.c8[iper] * mag);
 		R   = Math.sqrt(rRup*rRup + tmp * tmp);
 		f1  = Campbell2003Constants.c2[iper] * mag + Campbell2003Constants.c3[iper] * Math.pow((8.5-mag),2);
@@ -428,63 +370,27 @@ NamedObjectAPI, ParameterChangeListener {
 		lnY = Campbell2003Constants.c1[iper] + f1 + f2 + f3;
 
 		return (lnY);
-	}
 
-	private double computedf3(int iper, double rRup) {
-		double f3factor = Double.NaN;
-		if (rRup <= Campbell2003Constants.R1) {
-			f3factor = 0.00;
-		} else if (rRup > Campbell2003Constants.R1 && rRup <= Campbell2003Constants.R2) {
-			f3factor = Campbell2003Constants.c9[iper] * (Math.log(rRup) - 
-					Math.log(Campbell2003Constants.R1));
-		} else if (rRup > Campbell2003Constants.R2) {
-			f3factor = Campbell2003Constants.c9[iper] * (Math.log(rRup) - 
-					Math.log(Campbell2003Constants.R1)) + 
-					Campbell2003Constants.c10[iper] * (Math.log(rRup) - 
-							Math.log(Campbell2003Constants.R2));
 		}
-		return f3factor;
-	};
-
 	/**
-	 * Compute style-of-faulting adjustment
-	 **/		
-	private double[] computeStyleOfFaultingTerm(final int iper, final double rake) {
-		double[] f = new double[3];
-		if (rake > Campbell2003Constants.FLT_TYPE_NORMAL_RAKE_LOWER
-				&& rake <= Campbell2003Constants.FLT_TYPE_NORMAL_RAKE_UPPER){
-			f[0] = 1.0;
-			f[1] = 0.0;
-			f[2] = f[0]*Math.pow(Campbell2003Constants.Frss[iper], (1-Campbell2003Constants.pR)) * 
-			Math.pow(Campbell2003Constants.Fnss, - Campbell2003Constants.pN);
-		} else if (rake > Campbell2003Constants.FLT_TYPE_REVERSE_RAKE_LOWER
-				&& rake <= Campbell2003Constants.FLT_TYPE_REVERSE_RAKE_UPPER) {
-			f[0] = 0.0;
-			f[1] = 1.0;
-			f[2] = f[1] * Math.pow(Campbell2003Constants.Frss[iper], -Campbell2003Constants.pR) * 
-			Math.pow(Campbell2003Constants.Fnss, (1-Campbell2003Constants.pN));;
-		} else {
-			f[0] = 0.0;
-			f[1] = 0.0;
-			f[2] = Math.pow(Campbell2003Constants.Frss[iper], -Campbell2003Constants.pR) * 
-			Math.pow(Campbell2003Constants.Fnss, -Campbell2003Constants.pN);
-		}
-		return f;
-	}
-	/**
-	 * Compute adjustment factor for rock (vs30 = 800m/s)
-	 **/		
-	private double[] computeSiteTerm(final int iper, final double vs30) {
-		double[] s = new double[2];
-		if (vs30 == Campbell2003Constants.SITE_TYPE_ROCK_UPPER_BOUND) {
-			s[0] = Campbell2003Constants.AFrock[iper];
-			s[1] = 0.0; 
-		} else {
-			s[0] = 0.0;
-			s[1] = 0.0;
-		}
-		return s;
-	}
+	 * Compute f3 term 
+	 * 
+	 * */
+		private double computedf3(int iper, double rRup) {
+			double f3factor = Double.NaN;
+			if (rRup <= Campbell2003Constants.R1) {
+				f3factor = 0.00;
+			} else if (rRup > Campbell2003Constants.R1 && rRup <= Campbell2003Constants.R2) {
+				f3factor = Campbell2003Constants.c9[iper] * (Math.log(rRup) - 
+						Math.log(Campbell2003Constants.R1));
+			} else if (rRup > Campbell2003Constants.R2) {
+				f3factor = Campbell2003Constants.c9[iper] * (Math.log(rRup) - 
+						Math.log(Campbell2003Constants.R1)) + 
+						Campbell2003Constants.c10[iper] * (Math.log(rRup) - 
+								Math.log(Campbell2003Constants.R2));
+			}
+			return f3factor;
+		};
 
 	public double getStdDev(int iper, double mag, String stdDevType ) {
 		double sigma = Double.NaN;;
@@ -494,14 +400,11 @@ NamedObjectAPI, ParameterChangeListener {
 		else {
 			final double M1 = 7.16; 
 			if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL_MAG_DEP))
-					//&& vs30 == Campbell2003Constants.SITE_TYPE_ROCK_UPPER_BOUND)
 				if (mag < M1) {
 					sigma = (Campbell2003Constants.c11[iper] + Campbell2003Constants.c12[iper] * mag);
-					// *Campbell2003Constants.sig_AFrock[iper];
 				} 
 				else {
 					sigma = Campbell2003Constants.c13[iper];
-			       //*Campbell2003Constants.sig_AFrock[iper];
 				}
 			return (sigma);
 		}
@@ -514,14 +417,11 @@ NamedObjectAPI, ParameterChangeListener {
 	public final void setParamDefaults() {
 
 		magParam.setValueAsDefault();
-		rakeParam.setValueAsDefault();
-		vs30Param.setValueAsDefault();
 		distanceRupParam.setValueAsDefault();
 		saPeriodParam.setValueAsDefault();
 		saDampingParam.setValueAsDefault();
 		saParam.setValueAsDefault();
 		pgaParam.setValueAsDefault();
-		pgvParam.setValueAsDefault();
 		stdDevTypeParam.setValueAsDefault();
 		sigmaTruncTypeParam.setValueAsDefault();
 		sigmaTruncLevelParam.setValueAsDefault();
@@ -538,14 +438,10 @@ NamedObjectAPI, ParameterChangeListener {
 
 		if (pName.equals(MagParam.NAME)) {
 			mag = ((Double) val).doubleValue();
-		} else if (pName.equals(Vs30_Param.NAME)) {
-			vs30 = ((Double) val).doubleValue();
 		} else if (pName.equals(DistanceRupParameter.NAME)) {
 			rRup = ((Double) val).doubleValue();
 		} else if (pName.equals(StdDevTypeParam.NAME)) {
 			stdDevType = (String) val;
-		} else if (pName.equals(FaultTypeParam.NAME)) {
-			rake = ((Double) val).doubleValue();
 		}
 	}
 	/**
@@ -553,8 +449,6 @@ NamedObjectAPI, ParameterChangeListener {
 	 */
 	public void resetParameterEventListeners(){
 		magParam.removeParameterChangeListener(this);
-		rakeParam.removeParameterChangeListener(this);
-		vs30Param.removeParameterChangeListener(this);
 		distanceRupParam.removeParameterChangeListener(this);
 		stdDevTypeParam.removeParameterChangeListener(this);
 		saPeriodParam.removeParameterChangeListener(this);
@@ -567,8 +461,6 @@ NamedObjectAPI, ParameterChangeListener {
 	protected void initParameterEventListeners() {
 
 		magParam.addParameterChangeListener(this);
-		rakeParam.addParameterChangeListener(this);
-		vs30Param.addParameterChangeListener(this);
 		distanceRupParam.addParameterChangeListener(this);
 		stdDevTypeParam.addParameterChangeListener(this);
 		saPeriodParam.addParameterChangeListener(this);
@@ -595,31 +487,22 @@ NamedObjectAPI, ParameterChangeListener {
 	public URL getInfoURL() throws MalformedURLException{
 		return new URL("http://www.opensha.org/documentation/modelsImplemented/attenRel/Campbell2003.html");
 	}
-//	/**
-//	 * For testing
-//	 * 
-//	 */
-//
-//	public static void main(String[] args) {
-//
-//		Campbell2003_AttenRel ar = new Campbell2003_AttenRel(null);
-//		ar.setParamDefaults();
-//		ar.setIntensityMeasure(SA_Param.NAME);
-//     		for (int i=0; i < 1; i++){
-//			 System.out.println(i + ". T(sec) ="  + Campbell2003Constants.PERIOD[i]);
-//			 System.out.println(" mag = 5.00 " + "r =    1.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,    1.00, 800, -90)));
-//			 System.out.println(" mag = 5.00 " + "r =   20.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,   20.00, 800, -90)));
-//			 System.out.println(" mag = 5.00 " + "r =   30.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,   30.00, 800, -90)));
-//			 System.out.println(" mag = 5.00 " + "r =   50.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,   50.00, 800, -90)));
-//			 System.out.println(" mag = 5.00 " + "r =   75.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,   75.00, 800, -90)));
-//			 System.out.println(" mag = 5.00 " + "r =  100.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,  100.00, 800, -90)));
-//			 System.out.println(" mag = 5.00 " + "r =  200.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,  200.00, 800, -90)));
-//			 System.out.println(" mag = 5.00 " + "r =  500.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,  500.00, 800, -90)));
-//			 System.out.println(" mag = 5.00 " + "r = 1000.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00, 1000.00, 800, -90)));
-//			 System.out.println(ar.getStdDev(i, 5.00, StdDevTypeParam.STD_DEV_TYPE_TOTAL_MAG_DEP.toString()));
+	/**
+	 * For testing
+	 * 
+	 */
+
+	public static void main(String[] args) {
+		Campbell2003_AttenRel ar = new Campbell2003_AttenRel(null);
+		ar.setParamDefaults();
+		ar.setIntensityMeasure(SA_Param.NAME);
+     		for (int i=1; i < 3; i++){
+			 System.out.println(i + ". T(sec) ="  + Campbell2003Constants.PERIOD[i]);
+			 System.out.println(" mag = 5.00 " + "r =    1.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00, 1.00)));
+			 System.out.println(ar.getStdDev(i, 5.00, StdDevTypeParam.STD_DEV_TYPE_TOTAL_MAG_DEP.toString()));
 //			 System.out.println (ar.getStdDev(i, 7.00, StdDevTypeParam.STD_DEV_TYPE_TOTAL_MAG_DEP.toString()));
 			 
-//		 }
-//	}	
+		 }
+	}	
 
 }

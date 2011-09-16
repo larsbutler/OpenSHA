@@ -45,9 +45,11 @@ public class FocalDepthParam extends WarningDoubleParameter {
      */
     public FocalDepthParam(double defaultDepth) {
         super(NAME, new DoubleConstraint(MIN, MAX), UNITS);
+    	System.out.println("inside focaldepthparam coinstructor: 1");
         getConstraint().setNonEditable();
         setInfo(INFO);
         setDefaultValue(defaultDepth);
+        System.out.println("inside focaldepthparam coinstructor: 2");
     }
 
     /**
@@ -56,6 +58,7 @@ public class FocalDepthParam extends WarningDoubleParameter {
      */
     public FocalDepthParam() {
         this(0.0);
+        System.out.println("inside focaldepthparam constructor with empty params");
     }
 
 }

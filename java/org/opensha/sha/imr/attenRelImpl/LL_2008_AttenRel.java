@@ -18,7 +18,6 @@ import org.opensha.sha.imr.ScalarIntensityMeasureRelationshipAPI;
 import org.opensha.sha.imr.param.EqkRuptureParams.MagParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.DampingParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PGA_Param;
-import org.opensha.sha.imr.param.IntensityMeasureParams.PGV_Param;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PeriodParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.SA_Param;
 import org.opensha.sha.imr.param.OtherParams.ComponentParam;
@@ -130,13 +129,13 @@ NamedObjectAPI, ParameterChangeListener {
 
 		// Init the hashmap for rock
 		indexFromPerHashMapRock = new HashMap<Double, Integer>();
-		for (int i = 2; i < LL2008Constants.PERIOD.length; i++) {
+		for (int i = 1; i < LL2008Constants.PERIOD.length; i++) {
 			indexFromPerHashMapRock.put(new Double(LL2008Constants.PERIOD[i]), 
 					new Integer(i));
 		}
 		// Init the hashmap for soil
 		indexFromPerHashMapSoil = new HashMap<Double, Integer>();
-		for (int i = 2; i < LL2008Constants.PERIOD.length; i++) {
+		for (int i = 1; i < LL2008Constants.PERIOD.length; i++) {
 			indexFromPerHashMapSoil.put(new Double(LL2008Constants.PERIOD[i]), 
 					new Integer(i));
 		}
@@ -150,7 +149,7 @@ NamedObjectAPI, ParameterChangeListener {
 	}
 
 	/**
-	 * Creates the three supported IM parameters (PGA, PGV and SA), as well as the
+	 * Creates the three supported IM parameters (PGA and SA), as well as the
 	 * independenParameters of SA (periodParam and dampingParam) and adds them
 	 * to the supportedIMParams list. Makes the parameters non-editable.
 	 */
@@ -158,7 +157,7 @@ NamedObjectAPI, ParameterChangeListener {
 
 		// set supported periods for spectral acceleration
 		DoubleDiscreteConstraint periodConstraint = new DoubleDiscreteConstraint();
-		for (int i = 2; i < LL2008Constants.PERIOD.length; i++) {
+		for (int i = 1; i < LL2008Constants.PERIOD.length; i++) {
 			periodConstraint.addDouble(new Double(LL2008Constants.PERIOD[i]));
 		}
 		periodConstraint.setNonEditable();
@@ -177,20 +176,14 @@ NamedObjectAPI, ParameterChangeListener {
 		pgaParam = new PGA_Param();
 		pgaParam.setNonEditable();
 
-		// initialize peak ground velocity parameter (units: cm/sec)
-		pgvParam = new PGV_Param();
-		pgvParam.setNonEditable();
-
 		// add the warning listeners
 		saParam.addParameterChangeWarningListener(warningListener);
 		pgaParam.addParameterChangeWarningListener(warningListener);
-		pgvParam.addParameterChangeWarningListener(warningListener);
 
 		// put parameters in the supportedIMParams list
 		supportedIMParams.clear();
 		supportedIMParams.addParameter(saParam);
 		supportedIMParams.addParameter(pgaParam);
-		supportedIMParams.addParameter(pgvParam);
 
 	}
 
@@ -201,9 +194,8 @@ NamedObjectAPI, ParameterChangeListener {
 	 */
 	protected final void initEqkRuptureParams() {
 
-		// moment magnitude (default 5.5)
-		magParam = new MagParam(AB2003Constants.MAG_WARN_MIN,
-				AB2003Constants.MAG_WARN_MAX);
+		magParam = new MagParam(LL2008Constants.MAG_WARN_MIN,
+				LL2008Constants.MAG_WARN_MAX);
 
 		// tectonic region type
 		StringConstraint options = new StringConstraint();
@@ -421,10 +413,8 @@ NamedObjectAPI, ParameterChangeListener {
 	 * Set period index.
 	 */
 	protected final void setPeriodIndex() {
-		if (im.getName().equalsIgnoreCase(PGV_Param.NAME)) {
+		if (im.getName().equalsIgnoreCase(PGA_Param.NAME)) {
 			iper = 0;
-		} else if (im.getName().equalsIgnoreCase(PGA_Param.NAME)) {
-			iper = 1;
 		} else {
 			if (vs30Param.getValue()>=LL2008Constants.SOIL_TYPE_SOFT_UPPER_BOUND){
 				iper = ( (Integer) indexFromPerHashMapRock.get(saPeriodParam.getValue()))
@@ -473,7 +463,6 @@ NamedObjectAPI, ParameterChangeListener {
 		saDampingParam.setValueAsDefault();
 		saParam.setValueAsDefault();
 		pgaParam.setValueAsDefault();
-		pgvParam.setValueAsDefault();
 		stdDevTypeParam.setValueAsDefault();
 		sigmaTruncTypeParam.setValueAsDefault();
 		sigmaTruncLevelParam.setValueAsDefault();
@@ -535,24 +524,7 @@ NamedObjectAPI, ParameterChangeListener {
 			logY = LL2008Constants.soil_C1[iper] + term1 + term2 + term3 + LL2008Constants.soil_C7[iper] * Zt;
 		}
 
-		if (LL2008Constants.PERIOD[iper] == -1){
-			mean = Math.exp(logY) * LL2008Constants.SA_g_to_PGV_cms_CONVERSION_FACTOR;
-//			System.out.println("PGV");
-
-		} else {
-			mean = Math.exp(logY);
-//			System.out.println("SA");
-//
-//			System.out.println("c1 = " + LL2008Constants.soil_C1[iper]);
-//			System.out.println("c2 = " + LL2008Constants.soil_C2[iper]);
-//			System.out.println("c3 = " + LL2008Constants.soil_C3[iper]);
-//			System.out.println("c4 = " + LL2008Constants.soil_C4[iper]);
-//			System.out.println("c5 = " + LL2008Constants.soil_C5[iper]);
-//			System.out.println("c6 = " + LL2008Constants.soil_C6[iper]);
-//			System.out.println("c7 = " + LL2008Constants.soil_C7[iper]);
-
-		}
-		return Math.log(mean);
+		return logY;
 	}
 	/**
 	 * @return The stdDev value

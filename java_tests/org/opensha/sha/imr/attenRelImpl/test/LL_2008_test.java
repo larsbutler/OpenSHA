@@ -52,10 +52,10 @@ public class LL_2008_test implements ParameterChangeWarningListener {
 	private static String[] TABLE_HEADER_MEDIAN = new String[1];
 	
 	/** Number of columns in test tables for standard deviation. */
-	private static final int TABLE_NUM_COL_STD = 32;
+	private static final int TABLE_NUM_COL_STD = 31;
 
 	/** Number of columns in test tables. */
-	private static final int TABLE_NUM_COL = 32;
+	private static final int TABLE_NUM_COL = 31;
 
 	/** Number of rows in test table. */
 	private static final int TABLE_NUM_ROWS = 81;
@@ -177,9 +177,9 @@ public class LL_2008_test implements ParameterChangeWarningListener {
 	private void validateMedian(double hypoDepth, double vs30,  String tectRegType, double[][] table) {
 		String[] columnDescr = TABLE_HEADER_MEDIAN[0].trim().split("\\s+");
 		// check for SA
-		for (int i = 3; i < columnDescr.length - 2; i++) {
+		for (int i = 3; i < columnDescr.length - 1; i++) {
 			for (int j = 0; j < table.length; j++) {
-				int iper = i-1;
+				int iper = i-2;
 				double mag = table[j][0];
 				double rJB = table[j][1];
 				double expectedMedian = table[j][i];
@@ -197,24 +197,10 @@ public class LL_2008_test implements ParameterChangeWarningListener {
 		for (int j = 0; j < table.length; j++) {
 			double mag = table[j][0];
 			double rJB = table[j][1];
-			double expectedMedian = table[j][columnDescr.length - 2];
-			double computedMedian = Math.exp(ll08AttenRel.getMean(1, mag, rJB, 
-					hypoDepth, vs30, tectRegType));
-			System.out.println("expected: "+expectedMedian);
-			System.out.println("computed: "+computedMedian);
-			assertEquals(expectedMedian, computedMedian, TOLERANCE);
-
-		}
-		// check for PGV
-		for (int j = 0; j < table.length; j++) {
-			double mag = table[j][0];
-			double rJB = table[j][1];
 			double expectedMedian = table[j][columnDescr.length - 1];
 			double computedMedian = Math.exp(ll08AttenRel.getMean(0, mag, rJB, 
 					hypoDepth, vs30, tectRegType));
-			System.out.println("expected: "+expectedMedian);
-			System.out.println("computed: "+computedMedian);
-			assertEquals(expectedMedian, computedMedian, TOLERANCE_pgv);
+			assertEquals(expectedMedian, computedMedian, TOLERANCE);
 		}
 	}
 
@@ -225,26 +211,16 @@ public class LL_2008_test implements ParameterChangeWarningListener {
 		for (int i = 3; i < columnDescr.length - 2; i++) {
 			for (int j = 0; j < table.length; j++) {
 				double expectedStd = table[j][i];
-				double computedStd = ll08AttenRel.getStdDev(i-1, stdDevType, vs30);
+				double computedStd = ll08AttenRel.getStdDev(i-2, stdDevType, vs30);
 				assertEquals(expectedStd, computedStd, TOLERANCE);
-				System.out.println("expected: "+expectedStd);
-				System.out.println("computed: "+computedStd);
 			}
 		}
 		// check for PGA
 		for (int j = 0; j < table.length; j++) {
-			double expectedStd = table[j][columnDescr.length - 2];
-			double computedStd = ll08AttenRel.getStdDev(1, stdDevType, vs30 );
-			assertEquals(expectedStd, computedStd, TOLERANCE);
-			System.out.println("expected: "+expectedStd);
-			System.out.println("computed: "+computedStd);
-		}
-		// check for PGV
-		for (int j = 0; j < table.length; j++) {
 			double expectedStd = table[j][columnDescr.length - 1];
 			double computedStd = ll08AttenRel.getStdDev(0, stdDevType, vs30);
 
-			assertEquals(expectedStd, computedStd, TOLERANCE_pgv);
+			assertEquals(expectedStd, computedStd, TOLERANCE);
 		}
 	}
 	/**
@@ -294,26 +270,6 @@ public class LL_2008_test implements ParameterChangeWarningListener {
 				erf);
 	}
 	
-//	/**
-//	 * Check LL_2008_AttenRel usage for computing hazard curves using GEM1ERF constructed
-//	 * from area source data for shallow crust events.
-//	 * @throws Exception 
-//	 */
-//	@Test
-//	public final void ll2008WithGEM1ERFShallowCrustAreaSource() throws Exception{
-//		ll08AttenRel.setIntensityMeasure(PGA_Param.NAME);
-//		ArrayList<GEMSourceData> srcDataList = new ArrayList<GEMSourceData>();
-//		srcDataList.
-//		add(AttenRelTestHelper.getActiveCrustAreaSourceData());
-//		double timeSpan = 50.0;
-//		GEM1ERF erf = GEM1ERF.getGEM1ERF(srcDataList, timeSpan);
-//		HazardCurveCalculator hazCurveCalculator = new HazardCurveCalculator();
-//		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper.setUpHazardCurve();
-//		Site site = new Site(new Location(-3.78,-81.18));
-//		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
-//		hazCurveCalculator.getHazardCurve(hazCurve, site, ll08AttenRel,
-//				erf);
-//	}
 	/**
 	 * Check LL_2008_AttenRel usage for computing hazard curves using
 	 * GEM1ERF constructed from area source data for intraslab events. Ruptures

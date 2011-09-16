@@ -44,7 +44,6 @@ import org.opensha.sha.util.TectonicRegionType;
  * <p>
  * <UL>
  * <LI>pgaParam - Peak Ground Acceleration
- * <LI>pgaParam - Peak Ground Velocity = SA(0.5)/20
  * <LI>saParam - Response Spectral Acceleration (5% damping)
  * </UL>
  * <p>
@@ -137,13 +136,13 @@ public class YoungsEtAl_1997_AttenRel extends AttenuationRelationship implements
 
 		// init period index - period value map for rock
 		indexFromPerHashMapRock = new HashMap<Double, Integer>();
-		for (int i = 2; i < YoungsEtAl1997Constants.PERIOD_ROCK.length; i++) {
+		for (int i = 1; i < YoungsEtAl1997Constants.PERIOD_ROCK.length; i++) {
 			indexFromPerHashMapRock.put(new Double(
 					YoungsEtAl1997Constants.PERIOD_ROCK[i]), new Integer(i));
 		}
 		// init period index - period value map for soil
 		indexFromPerHashMapSoil = new HashMap<Double, Integer>();
-		for (int i = 2; i < YoungsEtAl1997Constants.PERIOD_SOIL.length; i++) {
+		for (int i = 1; i < YoungsEtAl1997Constants.PERIOD_SOIL.length; i++) {
 			indexFromPerHashMapSoil.put(new Double(
 					YoungsEtAl1997Constants.PERIOD_SOIL[i]), new Integer(i));
 		}
@@ -186,21 +185,15 @@ public class YoungsEtAl_1997_AttenRel extends AttenuationRelationship implements
 		// initialize peak ground acceleration parameter (units: g):
 		pgaParam = new PGA_Param();
 		pgaParam.setNonEditable();
-		// initialize peak ground velocity parameter (units: cm/sec):
-		pgvParam = new PGV_Param();
-		pgvParam.setNonEditable();
 
 		// add the warning listeners:
 		saParam.addParameterChangeWarningListener(warningListener);
 		pgaParam.addParameterChangeWarningListener(warningListener);
-		pgvParam.addParameterChangeWarningListener(warningListener);
 
 		// put parameters in the supportedIMParams list
 		supportedIMParams.clear();
 		supportedIMParams.addParameter(saParam);
 		supportedIMParams.addParameter(pgaParam);
-		supportedIMParams.addParameter(pgvParam);
-
 	}
 
 	/**
@@ -252,7 +245,7 @@ public class YoungsEtAl_1997_AttenRel extends AttenuationRelationship implements
 		distanceRupParam = new DistanceRupParameter(0.0);
 		distanceRupParam.addParameterChangeWarningListener(warningListener);
 		DoubleConstraint warndistance = new DoubleConstraint(
-				YoungsEtAl1997Constants.DISTANCE_RUP_WARN_MIN,
+				new Double(0.00),
 				YoungsEtAl1997Constants.DISTANCE_RUP_WARN_MAX);
 		warndistance.setNonEditable();
 		distanceRupParam.setWarningConstraint(warndistance);
@@ -454,7 +447,6 @@ public class YoungsEtAl_1997_AttenRel extends AttenuationRelationship implements
 		saDampingParam.setValueAsDefault();
 		saParam.setValueAsDefault();
 		pgaParam.setValueAsDefault();
-		pgvParam.setValueAsDefault();
 		stdDevTypeParam.setValueAsDefault();
 		sigmaTruncTypeParam.setValueAsDefault();
 		sigmaTruncLevelParam.setValueAsDefault();
@@ -466,10 +458,8 @@ public class YoungsEtAl_1997_AttenRel extends AttenuationRelationship implements
 	 */
 	protected void setPeriodIndex() throws ParameterException {
 
-		if (im.getName().equalsIgnoreCase(PGV_Param.NAME)) {
+		if (im.getName().equalsIgnoreCase(PGA_Param.NAME)) {
 			iper = 0;
-		} else if (im.getName().equalsIgnoreCase(PGA_Param.NAME)) {
-			iper = 1;
 		} else {
 			double period = saPeriodParam.getValue();
 			// rock
@@ -561,20 +551,7 @@ public class YoungsEtAl_1997_AttenRel extends AttenuationRelationship implements
 					+ YoungsEtAl1997Constants.A7_SOIL * Zt;
 		}
 
-		if ( iper == 0) {
-			
-			mean = Math.exp(lnY) * YoungsEtAl1997Constants.SA_g_to_PGV_cms_CONVERSION_FACTOR;
-
-		} else if (YoungsEtAl1997Constants.PERIOD_ROCK[iper] == 4.00) {
-		
-			mean = Math.exp(lnY) * YoungsEtAl1997Constants.T3sec_TO_T4sec_factor;
-
-		} else {
-		
-			mean = Math.exp(lnY);
-		
-		}
-		return Math.log(mean);
+		return lnY;
 	}
 
 	/** 
@@ -622,7 +599,7 @@ public class YoungsEtAl_1997_AttenRel extends AttenuationRelationship implements
 		ar.setParamDefaults();
 		ar.setIntensityMeasure(SA_Param.NAME);
 
-		for (int i=0; i < 14; i++){
+		for (int i=0; i < 13; i++){
 			System.out.println(YoungsEtAl1997Constants.PERIOD_ROCK[i] + " mean = " + Math.exp(ar.getMean(i, 7.00, 15, 
 					TectonicRegionType.SUBDUCTION_INTERFACE.toString(), 800, 30)));
 			System.out.println("st.dev" + ar.getStdDev(i, 7, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));

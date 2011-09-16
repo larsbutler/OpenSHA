@@ -17,9 +17,8 @@ import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.calc.HazardCurveCalculator;
 import org.opensha.sha.earthquake.rupForecastImpl.GEM1.GEM1ERF;
 import org.opensha.sha.earthquake.rupForecastImpl.GEM1.SourceData.GEMSourceData;
-import org.opensha.sha.imr.attenRelImpl.CF_2008Constants;
-import org.opensha.sha.imr.attenRelImpl.CF_2008_AttenRel;
-import org.opensha.sha.imr.attenRelImpl.Campbell2003_AttenRel;
+import org.opensha.sha.imr.attenRelImpl.Campbell2003Constants;
+import org.opensha.sha.imr.attenRelImpl.Campbell2003share_AttenRel;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PGA_Param;
 import org.opensha.sha.imr.param.OtherParams.StdDevTypeParam;
 import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
@@ -28,10 +27,10 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  * Class providing methods for testing {@link Campbell_2003_AttenRel}. Tables
  * provided by the original authors.
  */
-public class Campbell_2003_test implements ParameterChangeWarningListener {
+public class Campbell2003share_test implements ParameterChangeWarningListener {
 
 	/** Campbell_2003_AttenRel GMPE (attenuation relationship) */
-	private Campbell2003_AttenRel ca03AttenRel = null;
+	private Campbell2003share_AttenRel ca03AttenRel = null;
 
 	/**
 	 * Table for total standard deviation validation.
@@ -74,7 +73,7 @@ public class Campbell_2003_test implements ParameterChangeWarningListener {
 	 */
 	@Before
 	public final void setUp() throws Exception {
-		ca03AttenRel = new Campbell2003_AttenRel(this);
+		ca03AttenRel = new Campbell2003share_AttenRel(this);
 		ca03AttenRel.setParamDefaults();
 
 		stdTotalTable = new double[TABLE_NUM_ROWS][TABLE_NUM_COL_STD];
@@ -105,7 +104,8 @@ public class Campbell_2003_test implements ParameterChangeWarningListener {
 
 	@Test
 	public void checkMedianEventOnHardRock() {
-		validateMedian(medianHardRockTable);
+		double rake = -90.0;
+		validateMedian(rake, medianHardRockTable);
 	}
 	
 
@@ -180,7 +180,7 @@ public class Campbell_2003_test implements ParameterChangeWarningListener {
 				erf);
 	}
 
-	private void validateMedian(double[][] table) {
+	private void validateMedian(double rake, double[][] table) {
 		String[] columnDescr = TABLE_HEADER_MEDIAN[0].trim().split("\\s+");
 		// check for SA
 		for (int i = 3; i < columnDescr.length - 1; i++) {
@@ -192,7 +192,8 @@ public class Campbell_2003_test implements ParameterChangeWarningListener {
 				double mag = table[j][0];
 				double rJB = table[j][1];
 				double expectedMedian = table[j][i];
-				double computedMedian = Math.exp(ca03AttenRel.getMean(iper,mag, rJB));
+				double computedMedian = Math.exp(ca03AttenRel.getMean(iper,mag, rJB, rake))
+				/(ca03AttenRel.computeStyleOfFaultingTerm(iper, rake)[2]);
 				assertEquals(expectedMedian, computedMedian, TOLERANCE);
 			}
 		}
@@ -201,8 +202,8 @@ public class Campbell_2003_test implements ParameterChangeWarningListener {
 			double mag = table[j][0];
 			double rJB = table[j][1];
 			double expectedMedian = table[j][columnDescr.length - 1];
-			double computedMedian = Math.exp(ca03AttenRel.getMean(0, mag,
-					rJB));
+			double computedMedian = Math.exp(ca03AttenRel.getMean(0, mag, rJB, rake))
+                                   / (ca03AttenRel.computeStyleOfFaultingTerm(0, rake)[2]);
 			assertEquals(expectedMedian, computedMedian, TOLERANCE);
 		}
 	}

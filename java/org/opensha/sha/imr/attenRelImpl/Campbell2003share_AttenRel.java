@@ -20,55 +20,56 @@ import org.opensha.sha.imr.param.EqkRuptureParams.MagParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.RakeParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.DampingParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PGA_Param;
-import org.opensha.sha.imr.param.IntensityMeasureParams.PGV_Param;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PeriodParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.SA_Param;
 import org.opensha.sha.imr.param.OtherParams.ComponentParam;
 import org.opensha.sha.imr.param.OtherParams.SigmaTruncLevelParam;
 import org.opensha.sha.imr.param.OtherParams.SigmaTruncTypeParam;
 import org.opensha.sha.imr.param.OtherParams.StdDevTypeParam;
-import org.opensha.sha.imr.param.PropagationEffectParams.DistanceJBParameter;
 import org.opensha.sha.imr.param.PropagationEffectParams.DistanceRupParameter;
-import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
 
 
 /**
- * <b>Title:</b> Toro_2002_AttenRel<p>
+ * <b>Title:</b> Campbell_2003_AttenRel<p>
  *
- * <b>Description:</b> This implements the  updated GMPE developed by Toro et al (1997) with the 
- * distance term proposed by Toro (2002) 
- *  (www.riskeng.com/PDF/atten_toro_extended.pdf)
- * Disclaimer:
+ * <b>Description:</b> This implements the  GMPE developed by K. W. Campbell (2003, BSSA, vol
+ * 93, no 3, pp 1012-1033) <p>
+ * The GMPE is adjusted to account the style -of faulting and a default rock soil (Vs30 >=800m/sec)
+ * The adjustment coefficients were proposed by S. Drouet [2010] - internal SHARE WP4 report;  
+ * Supported Intensity-Measure Parameters:<p>
  * <UL>
- * <LI>saParam - Response Spectral Acceleration
  * <LI>PGA - Peak Ground Acceleration
+ * <LI>saParam - Response Spectral Acceleration
+ * <LI>
  * </UL><p>
  * Other Independent Parameters:<p>
  * <UL>
  * <LI>magParam - moment Magnitude
- * <LI>distanceJBParam - JB distance
+ * <LI>distanceRupParam - closest distance to surface projection of fault
  * <LI>componentParam - Component of shaking
- * <LI> stdDevTypeParam - The type of standard deviation (magnitude dependent)
+ * <LI>siteType - adjusted rock
+ * <LI>fltType - adjuste to account for style-of-faulting 
+ * <LI> stdDevTypeParam - The type of standard deviation (distance dependent)
  * </UL><p>
  *
  * @author     l.danciu
- * @created    July, 2011
- * @version    1.0
+ * @created    October, 2010 - updated July 2011
+ * @version    1.01
  */
 
 
-public class ToroEtAl2002_AttenRel extends AttenuationRelationship implements
-ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
+public class Campbell2003share_AttenRel extends AttenuationRelationship implements
+ScalarIntensityMeasureRelationshipAPI,
+NamedObjectAPI, ParameterChangeListener {
 
-	// Debugging stuff
-	private final static String C = "ToroEtAl_2002_AttenRel";
-	private final static boolean D = false;
-	public final static String SHORT_NAME = "ToroEtAl2002";
-	private static final long serialVersionUID = 1234567890987654353L;
+	/** Short name. */	
+	public final static String SHORT_NAME = "Campbell_2003";
 
+	/** Full name. */
+	public final static String NAME = "Campbell (2003)";
 
-	// Name of IMR
-	public final static String NAME = "Toro et al. (2002)";
+	/** Version number. */
+	private static final long serialVersionUID = 007L;
 
 	/** Period index. */
 	private int iper;
@@ -76,8 +77,11 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 	/** Moment magnitude. */
 	private double mag;
 
+	/** rake angle. */
+	private double rake;
+
 	/** Rupture distance. */
-	private double rJB;
+	private double rRup;
 
 	/** Tectonic region type. */
 	private String tecRegType;
@@ -95,20 +99,22 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 	 * Construct attenuation relationship. Initialize parameters and parameter
 	 * lists.
 	 */
-	public ToroEtAl2002_AttenRel(ParameterChangeWarningListener
+	public Campbell2003share_AttenRel(ParameterChangeWarningListener
 			warningListener) {
 
+		// creates exceedProbParam
 		super();
 
 		this.warningListener = warningListener;
 
 		initSupportedIntensityMeasureParams();
+
+		// Create an Hash map that links the period with its index
 		indexFromPerHashMap = new HashMap<Double, Integer>();
-		for (int i = 1; i < ToroEtAl2002Constants.PERIOD.length ; i++) {
-			indexFromPerHashMap.put(new Double(ToroEtAl2002Constants.PERIOD[i]), 
+		for (int i = 1; i < Campbell2003Constants.PERIOD.length; i++) { 
+			indexFromPerHashMap.put(new Double(Campbell2003Constants.PERIOD[i]), 
 					new Integer(i));
 		}
-
 		// Initialize earthquake Rupture parameters (e.g. magnitude)
 		initEqkRuptureParams();
 		// Initialize Propagation Effect Parameters (e.g. source-site distance)
@@ -121,11 +127,10 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 		initIndependentParamLists();
 		// Initialize the parameter change listeners
 		initParameterEventListeners();
-
 	}
 
 	/**
-	 * Creates the two supported IM parameters (PGA and SA), as well as the
+	 * Creates the three supported IM parameters (PGA, PGV and SA), as well as the
 	 * independenParameters of SA (periodParam and dampingParam) and adds them
 	 * to the supportedIMParams list. Makes the parameters non-editable.
 	 */
@@ -133,15 +138,15 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 
 		// set supported periods for spectral acceleration
 		DoubleDiscreteConstraint periodConstraint = new DoubleDiscreteConstraint();
-		for (int i = 1; i < ToroEtAl2002Constants.PERIOD.length; i++) {
-			periodConstraint.addDouble(new Double(ToroEtAl2002Constants.PERIOD[i]));
+		for (int i = 1; i < Campbell2003Constants.PERIOD.length; i++) {
+			periodConstraint.addDouble(new Double(Campbell2003Constants.PERIOD[i]));
 		}
 		periodConstraint.setNonEditable();
-		// set period param (default is 1s, which is provided by Toro et al 2002 GMPE)
+		// set period param (default is 1s, which is provided by Campbell2003 GMPE)
 		saPeriodParam = new PeriodParam(periodConstraint);
 
 		// set damping parameter. Empty constructor set damping
-		// factor to 5 % (which is the one provided by Toro et 2002 GMPE)
+		// factor to 5 % (which is the one provided by Campbell2003 GMPE)
 		saDampingParam = new DampingParam();
 
 		// initialize spectral acceleration parameter (units: g)
@@ -157,7 +162,6 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 		saParam.addParameterChangeWarningListener(warningListener);
 		pgaParam.addParameterChangeWarningListener(warningListener);
 
-
 		// put parameters in the supportedIMParams list
 		supportedIMParams.clear();
 		supportedIMParams.addParameter(saParam);
@@ -172,10 +176,13 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 	protected final void initEqkRuptureParams() {
 
 		// moment magnitude (default 5.0)
-		magParam = new MagParam(ToroEtAl2002Constants.MAG_WARN_MIN,
-				ToroEtAl2002Constants.MAG_WARN_MAX);
+		magParam = new MagParam(Campbell2003Constants.MAG_WARN_MIN,
+				Campbell2003Constants.MAG_WARN_MAX);
+		// Focal mechanism
+		rakeParam = new RakeParam(); 
 		eqkRuptureParams.clear();
 		eqkRuptureParams.addParameter(magParam);
+		eqkRuptureParams.addParameter(rakeParam);
 
 	}
 
@@ -186,26 +193,26 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 	protected final void initSiteParams() {
 
 	}
-
 	/**
-	 * Initialize Propagation Effect parameters (JB distance)
+	 * Initialize Propagation Effect parameters (closest distance to rupture)
 	 * and adds them to the propagationEffectParams list. Makes the parameters
 	 * non-editable.
 	 */
 	protected final void initPropagationEffectParams() {
 
-		distanceJBParam = new DistanceJBParameter(
-				ToroEtAl2002Constants.DISTANCE_JB_WARN_MIN);
-		distanceJBParam.addParameterChangeWarningListener(warningListener);
+		distanceRupParam = new DistanceRupParameter(
+				Campbell2003Constants.DISTANCE_RUP_WARN_MIN);
+		distanceRupParam.addParameterChangeWarningListener(warningListener);
 		DoubleConstraint warn = new DoubleConstraint(
-				new Double(0.00),
-				ToroEtAl2002Constants.DISTANCE_JB_WARN_MAX);
+				Campbell2003Constants.DISTANCE_RUP_WARN_MIN,
+				Campbell2003Constants.DISTANCE_RUP_WARN_MAX);
 		warn.setNonEditable();
-		distanceJBParam.setWarningConstraint(warn);
-		distanceJBParam.setNonEditable();
+		distanceRupParam.setWarningConstraint(warn);
+		distanceRupParam.setNonEditable();
 
-		propagationEffectParams.addParameter(distanceJBParam);
+		propagationEffectParams.addParameter(distanceRupParam);
 	}
+
 	/**
 	 * Initialize other Parameters (standard deviation type, component, sigma
 	 * truncation type, sigma truncation level).
@@ -219,17 +226,19 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 		StringConstraint stdDevTypeConstraint = new StringConstraint();
 		stdDevTypeConstraint.addString(StdDevTypeParam.STD_DEV_TYPE_TOTAL);
 		stdDevTypeConstraint.addString(StdDevTypeParam.STD_DEV_TYPE_NONE);
+		stdDevTypeConstraint.addString(StdDevTypeParam.STD_DEV_TYPE_INTER);
+		stdDevTypeConstraint.addString(StdDevTypeParam.STD_DEV_TYPE_INTRA);
 		stdDevTypeConstraint.setNonEditable();
 		stdDevTypeParam = new StdDevTypeParam(stdDevTypeConstraint);
 
-		// the Component Parameter
+        // the Component Parameter
 		// Geometrical Mean (COMPONENT_AVE_HORZ) = Geometrical MeanI50 (COMPONENT_GMRotI50)
-		StringConstraint constraint = new StringConstraint();
-		constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
-		constraint.addString(ComponentParam.COMPONENT_GMRotI50);
-		constraint.setNonEditable();
-//		componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_GMRotI50);
-		componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_AVE_HORZ);
+        StringConstraint constraint = new StringConstraint();
+        constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
+        constraint.addString(ComponentParam.COMPONENT_GMRotI50);
+        constraint.setNonEditable();
+//        componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_GMRotI50);
+        componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_AVE_HORZ);
 
 		// add these to the list
 		otherParams.clear();
@@ -251,7 +260,7 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 		// params that the mean depends upon
 		meanIndependentParams.clear();
 		meanIndependentParams.addParameter(magParam);
-		meanIndependentParams.addParameter(distanceJBParam);
+		meanIndependentParams.addParameter(distanceRupParam);
 
 		// params that the stdDev depends upon
 		stdDevIndependentParams.clear();
@@ -298,7 +307,7 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 	protected void setPropagationEffectParams() {
 
 		if ( (this.site != null) && (this.eqkRupture != null)) {
-			distanceJBParam.setValue(eqkRupture, site);
+			distanceRupParam.setValue(eqkRupture, site);
 		}
 	}
 
@@ -316,16 +325,16 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 
 
 	/**
-	 * Compute mean. 
-	 * 
+	 * Compute mean. Applies correction for style of faulting and 
+	 * generic rock - Vs30 >= 800m/s .
 	 */
 	public double getMean(){
-		if (rJB > USER_MAX_DISTANCE) {
+		if (rRup > USER_MAX_DISTANCE) {
 			return VERY_SMALL_MEAN;
 		}
 		else{
 			setPeriodIndex();
-			return getMean (iper, mag, rJB);
+			return getMean (iper, mag, rRup, rake);
 		}
 	}
 
@@ -333,107 +342,103 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 		if (intensityMeasureChanged){
 			setPeriodIndex();
 		}
-		return getStdDev(iper, mag, rJB, stdDevType);
+		return getStdDev(iper, mag, stdDevType);
 	}
 
 	/**
 	 * This computes the mean ln(Y) 
 	 * @param iper
-	 * @param rJB
+	 * @param rRup
 	 * @param mag
-	 * @param vs30
 	 * @param rake
 	 */
-	public double getMean(final int iper, double mag, double rJB){
+	public double getMean(int iper, double mag, double rRup, double rake){
+
+		double f1 = Double.NaN;
+		double f2 = Double.NaN;
+		double f3 = Double.NaN;
+		double tmp = Double.NaN;
+		double R = Double.NaN;
+		double lnY = Double.NaN;
 		/**
-		 * This is to avoid very small values for rJB 
+		 * This is to avoid very small values for Rup 
 		 * 
 		 * */
-		if (rJB < 1e-3) {
-			rJB = 1;
+		if (rRup < 1e-3) {
+			rRup = 1;
 		}
 
-		double magDiff = mag - 6.0;
+		tmp = Campbell2003Constants.c7[iper] * Math.exp(Campbell2003Constants.c8[iper] * mag);
+		R   = Math.sqrt(rRup*rRup + tmp * tmp);
+		f1  = Campbell2003Constants.c2[iper] * mag + Campbell2003Constants.c3[iper] * Math.pow((8.5-mag),2);
+		f2  = Campbell2003Constants.c4[iper] * Math.log (R) + 
+		(Campbell2003Constants.c5[iper] + Campbell2003Constants.c6[iper] * mag) * rRup;
+		f3  = computedf3(iper, rRup);
+		double[] f = computeStyleOfFaultingTerm(iper, rake);
 
-		double rM = Math.sqrt(rJB * rJB + ToroEtAl2002Constants.c7[iper] * ToroEtAl2002Constants.c7[iper] *
-				Math.pow(Math.exp(-1.25 + 0.227 * mag), 2));
-
-		double f1 = ToroEtAl2002Constants.c1[iper] + ToroEtAl2002Constants.c2[iper]*magDiff +
-		ToroEtAl2002Constants.c3[iper] * magDiff * magDiff;
-
-		double f2 = ToroEtAl2002Constants.c4[iper] * Math.log (rM); 
-
-		double f3 = (ToroEtAl2002Constants.c5[iper]-ToroEtAl2002Constants.c4[iper]) * 
-		Math.max(Math.log(rM/100), 0);
-
-		double f4 = ToroEtAl2002Constants.c6[iper]*rM;
-
-		double lnY = f1 - f2 - f3 - f4;
-
-		return lnY;
-
+		lnY = Campbell2003Constants.c1[iper] + f1 + f2 + f3;
+        lnY = Math.exp(lnY) * f[2];
+		
+        return Math.log(lnY);
 	}
 
+	private double computedf3(int iper, double rRup) {
+		double f3factor = Double.NaN;
+		if (rRup <= Campbell2003Constants.R1) {
+			f3factor = 0.00;
+		} else if (rRup > Campbell2003Constants.R1 && rRup <= Campbell2003Constants.R2) {
+			f3factor = Campbell2003Constants.c9[iper] * (Math.log(rRup) - 
+					Math.log(Campbell2003Constants.R1));
+		} else if (rRup > Campbell2003Constants.R2) {
+			f3factor = Campbell2003Constants.c9[iper] * (Math.log(rRup) - 
+					Math.log(Campbell2003Constants.R1)) + 
+					Campbell2003Constants.c10[iper] * (Math.log(rRup) - 
+							Math.log(Campbell2003Constants.R2));
+		}
+		return f3factor;
+	};
 
-	public double getStdDev(int iper, double mag, double rJB, String stdDevType ) {
-		double sigmaaM  = Double.NaN;
-		double sigmaaR  = Double.NaN;
-		double sigmae   = Double.NaN;
-		double sigmatot = Double.NaN;
+	/**
+	 * Compute style-of-faulting adjustment
+	 **/		
+	public double[] computeStyleOfFaultingTerm(final int iper, final double rake) {
+		double[] f = new double[3];
+		if (rake > Campbell2003Constants.FLT_TYPE_NORMAL_RAKE_LOWER
+				&& rake <= Campbell2003Constants.FLT_TYPE_NORMAL_RAKE_UPPER){
+			f[0] = 1.0;
+			f[1] = 0.0;
+			f[2] = f[0]*Math.pow(Campbell2003Constants.Frss[iper], (1-Campbell2003Constants.pR)) * 
+			Math.pow(Campbell2003Constants.Fnss, - Campbell2003Constants.pN);
+		} else if (rake > Campbell2003Constants.FLT_TYPE_REVERSE_RAKE_LOWER
+				&& rake <= Campbell2003Constants.FLT_TYPE_REVERSE_RAKE_UPPER) {
+			f[0] = 0.0;
+			f[1] = 1.0;
+			f[2] = f[1] * Math.pow(Campbell2003Constants.Frss[iper], -Campbell2003Constants.pR) * 
+			Math.pow(Campbell2003Constants.Fnss, (1-Campbell2003Constants.pN));;
+		} else {
+			f[0] = 0.0;
+			f[1] = 0.0;
+			f[2] = Math.pow(Campbell2003Constants.Frss[iper], -Campbell2003Constants.pR) * 
+			Math.pow(Campbell2003Constants.Fnss, -Campbell2003Constants.pN);
+		}
+		return f;
+	}
+
+	public double getStdDev(int iper, double mag, String stdDevType ) {
+		double sigma = Double.NaN;;
 
 		if(stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE))
 			return 0;
 		else {
-			if (mag < 5.0) {
-				sigmaaM = ToroEtAl2002Constants.m50[iper]; 
-				//				System.out.println("mag 5 sigmaaM= " + sigmaaM);
-			}
-			else if ((mag >= 5.0) && (mag <=5.5)) {
-				sigmaaM = ToroEtAl2002Constants.m50[iper] + 
-				(ToroEtAl2002Constants.m55[iper] - ToroEtAl2002Constants.m50[iper]) / 
-				(5.5-5.0) * (mag - 5.0);
-				//				System.out.println("mag 5 to 5.5 sigmaaM=  " + sigmaaM);
-			}
-			else if ((mag > 5.5) && (mag < 8.0)) {
-				sigmaaM = ToroEtAl2002Constants.m55[iper] + 
-				(ToroEtAl2002Constants.m80[iper] - ToroEtAl2002Constants.m55[iper]) /
-				(8.0-5.5) * (mag - 5.5);
-				//				System.out.println("mag 5.5 to 8 sigmaaM=" + sigmaaM);
-			}
-			else {
-				sigmaaM = ToroEtAl2002Constants.m80[iper];
-				//				System.out.println(" mg > 8 sigmaaM= " + sigmaaM);
-			}
-
-			if (rJB < 5.0) {
-				sigmaaR = ToroEtAl2002Constants.r05[iper];
-				//				System.out.println("<5km sigmaaR= " +sigmaaR);
-			}
-			else if ((rJB >= 5.0) && (rJB <= 20.0)) {
-				sigmaaR = ToroEtAl2002Constants.r05[iper] + 
-				(ToroEtAl2002Constants.r20[iper] - ToroEtAl2002Constants.r05[iper]) / 
-				(20.0-5.0) * (rJB-5.0);
-				//				System.out.println("5-20km sigmaaR= " +sigmaaR);
-			}
-			else {
-				sigmaaR = ToroEtAl2002Constants.r20[iper];
-				//				System.out.println(">20km sigmaaR= " +sigmaaR);
-
-			}	  
-
-			if (ToroEtAl2002Constants.PERIOD[iper] >= 2.0) {
-				sigmae = 0.34 + 0.06 * (mag - 6.0);
-			}
-			else {
-				sigmae = 0.36 + 0.07 * (mag - 6.0);
-			}
-			double sigmaatot = Math.sqrt(sigmaaM*sigmaaM+sigmaaR*sigmaaR);
-
-
-			sigmatot = (Math.sqrt(sigmaatot*sigmaatot+sigmae*sigmae));
-
-			return sigmatot;
-
+			final double M1 = 7.16; 
+			if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL_MAG_DEP))
+				if (mag < M1) {
+					sigma = (Campbell2003Constants.c11[iper] + Campbell2003Constants.c12[iper] * mag);
+				} 
+				else {
+					sigma = Campbell2003Constants.c13[iper];
+				}
+			return (sigma);
 		}
 	}
 
@@ -444,7 +449,8 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 	public final void setParamDefaults() {
 
 		magParam.setValueAsDefault();
-		distanceJBParam.setValueAsDefault();
+		rakeParam.setValueAsDefault();
+		distanceRupParam.setValueAsDefault();
 		saPeriodParam.setValueAsDefault();
 		saDampingParam.setValueAsDefault();
 		saParam.setValueAsDefault();
@@ -466,9 +472,11 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 		if (pName.equals(MagParam.NAME)) {
 			mag = ((Double) val).doubleValue();
 		} else if (pName.equals(DistanceRupParameter.NAME)) {
-			rJB = ((Double) val).doubleValue();
+			rRup = ((Double) val).doubleValue();
 		} else if (pName.equals(StdDevTypeParam.NAME)) {
 			stdDevType = (String) val;
+		} else if (pName.equals(FaultTypeParam.NAME)) {
+			rake = ((Double) val).doubleValue();
 		}
 	}
 	/**
@@ -476,7 +484,8 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 	 */
 	public void resetParameterEventListeners(){
 		magParam.removeParameterChangeListener(this);
-		distanceJBParam.removeParameterChangeListener(this);
+		rakeParam.removeParameterChangeListener(this);
+		distanceRupParam.removeParameterChangeListener(this);
 		stdDevTypeParam.removeParameterChangeListener(this);
 		saPeriodParam.removeParameterChangeListener(this);
 		this.initParameterEventListeners();
@@ -488,7 +497,8 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 	protected void initParameterEventListeners() {
 
 		magParam.addParameterChangeListener(this);
-		distanceJBParam.addParameterChangeListener(this);
+		rakeParam.addParameterChangeListener(this);
+		distanceRupParam.addParameterChangeListener(this);
 		stdDevTypeParam.addParameterChangeListener(this);
 		saPeriodParam.addParameterChangeListener(this);
 	}
@@ -507,32 +517,38 @@ ScalarIntensityMeasureRelationshipAPI,NamedObjectAPI, ParameterChangeListener {
 		return SHORT_NAME;
 	}
 	/**
-	 * 
+	 * This provides a URL where more info on this model can be obtained
 	 * @throws MalformedURLException if returned URL is not a valid URL.
 	 * @returns the URL to the AttenuationRelationship document on the Web.
 	 */
-	public URL getAttenuationRelationshipURL() throws MalformedURLException{
-		return new URL("http://www.opensha.org/documentation/modelsImplemented/attenRel/ToroEtAl_2002.html");
+	public URL getInfoURL() throws MalformedURLException{
+		return new URL("http://www.opensha.org/documentation/modelsImplemented/attenRel/Campbell2003.html");
 	}
+	/**
+	 * For testing
+	 * 
+	 */
 
-//	/**
-//	 * For testing
-//	 * 
-//	 */
-//
-//	public static void main(String[] args) {
-//
-//		ToroEtAl2002_AttenRel ar = new ToroEtAl2002_AttenRel(null);
-//
-//		for (int i=0; i < 1; i++){
-//			System.out.println(ToroEtAl2002Constants.PERIOD[i] + ".PGA= " + Math.exp(ar.getMean(i, 5.00,  5)));
-			//			System.out.println(ToroEtAl2002Constants.PERIOD[i] + "r0km sdt.dev= " + ar.getStdDev(i,  6.50,     0, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
-			//			System.out.println(ToroEtAl2002Constants.PERIOD[i] + "r10km sdt.dev= " + ar.getStdDev(i,  6.50,    10, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
-			//			System.out.println(ToroEtAl2002Constants.PERIOD[i] + "r100km sdt.dev= " + ar.getStdDev(i,  6.50,   100, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
-			//			System.out.println(ToroEtAl2002Constants.PERIOD[i] + "r1000km sdt.dev= " + ar.getStdDev(i,  6.50,  1000, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
-			//			System.out.println(ToroEtAl2002Constants.PERIOD[i] + "m4.5 sdt.dev= " + ar.getStdDev(i,  4.50,    20, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
-			//			System.out.println(ToroEtAl2002Constants.PERIOD[i] + "m5.5 sdt.dev= " + ar.getStdDev(i,  5.50,    20, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
-			//			System.out.println(ToroEtAl2002Constants.PERIOD[i] + "m6.5 sdt.dev= " + ar.getStdDev(i,  6.50,    20, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
-//		}
-//	}	
+	public static void main(String[] args) {
+
+		Campbell2003share_AttenRel ar = new Campbell2003share_AttenRel(null);
+		ar.setParamDefaults();
+		ar.setIntensityMeasure(SA_Param.NAME);
+     		for (int i=0; i < 1; i++){
+			 System.out.println(i + ". T(sec) ="  + Campbell2003Constants.PERIOD[i]);
+			 System.out.println(" mag = 5.00 " + "r =    1.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00, 1.00, -90)));
+//			 System.out.println(" mag = 5.00 " + "r =   20.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,   20.00, 800, -90)));
+//			 System.out.println(" mag = 5.00 " + "r =   30.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,   30.00, 800, -90)));
+//			 System.out.println(" mag = 5.00 " + "r =   50.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,   50.00, 800, -90)));
+//			 System.out.println(" mag = 5.00 " + "r =   75.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,   75.00, 800, -90)));
+//			 System.out.println(" mag = 5.00 " + "r =  100.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,  100.00, 800, -90)));
+//			 System.out.println(" mag = 5.00 " + "r =  200.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,  200.00, 800, -90)));
+//			 System.out.println(" mag = 5.00 " + "r =  500.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00,  500.00, 800, -90)));
+//			 System.out.println(" mag = 5.00 " + "r = 1000.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00, 1000.00, 800, -90)));
+			 System.out.println(ar.getStdDev(i, 5.00, StdDevTypeParam.STD_DEV_TYPE_TOTAL_MAG_DEP.toString()));
+			 System.out.println (ar.getStdDev(i, 7.00, StdDevTypeParam.STD_DEV_TYPE_TOTAL_MAG_DEP.toString()));
+			 
+		 }
+	}	
+
 }
