@@ -34,7 +34,7 @@ public class ToroEtAl_2002_test implements ParameterChangeWarningListener {
 	/**
 	 * Table for total standard deviation validation.
 	 */
-	private static final String SIGMA_TOTAL_HARD_ROCK_TABLE = "Toro02_SIGMAT.TXT";
+	private static final String SIGMA_TOTAL_HARD_ROCK_TABLE = "Toro02_SIGMAT.txt";
 
 	/**
 	 * Table for median ground motion validation. Hard rock median.
