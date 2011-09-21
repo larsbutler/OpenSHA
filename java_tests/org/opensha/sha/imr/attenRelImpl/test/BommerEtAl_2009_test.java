@@ -17,18 +17,18 @@ import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.calc.HazardCurveCalculator;
 import org.opensha.sha.earthquake.rupForecastImpl.GEM1.GEM1ERF;
 import org.opensha.sha.earthquake.rupForecastImpl.GEM1.SourceData.GEMSourceData;
-import org.opensha.sha.imr.attenRelImpl.BoEtAl_2009_AttenRel;
+import org.opensha.sha.imr.attenRelImpl.BommerEtAl_2009_AttenRel;
 import org.opensha.sha.imr.param.IntensityMeasureParams.RelativeSignificantDuration_Param;
 import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
 
 /**
- * Class providing methods for testing {@link BoEtAl_2009_AttenRel}. Tables
+ * Class providing methods for testing {@link BommerEtAl_2009_AttenRel}. Tables
  * created from StaffordGMPEs.jar provided by Peter J. Stafford.
  */
-public class BoEtAl_2009_test implements ParameterChangeWarningListener {
+public class BommerEtAl_2009_test implements ParameterChangeWarningListener {
 
 	/** Bommer et al. (2009) GMPE (attenuation relationship) */
-	private BoEtAl_2009_AttenRel Betal2009AttenRel = null;
+	private BommerEtAl_2009_AttenRel Betal2009AttenRel = null;
 
 	/**
 	 * Table for median ground motion validation. M4.5 to M8 at R=10km. 
@@ -56,7 +56,7 @@ public class BoEtAl_2009_test implements ParameterChangeWarningListener {
 	 */
 	@Before
 	public final void setUp() throws Exception {
-		Betal2009AttenRel = new BoEtAl_2009_AttenRel(this);
+		Betal2009AttenRel = new BommerEtAl_2009_AttenRel(this);
 		Betal2009AttenRel.setParamDefaults();
 
 		medianTable = new double[TABLE_NUM_ROWS][TABLE_NUM_COL_MEDIAN];

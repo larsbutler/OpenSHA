@@ -78,7 +78,7 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  * @version 1.1
  */
 
-public class BoEtAl_2009_AttenRel extends AttenuationRelationship implements
+public class BommerEtAl_2009_AttenRel extends AttenuationRelationship implements
 ScalarIntensityMeasureRelationshipAPI, NamedObjectAPI,
 ParameterChangeListener {
 
@@ -113,7 +113,7 @@ ParameterChangeListener {
 	 * Construct attenuation relationship. Initialize parameters and parameter
 	 * lists.
 	 */
-	public BoEtAl_2009_AttenRel(
+	public BommerEtAl_2009_AttenRel(
 			final ParameterChangeWarningListener warningListener) {
 
 		// creates exceedProbParam
@@ -156,10 +156,10 @@ ParameterChangeListener {
 	protected final void initEqkRuptureParams() {
 
 		// moment magnitude (default 5.5)
-		magParam = new MagParam(BoEtAl2009Constants.MAG_WARN_MIN,
-				BoEtAl2009Constants.MAG_WARN_MAX);
-		rupTopDepthParam=new RupTopDepthParam(BoEtAl2009Constants.ZTOR_WARN_MIN,
-				BoEtAl2009Constants.ZTOR_WARN_MAX);
+		magParam = new MagParam(BommerEtAl2009Constants.MAG_WARN_MIN,
+				BommerEtAl2009Constants.MAG_WARN_MAX);
+		rupTopDepthParam=new RupTopDepthParam(BommerEtAl2009Constants.ZTOR_WARN_MIN,
+				BommerEtAl2009Constants.ZTOR_WARN_MAX);
 
 		eqkRuptureParams.clear();
 		eqkRuptureParams.addParameter(magParam);
@@ -186,11 +186,11 @@ ParameterChangeListener {
 	protected final void initPropagationEffectParams() {
 
 		distanceRupParam = new DistanceRupParameter(
-				BoEtAl2009Constants.DISTANCE_RUP_WARN_MIN);
+				BommerEtAl2009Constants.DISTANCE_RUP_WARN_MIN);
 		distanceRupParam.addParameterChangeWarningListener(warningListener);
 		DoubleConstraint warn = new DoubleConstraint(
-				BoEtAl2009Constants.DISTANCE_RUP_WARN_MIN,
-				BoEtAl2009Constants.DISTANCE_RUP_WARN_MAX);
+				BommerEtAl2009Constants.DISTANCE_RUP_WARN_MIN,
+				BommerEtAl2009Constants.DISTANCE_RUP_WARN_MAX);
 		warn.setNonEditable();
 		distanceRupParam.setWarningConstraint(warn);
 		distanceRupParam.setNonEditable();

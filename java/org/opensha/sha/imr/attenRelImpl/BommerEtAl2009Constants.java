@@ -1,6 +1,6 @@
 package org.opensha.sha.imr.attenRelImpl;
 
-public class BoEtAl2009Constants {
+public class BommerEtAl2009Constants {
 
 	/**
 	 * Minimum magnitude.
