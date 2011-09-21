@@ -36,14 +36,13 @@ import org.opensha.sha.util.TectonicRegionType;
  * <p>
  * <b>Description:</b> Class implementing attenuation relationship described in:
  * "Empirical Ground Motion Relations for Subduction-Zone Earthquakes and their
- * application to Cascadia and other regions", Gail M.Atkinson and 
- * David M. Boore, Bulletin of the Seismological Society of America,
- * Vol. 93, No. 4, pp 1703-1729, 2003.
- * "Erratum to 'Empirical Ground Motion Relations for Subduction-Zone 
- * Earthquakes and their application to Cascadia and other regions'", 
- * Gail M. Atkinson and David M. Boore, Vol. 98, No. 5, pp.2567-2569, 2008.
- * The class implements the global model but not the corrections
- * for Japan/Cascadia.
+ * application to Cascadia and other regions", Gail M.Atkinson and David M.
+ * Boore, Bulletin of the Seismological Society of America, Vol. 93, No. 4, pp
+ * 1703-1729, 2003. "Erratum to 'Empirical Ground Motion Relations for
+ * Subduction-Zone Earthquakes and their application to Cascadia and other
+ * regions'", Gail M. Atkinson and David M. Boore, Vol. 98, No. 5, pp.2567-2569,
+ * 2008. The class implements the global model but not the corrections for
+ * Japan/Cascadia.
  * <p>
  * Supported Intensity-Measure Parameters:
  * <p>
@@ -58,12 +57,14 @@ import org.opensha.sha.util.TectonicRegionType;
  * <LI>magParam - moment magnitude
  * <LI>distanceRupParam - closest distance to rupture surface
  * <LI>vs30Param - shear wave velocity (m/s) averaged over the top 30 m of the
- * soil profile; The model assumes the following classification:
- * vs30 > 760 -> NEHRP B; 360 < vs30 <=760 -> NEHRP C; 180 <= vs30
- * <= 360 -> NEHRP D; vs30 < 180 -> NEHRP E;
+ * soil profile; The model assumes the following classification: vs30 > 760 ->
+ * NEHRP B; 360 < vs30 <=760 -> NEHRP C; 180 <= vs30 <= 360 -> NEHRP D; vs30 <
+ * 180 -> NEHRP E;
  * <LI>tectonicRegionTypeParam - interface or intra slab
  * <LI>focalDepthParam - depth to the earthquake rupture hypocenter
- * <LI>componentParam - random horizontal component
+ * <LI>componentParam - random horizontal component, average horizontal (added
+ * for SHARE projects requirement, assuming equivalence of random horizontal and
+ * average horizontal)
  * <LI>stdDevTypeParam - total, inter-event, intra-event, none
  * </UL>
  * <p>
@@ -88,13 +89,13 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 		ParameterChangeListener {
 
 	/** Short name. */
-	public static  String SHORT_NAME = "AB2003";
+	public static String SHORT_NAME = "AB2003";
 
 	/** Full name. */
-	public static  String NAME = "Atkinson & Boore 2003";
+	public static String NAME = "Atkinson & Boore 2003";
 
 	/** Version number. */
-	private static  long serialVersionUID = 1234567890987654353L;
+	private static long serialVersionUID = 1234567890987654353L;
 
 	/** Moment magnitude. */
 	private double mag;
@@ -131,32 +132,22 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 
 		// creates exceedProbParam
 		super();
-		
-		System.out.println("A");
 
 		this.warningListener = warningListener;
-		
-		System.out.println("B");
 
 		initSupportedIntensityMeasureParams();
-		
-		System.out.println("C");
 
 		indexFromPerHashMap = new HashMap<Double, Integer>();
 		for (int i = 1; i < AB2003Constants.PERIOD.length; i++) {
-			indexFromPerHashMap.put(new Double(AB2003Constants.PERIOD[i]),new Integer(i));
+			indexFromPerHashMap.put(new Double(AB2003Constants.PERIOD[i]),
+					new Integer(i));
 		}
 
 		initEqkRuptureParams();
-		System.out.println("print inside loop 1");
 		initSiteParams();
-		System.out.println("print inside loop 2");
 		initPropagationEffectParams();
-		System.out.println("print inside loop 3");
 		initOtherParams();
-		System.out.println("print inside loop 4");
 		initIndependentParamLists();
-		System.out.println("print inside loop 5");
 		initParameterEventListeners();
 	}
 
@@ -205,12 +196,10 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 	 */
 	protected void initEqkRuptureParams() {
 
-		System.out.println("mag");
 		// moment magnitude (default 5.5)
 		magParam = new MagParam(AB2003Constants.MAG_WARN_MIN,
 				AB2003Constants.MAG_WARN_MAX);
 
-		System.out.println("trt");
 		// tectonic region type
 		StringConstraint options = new StringConstraint();
 		options.addString(TectonicRegionType.SUBDUCTION_INTERFACE.toString());
@@ -218,17 +207,12 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 		tectonicRegionTypeParam = new TectonicRegionTypeParam(options,
 				TectonicRegionType.SUBDUCTION_INTERFACE.toString());
 
-		System.out.println("focal depth");
 		// focal depth (default zero km)
 		focalDepthParam = new FocalDepthParam();
-		
-		System.out.println("set eqk params: clear");
+
 		eqkRuptureParams.clear();
-		System.out.println("set eqk params: mag");
 		eqkRuptureParams.addParameter(magParam);
-		System.out.println("set eqk params: trt");
 		eqkRuptureParams.addParameter(tectonicRegionTypeParam);
-		System.out.println("set eqk params: focal depth");
 		eqkRuptureParams.addParameter(focalDepthParam);
 	}
 
@@ -250,13 +234,12 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 	 * and adds them to the propagationEffectParams list. Makes the parameters
 	 * non-editable.
 	 */
-	protected  void initPropagationEffectParams() {
+	protected void initPropagationEffectParams() {
 
 		distanceRupParam = new DistanceRupParameter(
 				AB2003Constants.DISTANCE_RUP_WARN_MIN);
 		distanceRupParam.addParameterChangeWarningListener(warningListener);
-		DoubleConstraint warn = new DoubleConstraint(
-				new Double(0.00),
+		DoubleConstraint warn = new DoubleConstraint(new Double(0.00),
 				AB2003Constants.DISTANCE_RUP_WARN_MAX);
 		warn.setNonEditable();
 		distanceRupParam.setWarningConstraint(warn);
@@ -271,8 +254,8 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 	 */
 	protected void initOtherParams() {
 
-        sigmaTruncTypeParam = new SigmaTruncTypeParam();
-        sigmaTruncLevelParam = new SigmaTruncLevelParam();
+		sigmaTruncTypeParam = new SigmaTruncTypeParam();
+		sigmaTruncLevelParam = new SigmaTruncLevelParam();
 
 		// stdDevType Parameter
 		StringConstraint stdDevTypeConstraint = new StringConstraint();
@@ -286,15 +269,15 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 		// component Parameter
 		StringConstraint constraint = new StringConstraint();
 		constraint.addString(ComponentParam.COMPONENT_RANDOM_HORZ);
-        constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
+		constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
 		constraint.setNonEditable();
-//		componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_RANDOM_HORZ);
-        componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_AVE_HORZ);
+		componentParam = new ComponentParam(constraint,
+				ComponentParam.COMPONENT_AVE_HORZ);
 
 		// add these to the list
 		otherParams.clear();
-        otherParams.addParameter(sigmaTruncTypeParam);
-        otherParams.addParameter(sigmaTruncLevelParam);
+		otherParams.addParameter(sigmaTruncTypeParam);
+		otherParams.addParameter(sigmaTruncLevelParam);
 		otherParams.addParameter(stdDevTypeParam);
 		otherParams.addParameter(componentParam);
 	}
@@ -359,7 +342,7 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 	 * This listens for parameter changes and updates the primitive parameters
 	 * accordingly
 	 */
-	public void parameterChange( ParameterChangeEvent e) {
+	public void parameterChange(ParameterChangeEvent e) {
 
 		String pName = e.getParameterName();
 		Object val = e.getNewValue();
@@ -398,26 +381,24 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 	 * internally held eqkRupture object is also set as that passed in. Warning
 	 * constrains on magnitude and focal depth are ignored.
 	 */
-	public void setEqkRupture( EqkRupture eqkRupture) 
-             throws InvalidRangeException {
+	public void setEqkRupture(EqkRupture eqkRupture)
+			throws InvalidRangeException {
 		magParam.setValueIgnoreWarning(new Double(eqkRupture.getMag()));
 
-		if(eqkRupture.getTectRegType()!=null){
-			tectonicRegionTypeParam
-			.setValue(eqkRupture.getTectRegType().toString());
-		}
-		else{
-			throw new RuntimeException("Tectonic region type not set in " +
-					" earthquake rupture");
+		if (eqkRupture.getTectRegType() != null) {
+			tectonicRegionTypeParam.setValue(eqkRupture.getTectRegType()
+					.toString());
+		} else {
+			throw new RuntimeException("Tectonic region type not set in "
+					+ " earthquake rupture");
 		}
 
-		if(eqkRupture.getHypocenterLocation()!=null){
+		if (eqkRupture.getHypocenterLocation() != null) {
 			focalDepthParam.setValueIgnoreWarning(new Double(eqkRupture
-					.getHypocenterLocation().getDepth()));	
-		}
-		else{
-			throw new RuntimeException("Hypocenter location not set in"+
-					" earthquake rupture");
+					.getHypocenterLocation().getDepth()));
+		} else {
+			throw new RuntimeException("Hypocenter location not set in"
+					+ " earthquake rupture");
 		}
 
 		this.eqkRupture = eqkRupture;
@@ -430,7 +411,7 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 	 * object passed in. This also sets the internally held Site object as that
 	 * passed in.
 	 */
-	public  void setSite( Site site) {
+	public void setSite(Site site) {
 		vs30Param.setValueIgnoreWarning((Double) site.getParameter(
 				Vs30_Param.NAME).getValue());
 		this.site = site;
@@ -441,7 +422,7 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 	 * This sets the site and eqkRupture, and the related parameters, from the
 	 * propEffect object passed in.
 	 */
-	public  void setPropagationEffectParams() {
+	public void setPropagationEffectParams() {
 		if ((this.site != null) && (this.eqkRupture != null)) {
 			distanceRupParam.setValue(eqkRupture, site);
 		}
@@ -450,7 +431,7 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 	/**
 	 * Set period index.
 	 */
-	protected  void setPeriodIndex() {
+	protected void setPeriodIndex() {
 		if (im.getName().equalsIgnoreCase(PGA_Param.NAME)) {
 			iper = 0;
 		} else {
@@ -460,46 +441,45 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 	}
 
 	/**
-	 * Compute mean. Applies correction for periods = 2.5 and 5 Hz 
-	 * (for interface) as for Atkinson and Boore 2008 Erratum.
+	 * Compute mean. Applies correction for periods = 2.5 and 5 Hz (for
+	 * interface) as for Atkinson and Boore 2008 Erratum.
 	 */
-	public  double getMean() {
+	public double getMean() {
 
 		if (rRup > USER_MAX_DISTANCE) {
 			return VERY_SMALL_MEAN;
 		}
-		
+
 		double mean = Double.NaN;
-		
+
 		// if period corresponds to 5 Hz (PERIOD[3]) or 2.5 (PERIOD[4]) Hz
 		// and tectonic region type is interface applies correction.
-		if((saPeriodParam.getValue()==AB2003Constants.PERIOD[3] ||
-				saPeriodParam.getValue()==AB2003Constants.PERIOD[4]) &&
-				tecRegType.equalsIgnoreCase(
-						TectonicRegionType.SUBDUCTION_INTERFACE.toString())){
+		if ((saPeriodParam.getValue() == AB2003Constants.PERIOD[3] || saPeriodParam
+				.getValue() == AB2003Constants.PERIOD[4])
+				&& tecRegType
+						.equalsIgnoreCase(TectonicRegionType.SUBDUCTION_INTERFACE
+								.toString())) {
 			// compute log SA for 2.5 and 5 Hz and return a weighted sum
-			int indexPeriod5Hz = ((Integer) indexFromPerHashMap.
-					get(AB2003Constants.PERIOD[3])).intValue();
-			int indexPeriod25Hz = ((Integer) indexFromPerHashMap.
-					get(AB2003Constants.PERIOD[4])).intValue();
+			int indexPeriod5Hz = ((Integer) indexFromPerHashMap
+					.get(AB2003Constants.PERIOD[3])).intValue();
+			int indexPeriod25Hz = ((Integer) indexFromPerHashMap
+					.get(AB2003Constants.PERIOD[4])).intValue();
 			double logSA5Hz = getMean(indexPeriod5Hz, mag, rRup, vs30,
 					tecRegType, focalDepth);
-			double logSA25Hz = getMean(indexPeriod25Hz, mag,
-					rRup, vs30, tecRegType, focalDepth);
-			if(saPeriodParam.getValue()==AB2003Constants.PERIOD[3]){
+			double logSA25Hz = getMean(indexPeriod25Hz, mag, rRup, vs30,
+					tecRegType, focalDepth);
+			if (saPeriodParam.getValue() == AB2003Constants.PERIOD[3]) {
 				mean = AB2003Constants.CORRECTION_WEIGHTS[0] * logSA5Hz
-				+ AB2003Constants.CORRECTION_WEIGHTS[1] * logSA25Hz;
+						+ AB2003Constants.CORRECTION_WEIGHTS[1] * logSA25Hz;
 				return mean;
-			}
-			else if (saPeriodParam.getValue()==AB2003Constants.PERIOD[4]){
+			} else if (saPeriodParam.getValue() == AB2003Constants.PERIOD[4]) {
 				mean = AB2003Constants.CORRECTION_WEIGHTS[0] * logSA25Hz
-				+ AB2003Constants.CORRECTION_WEIGHTS[1] * logSA5Hz;
+						+ AB2003Constants.CORRECTION_WEIGHTS[1] * logSA5Hz;
 				return mean;
 			}
-		}
-		else{
+		} else {
 			setPeriodIndex();
-			return getMean(iper, mag, rRup, vs30, tecRegType, focalDepth);	
+			return getMean(iper, mag, rRup, vs30, tecRegType, focalDepth);
 		}
 		return mean;
 	}
@@ -507,7 +487,7 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 	/**
 	 * Compute standard deviation.
 	 */
-	public  double getStdDev() {
+	public double getStdDev() {
 
 		setPeriodIndex();
 
@@ -518,7 +498,7 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 	 * Allows the user to set the default parameter values for the selected
 	 * Attenuation Relationship.
 	 */
-	public  void setParamDefaults() {
+	public void setParamDefaults() {
 
 		magParam.setValueAsDefault();
 		tectonicRegionTypeParam.setValueAsDefault();
@@ -538,7 +518,7 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 	/**
 	 * Get the name of this IMR.
 	 */
-	public  String getName() {
+	public String getName() {
 		return NAME;
 	}
 
@@ -546,23 +526,23 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 	 * Returns the Short Name of each AttenuationRelationship
 	 * 
 	 */
-	public  String getShortName() {
+	public String getShortName() {
 		return SHORT_NAME;
 	}
 
 	/**
 	 * Compute mean (natural logarithm of median ground motion).
 	 */
-	public  double getMean( int iper, double mag,  double rRup,
-			 double vs30,  String tecRegType, double hypoDep) {
+	public double getMean(int iper, double mag, double rRup, double vs30,
+			String tecRegType, double hypoDep) {
 
 		hypoDep = capHypocentralDepth(hypoDep);
 
 		mag = capMagnitude(mag, tecRegType);
-		
-		double rockResponse = 
-			computeRockResponse(tecRegType, iper, mag, hypoDep, rRup);
-		
+
+		double rockResponse = computeRockResponse(tecRegType, iper, mag,
+				hypoDep, rRup);
+
 		double soilResponse = computeSoilResponse(tecRegType, iper, mag,
 				hypoDep, rRup, vs30);
 
@@ -580,7 +560,7 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 		return hypoDep;
 	}
 
-	private double capMagnitude(double mag,  String tecRegType) {
+	private double capMagnitude(double mag, String tecRegType) {
 		double thresholdMag = Double.NaN;
 		if (tecRegType.equals(TectonicRegionType.SUBDUCTION_INTERFACE
 				.toString())) {
@@ -643,8 +623,8 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 	private double computeSoilResponse(String tecRegType, int periodIndex,
 			double mag, double hypoDep, double rRup, double vs30) {
 		int indexPga = 0;
-		double pgaOnRock = Math.pow(10,
-				computeRockResponse(tecRegType, indexPga, mag, hypoDep, rRup));
+		double pgaOnRock = Math.pow(10, computeRockResponse(tecRegType,
+				indexPga, mag, hypoDep, rRup));
 		double sl = computeSoilLinearityTerm(periodIndex, pgaOnRock);
 		double[] s = computeSiteTermCorrection(vs30);
 		double soilResponse = Double.NaN;
@@ -662,34 +642,30 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 		return soilResponse;
 	}
 
-	private double computeSoilLinearityTerm( int iper, double PGArx) {
+	private double computeSoilLinearityTerm(int iper, double PGArx) {
 		double sl = Double.NaN;
-		if(PGArx <= 100.0 || AB2003Constants.FREQ[iper] <= 1.0){
+		if (PGArx <= 100.0 || AB2003Constants.FREQ[iper] <= 1.0) {
 			sl = 1.0;
-		}
-		else if(PGArx > 100.0 && PGArx < 500.0){
-			if(AB2003Constants.FREQ[iper] > 1.0 &&
-					AB2003Constants.FREQ[iper] < 2.0){
+		} else if (PGArx > 100.0 && PGArx < 500.0) {
+			if (AB2003Constants.FREQ[iper] > 1.0
+					&& AB2003Constants.FREQ[iper] < 2.0) {
 				sl = 1.0 - (AB2003Constants.FREQ[iper] - 1.0) * (PGArx - 100.0)
-				/ 400.0;
-			}
-			else if(AB2003Constants.FREQ[iper] > 2.0){
+						/ 400.0;
+			} else if (AB2003Constants.FREQ[iper] > 2.0) {
 				sl = 1.0 - (PGArx - 100.0) / 400.0;
 			}
-		}
-		else if(PGArx >= 500.0){
-			if(AB2003Constants.FREQ[iper] > 1.0 &&
-					AB2003Constants.FREQ[iper] < 2.0){
+		} else if (PGArx >= 500.0) {
+			if (AB2003Constants.FREQ[iper] > 1.0
+					&& AB2003Constants.FREQ[iper] < 2.0) {
 				sl = 1.0 - (AB2003Constants.FREQ[iper] - 1.0);
-			}
-			else if(AB2003Constants.FREQ[iper] > 2.0){
+			} else if (AB2003Constants.FREQ[iper] > 2.0) {
 				sl = 0.0;
 			}
 		}
 		return sl;
 	}
 
-	private double[] computeSiteTermCorrection( double vs30) {
+	private double[] computeSiteTermCorrection(double vs30) {
 		double[] s = new double[3];
 		if (vs30 > AB2003Constants.NEHRP_C_UPPER_BOUND) {
 			s[0] = 0.0;
@@ -716,8 +692,7 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 	/**
 	 * This gets the standard deviation for specific parameter settings.
 	 */
-	public  double getStdDev( int iper,  String stdDevType,
-			 String tecRegType) {
+	public double getStdDev(int iper, String stdDevType, String tecRegType) {
 
 		if (tecRegType.equals(TectonicRegionType.SUBDUCTION_INTERFACE
 				.toString())) {
@@ -754,10 +729,10 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 	}
 
 	/**
-	 * This provides a URL where more info on this model can be obtained.
-	 * It currently returns null because no URL has been set up.
+	 * This provides a URL where more info on this model can be obtained. It
+	 * currently returns null because no URL has been set up.
 	 */
-	public  URL getInfoURL() throws MalformedURLException {
+	public URL getInfoURL() throws MalformedURLException {
 		return null;
 	}
 

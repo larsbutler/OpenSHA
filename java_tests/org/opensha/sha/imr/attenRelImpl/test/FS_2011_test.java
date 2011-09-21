@@ -160,7 +160,6 @@ public class FS_2011_test implements ParameterChangeWarningListener {
 			double rrup = 10;
 			double expectedMedian = table[j][1];
 			double computedMedian = Math.exp(FS2011AttenRel.getMean(mag,rrup, vs30,rake));
-			System.out.println("IA");
 			assertEquals(expectedMedian, computedMedian, TOLERANCE);
 		}
 	}
@@ -176,7 +175,6 @@ public class FS_2011_test implements ParameterChangeWarningListener {
 			double computedStd_Intra = FS2011AttenRel.getStdDev(mag,rrup,vs30,rake,"Intra-Event");
 			double expectedStd_Total = table[j][5];
 			double computedStd_Total = FS2011AttenRel.getStdDev(mag,rrup,vs30,rake,"Total");
-			System.out.println("IA");	
 			assertEquals(expectedStd_Inter, computedStd_Inter, TOLERANCE);
 			assertEquals(expectedStd_Intra, computedStd_Intra, TOLERANCE);
 			assertEquals(expectedStd_Total, computedStd_Total, TOLERANCE);

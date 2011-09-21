@@ -2,7 +2,7 @@ package org.opensha.sha.imr.attenRelImpl;
 /**
  * <b>Title:</b> Toro_2002_Constants<p>
  *
- * <b>Description:</b> This contains the coeficients for Toro et al - 2002, 
+ * <b>Description:</b> This contains the coefficients for Toro et al - 2002, 
  *  (www.riskeng.com/PDF/atten_toro_extended.pdf)
  * The GMPE is adjusted to account the style -of faulting and a default rock soil (Vs30 >=800m/sec)
  * The adjustment coefficients were proposed by S. Drouet [2010]; 
@@ -30,12 +30,11 @@ public class ToroEtAl2002Constants {
 	 * and SA(2)/SA(4sec)
 	 * Disclaimer:
 	 * The adjustment of the SA(3sec) and SA(4sec) are obtained in the framework of 
-	 * SHARE project and the coefficents presented hereunder are not advised for use.
+	 * SHARE project.
 	 * */
 	public static final double[] PERIOD = { 0.0000,  0.0290,  0.04000, 0.10000, 0.20000, 0.40000, 0.50, 
 		1.00000, 2.00000, 3.00, 4.00};
-//	public static final double[] FREQ = {Double.POSITIVE_INFINITY,
-//		 -1.00, 35.0000, 25.0000, 10.00000, 5.00000, 2.50000, 1.00000, 0.50000, 0.00000};
+	
 	/**
 	 * c1 coefficients.
 	 */
@@ -186,18 +185,4 @@ public class ToroEtAl2002Constants {
 	 * Sa(4s)/Sa(3sec) to extend the spectral periods to 4sec
 	 */
 	public static final double T3sec_TO_T4sec_factor = 0.612;
-
-
-	public static void main(String [] args){
-		System.out.println(PERIOD.length);
-		System.out.println(c1.length);
-		System.out.println(c2.length);
-		System.out.println(c3.length);
-		System.out.println(c4.length);
-		System.out.println(c5.length);
-		System.out.println(c6.length);
-		System.out.println(c7.length);
-		System.out.println(Frss.length);
-		System.out.println(AFrock.length);
-		}
 }

@@ -11,11 +11,12 @@ import org.opensha.commons.param.event.ParameterChangeEvent;
 import org.opensha.commons.param.event.ParameterChangeListener;
 import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.earthquake.EqkRupture;
+import org.opensha.sha.faultSurface.EvenlyGriddedSurfaceAPI;
 import org.opensha.sha.imr.AttenuationRelationship;
 import org.opensha.sha.imr.ScalarIntensityMeasureRelationshipAPI;
 import org.opensha.sha.imr.param.EqkRuptureParams.MagParam;
-import org.opensha.sha.imr.param.EqkRuptureParams.RakeParam;
-import org.opensha.sha.imr.param.IntensityMeasureParams.IA_Param;
+import org.opensha.sha.imr.param.EqkRuptureParams.RupTopDepthParam;
+import org.opensha.sha.imr.param.IntensityMeasureParams.RelativeSignificantDuration_Param;
 import org.opensha.sha.imr.param.OtherParams.ComponentParam;
 import org.opensha.sha.imr.param.OtherParams.SigmaTruncLevelParam;
 import org.opensha.sha.imr.param.OtherParams.SigmaTruncTypeParam;
@@ -24,43 +25,48 @@ import org.opensha.sha.imr.param.PropagationEffectParams.DistanceRupParameter;
 import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
 
 /**
- * <b>Title:</b> Tetal_2003_AttenRel
+ * <b>Title:</b> Betal_2009_AttenRel
  * <p>
  * 
- * <b>Description:</b> Class implementing attenuation relationship described in:
- * "Empirical attenuation relationship for Arias intensity", Travasarou, T.,
- * Bray, J. D. & Abrahamson, N. A., Earthquake Engineering & Structural
- * Dynamics, Vol. 32, pp 1133-1155, 2003.
+ * <b>Description:</b> Class implementing attenuation relationship (horizontal component)
+ * described in:
+ * "Empirical equations for the prediction of the significant, bracketed, and uniform
+ *  duration of earthquake ground motion",
+ * Bommer, J. J., Stafford, P. J. & Alarcon, J. E.
+ * Bulletin of the Seismological Society of America, 99(6),3217-3233, 
+ * doi: 10.1785/0120080298, 2009.	
+ * 
  * <p>
  * 
  * Supported Intensity-Measure Parameters:
  * <p>
  * <UL>
- * <LI>IA_Param - Arias intensity (m/s)
+ * <LI>RelativeSignificantDuration_Param - Relative significant duration (s)
  * </UL>
  * <p>
  * Other Independent Parameters:
  * <p>
  * <UL>
  * <LI>magParam - moment magnitude
- * <LI>rakeParam - rake angle. Used to establish if event is normal
- * (-112.5<rake<-67.5), reverse/reverse oblique (22.5 < rake < 112.5) or
- * strike-slip.
+ * <L1>rupTopDepthParam - depth to top of rupture
  * <LI>distanceRupParam - rupture distance
  * <LI>vs30Param - shear wave velocity (m/s) averaged over the top 30 m of the
- * soil profile; The model assumes the following classification: vs30 < 360 m/s
- * -> NEHRP D (soft soil), 360 <= vs30 <= 760 -> NEHRP C (stiff soil), vs30 >
- * 760 -> NEHRP A/B (rock).
+ * soil profile; The model assumes a continuous function.
  * <LI>componentParam - average horizontal
- * <LI>stdDevTypeParam - total, inter-event, intra-event, none
+ * <LI>stdDevTypeParam - total, none
  * </UL>
  * <p>
  * 
  * <p>
  * 
- * Verification - Checked against my previous Fortran implementation of this
- * GMPE Checked against Excel spreadsheet implementation of this GMPE provided
- * by Peter J. Stafford (Imperial College London)
+ * Verification -
+ * Checked against my previous Fortran implementation of this GMPE
+ * and against results of StaffordGMPEs.jar provided by Peter J.
+ * Stafford
+ * 
+ * N.B. There is an error in equation 6 of the paper.  
+ * The sigma_c^2 should be added to get the arbitrary component.
+ * This was confirmed by Peter J. Stafford
  * 
  * 
  * </p>
@@ -68,19 +74,19 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  ** 
  * @author J. Douglas
  * @reviewed l. danciu
- * @created August 30, 2011
+ * @created September 1, 2011
  * @version 1.1
  */
 
-public class Tetal_2003_AttenRel extends AttenuationRelationship implements
-		ScalarIntensityMeasureRelationshipAPI, NamedObjectAPI,
-		ParameterChangeListener {
+public class BoEtAl_2009_AttenRel extends AttenuationRelationship implements
+ScalarIntensityMeasureRelationshipAPI, NamedObjectAPI,
+ParameterChangeListener {
 
 	/** Short name. */
-	public final static String SHORT_NAME = "Tetal2003";
+	public final static String SHORT_NAME = "BoEtAl2009";
 
 	/** Full name. */
-	public final static String NAME = "Travasarou et al. (2003)";
+	public final static String NAME = "Bommer et al. (2009)";
 
 	/** Version number. */
 	private static final long serialVersionUID = 1234567890987654353L;
@@ -88,8 +94,8 @@ public class Tetal_2003_AttenRel extends AttenuationRelationship implements
 	/** Moment magnitude. */
 	private double mag;
 
-	/** rake angle. */
-	private double rake;
+	/** Depth to top of rupture. */
+	private double ztor;
 
 	/** Rupture distance. */
 	private double rrup;
@@ -107,7 +113,7 @@ public class Tetal_2003_AttenRel extends AttenuationRelationship implements
 	 * Construct attenuation relationship. Initialize parameters and parameter
 	 * lists.
 	 */
-	public Tetal_2003_AttenRel(
+	public BoEtAl_2009_AttenRel(
 			final ParameterChangeWarningListener warningListener) {
 
 		// creates exceedProbParam
@@ -126,21 +132,21 @@ public class Tetal_2003_AttenRel extends AttenuationRelationship implements
 	}
 
 	/**
-	 * Creates the supported IM parameter (IA) and adds them to the
-	 * supportedIMParams list. Makes the parameters non-editable.
+	 * Creates the supported IM parameter (RSD) and adds
+	 * them to the supportedIMParams list. Makes the parameters non-editable.
 	 */
 	protected final void initSupportedIntensityMeasureParams() {
 
-		// initialize Arias intensity (units: m/s)
-		aiParam = new IA_Param();
-		aiParam.setNonEditable();
+		// initialize relative significant duration (units: s)
+		rsdParam = new RelativeSignificantDuration_Param();
+		rsdParam.setNonEditable();
 
 		// add the warning listeners
-		aiParam.addParameterChangeWarningListener(warningListener);
+		rsdParam.addParameterChangeWarningListener(warningListener);
 
 		// put parameters in the supportedIMParams list
 		supportedIMParams.clear();
-		supportedIMParams.addParameter(aiParam);
+		supportedIMParams.addParameter(rsdParam);
 	}
 
 	/**
@@ -150,14 +156,13 @@ public class Tetal_2003_AttenRel extends AttenuationRelationship implements
 	protected final void initEqkRuptureParams() {
 
 		// moment magnitude (default 5.5)
-		magParam = new MagParam(Tetal2003Constants.MAG_WARN_MIN,
-				Tetal2003Constants.MAG_WARN_MAX);
-		// rake angle (default 0.0 -> strike-slip)
-		rakeParam = new RakeParam();
+		magParam = new MagParam(BoEtAl2009Constants.MAG_WARN_MIN,
+				BoEtAl2009Constants.MAG_WARN_MAX);
+		rupTopDepthParam=new RupTopDepthParam(BoEtAl2009Constants.ZTOR_WARN_MIN,
+				BoEtAl2009Constants.ZTOR_WARN_MAX);
 
 		eqkRuptureParams.clear();
 		eqkRuptureParams.addParameter(magParam);
-		eqkRuptureParams.addParameter(rakeParam);
 	}
 
 	/**
@@ -174,17 +179,18 @@ public class Tetal_2003_AttenRel extends AttenuationRelationship implements
 	}
 
 	/**
-	 * Initialize Propagation Effect parameters (rupture distance) and adds them
-	 * to the propagationEffectParams list. Makes the parameters non-editable.
+	 * Initialize Propagation Effect parameters (rupture distance) and adds
+	 * them to the propagationEffectParams list. Makes the parameters
+	 * non-editable.
 	 */
 	protected final void initPropagationEffectParams() {
 
 		distanceRupParam = new DistanceRupParameter(
-				Tetal2003Constants.DISTANCE_RUP_WARN_MIN);
+				BoEtAl2009Constants.DISTANCE_RUP_WARN_MIN);
 		distanceRupParam.addParameterChangeWarningListener(warningListener);
 		DoubleConstraint warn = new DoubleConstraint(
-				Tetal2003Constants.DISTANCE_RUP_WARN_MIN,
-				Tetal2003Constants.DISTANCE_RUP_WARN_MAX);
+				BoEtAl2009Constants.DISTANCE_RUP_WARN_MIN,
+				BoEtAl2009Constants.DISTANCE_RUP_WARN_MAX);
 		warn.setNonEditable();
 		distanceRupParam.setWarningConstraint(warn);
 		distanceRupParam.setNonEditable();
@@ -237,7 +243,6 @@ public class Tetal_2003_AttenRel extends AttenuationRelationship implements
 		// params that the mean depends upon
 		meanIndependentParams.clear();
 		meanIndependentParams.addParameter(magParam);
-		meanIndependentParams.addParameter(rakeParam);
 		meanIndependentParams.addParameter(distanceRupParam);
 		meanIndependentParams.addParameter(vs30Param);
 
@@ -254,7 +259,7 @@ public class Tetal_2003_AttenRel extends AttenuationRelationship implements
 
 		// params that the IML at exceed. prob. depends upon
 		imlAtExceedProbIndependentParams
-				.addParameterList(exceedProbIndependentParams);
+		.addParameterList(exceedProbIndependentParams);
 		imlAtExceedProbIndependentParams.addParameter(exceedProbParam);
 	}
 
@@ -265,7 +270,6 @@ public class Tetal_2003_AttenRel extends AttenuationRelationship implements
 	protected void initParameterEventListeners() {
 
 		magParam.addParameterChangeListener(this);
-		rakeParam.addParameterChangeListener(this);
 		distanceRupParam.addParameterChangeListener(this);
 		vs30Param.addParameterChangeListener(this);
 		componentParam.addParameterChangeListener(this);
@@ -283,8 +287,8 @@ public class Tetal_2003_AttenRel extends AttenuationRelationship implements
 
 		if (pName.equals(MagParam.NAME)) {
 			mag = ((Double) val).doubleValue();
-		} else if (pName.equals(RakeParam.NAME)) {
-			rake = ((Double) val).doubleValue();
+		} else if (pName.equals(RupTopDepthParam.NAME)) {
+			ztor = ((Double) val).doubleValue();
 		} else if (pName.equals(DistanceRupParameter.NAME)) {
 			rrup = ((Double) val).doubleValue();
 		} else if (pName.equals(Vs30_Param.NAME)) {
@@ -300,7 +304,7 @@ public class Tetal_2003_AttenRel extends AttenuationRelationship implements
 	public void resetParameterEventListeners() {
 
 		magParam.removeParameterChangeListener(this);
-		rakeParam.removeParameterChangeListener(this);
+		rupTopDepthParam.removeParameterChangeListener(this);
 		distanceRupParam.removeParameterChangeListener(this);
 		vs30Param.removeParameterChangeListener(this);
 		stdDevTypeParam.removeParameterChangeListener(this);
@@ -315,9 +319,9 @@ public class Tetal_2003_AttenRel extends AttenuationRelationship implements
 	public final void setEqkRupture(final EqkRupture eqkRupture) {
 
 		magParam.setValueIgnoreWarning(new Double(eqkRupture.getMag()));
-		if (!Double.isNaN(eqkRupture.getAveRake())) {
-			rakeParam.setValue(eqkRupture.getAveRake());
-		}
+		EvenlyGriddedSurfaceAPI surface = eqkRupture.getRuptureSurface();
+		double depth = surface.getLocation(0, 0).getDepth();
+		rupTopDepthParam.setValueIgnoreWarning(depth);
 		this.eqkRupture = eqkRupture;
 		setPropagationEffectParams();
 	}
@@ -336,8 +340,8 @@ public class Tetal_2003_AttenRel extends AttenuationRelationship implements
 	}
 
 	/**
-	 * This calculates the rupture Distance propagation effect parameter based
-	 * on the current site and eqkRupture.
+	 * This calculates the rupture Distance propagation effect parameter based on the
+	 * current site and eqkRupture.
 	 */
 	protected void setPropagationEffectParams() {
 
@@ -354,10 +358,7 @@ public class Tetal_2003_AttenRel extends AttenuationRelationship implements
 		if (rrup > USER_MAX_DISTANCE) {
 			return VERY_SMALL_MEAN;
 		} else {
-			/**
-			 * setPeriodIndex();
-			 */
-			return getMean(mag, rrup, vs30, rake);
+			return getMean(mag, rrup, vs30,ztor);
 		}
 	}
 
@@ -365,10 +366,7 @@ public class Tetal_2003_AttenRel extends AttenuationRelationship implements
 	 * Compute standard deviation.
 	 */
 	public final double getStdDev() {
-		/**
-		 * setPeriodIndex();
-		 */
-		return getStdDev(mag, rrup, vs30, rake, stdDevType);
+		return getStdDev(stdDevType);
 	}
 
 	/**
@@ -378,10 +376,10 @@ public class Tetal_2003_AttenRel extends AttenuationRelationship implements
 	public final void setParamDefaults() {
 
 		magParam.setValueAsDefault();
-		rakeParam.setValueAsDefault();
+		rupTopDepthParam.setValueAsDefault();
 		distanceRupParam.setValueAsDefault();
 		vs30Param.setValueAsDefault();
-		aiParam.setValueAsDefault();
+		rsdParam.setValueAsDefault();
 		stdDevTypeParam.setValueAsDefault();
 		sigmaTruncTypeParam.setValueAsDefault();
 		sigmaTruncLevelParam.setValueAsDefault();
@@ -406,118 +404,45 @@ public class Tetal_2003_AttenRel extends AttenuationRelationship implements
 	/**
 	 * Compute mean (natural logarithm of median ground motion).
 	 */
-	public double getMean(double mag, final double rrup, final double vs30,
-			final double rake) {
+	public double getMean( double mag, final double rrup,
+			final double vs30, final double ztor) {
 
 		double lnY = Double.NaN;
 
-		double c1 = 2.800;
-		double c2 = -1.981;
-		double c3 = 20.72;
-		double c4 = -1.703;
-		double h = 8.78;
-		double s11 = 0.454;
-		double s12 = 0.101;
-		double s21 = 0.479;
-		double s22 = 0.334;
-		double f1 = -0.166;
-		double f2 = 0.512;
+		double c0=-2.2393;
+		double m1=0.9368;
+		double r1=1.5686;
+		double r2=-0.1953;
+		double h1=2.5;
+		double v1=-0.3478;
+		double z1=-0.0365;
 
-		int[] soilTerms = setSoilTerms(vs30);
-
-		int[] faultStyleTerms = setFaultStyleTerms(rake);
-
-		lnY = c1 + c2 * (mag - 6.0) + c3 * Math.log(mag / 6.0) + c4
-				* Math.log(Math.sqrt(rrup * rrup + h * h))
-				+ (s11 + s12 * (mag - 6.0)) * soilTerms[0]
-				+ (s21 + s22 * (mag - 6.0)) * soilTerms[1] + +f1
-				* faultStyleTerms[0] + f2 * faultStyleTerms[1];
+		lnY=c0+m1*mag+(r1+r2*mag)*Math.log(Math.sqrt(rrup*rrup+h1*h1))+v1*Math.log(vs30)+z1*ztor;
 
 		return lnY;
 	}
 
-	private int[] setFaultStyleTerms(final double rake) {
-		int[] faultStyleTerms = new int[] { 0, 0 };
-		boolean normal = rake > -112.5 && rake < -67.5;
-		boolean reverse = rake > 22.5 && rake < 112.5;
-		if (normal) {
-			faultStyleTerms[0] = 1;
-		}
-		if (reverse) {
-			faultStyleTerms[1] = 1;
-		}
-		return faultStyleTerms;
-	}
-
-	private int[] setSoilTerms(final double vs30) {
-		int[] soilTerms = new int[] { 0, 0, 0 };
-
-		if (vs30 < Tetal2003Constants.SOFT_SOIL_UPPER_BOUND) {
-			/**
-			 * Class D
-			 */
-			soilTerms[1] = 1;
-		}
-		if (vs30 >= Tetal2003Constants.SOFT_SOIL_UPPER_BOUND
-				&& vs30 <= Tetal2003Constants.STIFF_SOIL_UPPER_BOUND) {
-			/**
-			 * Class C
-			 */
-			soilTerms[0] = 1;
-		}
-		if (vs30 > Tetal2003Constants.STIFF_SOIL_UPPER_BOUND) {
-			/**
-			 * Class B
-			 */
-			soilTerms[2] = 1;
-		}
-		return soilTerms;
-	}
-
-	public double getStdDev(double mag, final double rrup, final double vs30,
-			final double rake, String stdDevType) {
+	public double getStdDev(String stdDevType) {
 		/**
 		 * inter-event
 		 */
-		double tau;
-		if (mag < 4.7)
-			tau = 0.611;
-		else if (mag >= 4.7 && mag <= 7.6)
-			tau = 0.611 - 0.047 * (mag - 4.7);
-		else
-			tau = 0.475;
-		/**
-		 * the intra-event standard deviation sigma1 for different site classes.
-		 */
-		final double[] sigma1 = { 1.17, 0.96, 1.18 };
-		/**
-		 * the intra-event standard deviation sigma2 for different site classes.
-		 */
-		final double[] sigma2 = { 0.93, 0.73, 0.94 };
+		double tau=0.3252;
 		/**
 		 * intra-event
 		 */
-		double y = Math.exp(getMean(mag, rrup, vs30, rake));
-		int[] soilTerms = setSoilTerms(vs30);
-		double sigmas;
-		if (y <= 0.013)
-			sigmas = sigma1[0] * soilTerms[0] + sigma1[1] * soilTerms[1]
-					+ sigma1[2] * soilTerms[2];
-		else if (y > 0.013 && y < 0.125)
-			sigmas = sigma1[0] * soilTerms[0] + sigma1[1] * soilTerms[1]
-					+ sigma1[2] * soilTerms[2] - 0.106
-					* (Math.log(y) - Math.log(0.0132));
-		else
-			sigmas = sigma2[0] * soilTerms[0] + sigma2[1] * soilTerms[1]
-					+ sigma2[2] * soilTerms[2];
+		double sigma=0.346;
+		/**
+		 * sigma for arbitrary component
+		 */
+		double sigmac=0.1114;
 		if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE))
 			return 0;
 		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTER))
 			return tau;
 		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTRA))
-			return sigmas;
+			return Math.sqrt(sigma*sigma-sigmac*sigmac);
 		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL))
-			return Math.sqrt(tau * tau + sigmas * sigmas);
+			return Math.sqrt(tau*tau+sigma*sigma-sigmac*sigmac);
 		else
 			return Double.NaN;
 	}
@@ -529,36 +454,4 @@ public class Tetal_2003_AttenRel extends AttenuationRelationship implements
 	public URL getInfoURL() throws MalformedURLException {
 		return null;
 	}
-
-//	/**
-//	 * For testing
-//	 * 
-//	 */
-//	public static void main(String[] args) {
-//
-//		Tetal_2003_AttenRel ar = new Tetal_2003_AttenRel(null);
-//
-//		System.out.println("mean = "
-//				+ Math.exp(ar.getMean(7.00, 10, 800, -90.0)));
-//		System.out.println("mean = "
-//				+ Math.exp(ar.getMean(7.00, 10, 800, 60.0)));
-//		System.out
-//				.println("mean = " + Math.exp(ar.getMean(7.00, 10, 800, 0.0)));
-//		System.out.println("mean = "
-//				+ Math.exp(ar.getMean(7.00, 100, 800, 0.0)));
-//		System.out
-//				.println("mean = " + Math.exp(ar.getMean(7.00, 10, 100, 0.0)));
-//
-//		System.out.println("s.d. (inter) = "
-//				+ ar.getStdDev(7.00, 10, 100, -90.0, "Inter-Event"));
-//		System.out.println("s.d. (intra) = "
-//				+ ar.getStdDev(7.00, 10, 100, -90.0, "Intra-Event"));
-//		System.out.println("s.d. (total) = "
-//				+ ar.getStdDev(7.00, 10, 100, -90.0, "Total"));
-//		System.out.println("s.d. (total) = "
-//				+ ar.getStdDev(9.00, 10, 100, -90.0, "Total"));
-//		System.out.println("s.d. (total) = "
-//				+ ar.getStdDev(4.00, 10, 100, -90.0, "Total"));
-//
-//	}
 }

@@ -11,12 +11,12 @@ import org.opensha.commons.param.event.ParameterChangeEvent;
 import org.opensha.commons.param.event.ParameterChangeListener;
 import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.earthquake.EqkRupture;
-import org.opensha.sha.faultSurface.EvenlyGriddedSurfaceAPI;
 import org.opensha.sha.imr.AttenuationRelationship;
 import org.opensha.sha.imr.ScalarIntensityMeasureRelationshipAPI;
+import org.opensha.sha.imr.param.EqkRuptureParams.FocalDepthParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.MagParam;
-import org.opensha.sha.imr.param.EqkRuptureParams.RupTopDepthParam;
-import org.opensha.sha.imr.param.IntensityMeasureParams.RelativeSignificantDuration_Param;
+import org.opensha.sha.imr.param.EqkRuptureParams.RakeParam;
+import org.opensha.sha.imr.param.IntensityMeasureParams.IA_Param;
 import org.opensha.sha.imr.param.OtherParams.ComponentParam;
 import org.opensha.sha.imr.param.OtherParams.SigmaTruncLevelParam;
 import org.opensha.sha.imr.param.OtherParams.SigmaTruncTypeParam;
@@ -25,35 +25,40 @@ import org.opensha.sha.imr.param.PropagationEffectParams.DistanceRupParameter;
 import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
 
 /**
- * <b>Title:</b> Betal_2009_AttenRel
+ * <b>Title:</b> Setal_2009_AttenRel
  * <p>
  * 
- * <b>Description:</b> Class implementing attenuation relationship (horizontal component)
- * described in:
- * "Empirical equations for the prediction of the significant, bracketed, and uniform
- *  duration of earthquake ground motion",
- * Bommer, J. J., Stafford, P. J. & Alarcon, J. E.
- * Bulletin of the Seismological Society of America, 99(6),3217-3233, 
- * doi: 10.1785/0120080298, 2009.	
+ * <b>Description:</b> Class implementing attenuation relationship described in:
+ * "New predictive equations for Arias intensity from crustal earthquakes in 
+ * New Zealand",
+ * Stafford, P. J., Berrill, J. B. & Pettinga, J. R. 
+ * Journal of Seismology, Vol. 13, no. 1,
+ * pp 31-52, 2009.
  * 
+ * Model 2 for rupture distance and geometric mean programmed
+ * This is the one recommended by the authors out of the four models they derive.
  * <p>
  * 
  * Supported Intensity-Measure Parameters:
  * <p>
  * <UL>
- * <LI>RelativeSignificantDuration_Param - Relative significant duration (s)
+ * <LI>IA_Param - Arias intensity (m/s)
  * </UL>
  * <p>
  * Other Independent Parameters:
  * <p>
  * <UL>
  * <LI>magParam - moment magnitude
- * <L1>rupTopDepthParam - depth to top of rupture
+ * <LI>rakeParam - rake angle. Used to establish if event is reverse/reverse oblique 
+ * (22.5 < rake < 112.5) or other mechanism (strike-slip or normal).
  * <LI>distanceRupParam - rupture distance
+ * <LI>FocalDepthParam - focal depth
  * <LI>vs30Param - shear wave velocity (m/s) averaged over the top 30 m of the
- * soil profile; The model assumes a continuous function.
- * <LI>componentParam - average horizontal
- * <LI>stdDevTypeParam - total, none
+ * soil profile; The model assumes the following classification (from NZ building 
+ * code): vs30 < 180 m/s -> soft soil, 180 <= vs30 <= 360 -> stiff soil, 
+ * vs30 > 360 -> rock.
+ * <LI>componentParam - geometric mean horizontal
+ * <LI>stdDevTypeParam - total, inter-event, intra-event, none
  * </UL>
  * <p>
  * 
@@ -61,32 +66,27 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  * 
  * Verification -
  * Checked against my previous Fortran implementation of this GMPE
- * and against results of StaffordGMPEs.jar provided by Peter J.
- * Stafford
- * 
- * N.B. There is an error in equation 6 of the paper.  
- * The sigma_c^2 should be added to get the arbitrary component.
- * This was confirmed by Peter J. Stafford
- * 
+ *  Checked against Excel spreadsheet implementation of this GMPE provided by 
+ * Peter J. Stafford (Imperial College London)
  * 
  * </p>
  * 
  ** 
  * @author J. Douglas
  * @reviewed l. danciu
- * @created September 1, 2011
+ * @created August 31, 2011
  * @version 1.1
  */
 
-public class Betal_2009_AttenRel extends AttenuationRelationship implements
+public class StaffordEtAl_2009_AttenRel extends AttenuationRelationship implements
 ScalarIntensityMeasureRelationshipAPI, NamedObjectAPI,
 ParameterChangeListener {
 
 	/** Short name. */
-	public final static String SHORT_NAME = "Betal2009";
+	public final static String SHORT_NAME = "Setal2009";
 
 	/** Full name. */
-	public final static String NAME = "Bommer et al. (2009)";
+	public final static String NAME = "Stafford et al. (2009)";
 
 	/** Version number. */
 	private static final long serialVersionUID = 1234567890987654353L;
@@ -94,11 +94,14 @@ ParameterChangeListener {
 	/** Moment magnitude. */
 	private double mag;
 
-	/** Depth to top of rupture. */
-	private double ztor;
+	/** rake angle. */
+	private double rake;
 
 	/** Rupture distance. */
 	private double rrup;
+
+	/** Focal depth. */
+	private double focaldepth;
 
 	/** Vs 30. */
 	private double vs30;
@@ -113,7 +116,7 @@ ParameterChangeListener {
 	 * Construct attenuation relationship. Initialize parameters and parameter
 	 * lists.
 	 */
-	public Betal_2009_AttenRel(
+	public StaffordEtAl_2009_AttenRel(
 			final ParameterChangeWarningListener warningListener) {
 
 		// creates exceedProbParam
@@ -132,21 +135,21 @@ ParameterChangeListener {
 	}
 
 	/**
-	 * Creates the supported IM parameter (RSD) and adds
+	 * Creates the supported IM parameter (IA) and adds
 	 * them to the supportedIMParams list. Makes the parameters non-editable.
 	 */
 	protected final void initSupportedIntensityMeasureParams() {
 
-		// initialize relative significant duration (units: s)
-		rsdParam = new RelativeSignificantDuration_Param();
-		rsdParam.setNonEditable();
+		// initialize Arias intensity (units: m/s)
+		aiParam = new IA_Param();
+		aiParam.setNonEditable();
 
 		// add the warning listeners
-		rsdParam.addParameterChangeWarningListener(warningListener);
+		aiParam.addParameterChangeWarningListener(warningListener);
 
 		// put parameters in the supportedIMParams list
 		supportedIMParams.clear();
-		supportedIMParams.addParameter(rsdParam);
+		supportedIMParams.addParameter(aiParam);
 	}
 
 	/**
@@ -156,13 +159,16 @@ ParameterChangeListener {
 	protected final void initEqkRuptureParams() {
 
 		// moment magnitude (default 5.5)
-		magParam = new MagParam(Betal2009Constants.MAG_WARN_MIN,
-				Betal2009Constants.MAG_WARN_MAX);
-		rupTopDepthParam=new RupTopDepthParam(Betal2009Constants.ZTOR_WARN_MIN,
-				Betal2009Constants.ZTOR_WARN_MAX);
+		magParam = new MagParam(StaffordEtAl2009Constants.MAG_WARN_MIN,
+				StaffordEtAl2009Constants.MAG_WARN_MAX);
+		focalDepthParam=new FocalDepthParam();
+		// rake angle (default 0.0 -> strike-slip)
+		rakeParam = new RakeParam();
 
 		eqkRuptureParams.clear();
 		eqkRuptureParams.addParameter(magParam);
+		eqkRuptureParams.addParameter(rakeParam);
+		eqkRuptureParams.addParameter(focalDepthParam);
 	}
 
 	/**
@@ -186,11 +192,11 @@ ParameterChangeListener {
 	protected final void initPropagationEffectParams() {
 
 		distanceRupParam = new DistanceRupParameter(
-				Betal2009Constants.DISTANCE_RUP_WARN_MIN);
+				StaffordEtAl2009Constants.DISTANCE_RUP_WARN_MIN);
 		distanceRupParam.addParameterChangeWarningListener(warningListener);
 		DoubleConstraint warn = new DoubleConstraint(
-				Betal2009Constants.DISTANCE_RUP_WARN_MIN,
-				Betal2009Constants.DISTANCE_RUP_WARN_MAX);
+				StaffordEtAl2009Constants.DISTANCE_RUP_WARN_MIN,
+				StaffordEtAl2009Constants.DISTANCE_RUP_WARN_MAX);
 		warn.setNonEditable();
 		distanceRupParam.setWarningConstraint(warn);
 		distanceRupParam.setNonEditable();
@@ -243,7 +249,9 @@ ParameterChangeListener {
 		// params that the mean depends upon
 		meanIndependentParams.clear();
 		meanIndependentParams.addParameter(magParam);
+		meanIndependentParams.addParameter(rakeParam);
 		meanIndependentParams.addParameter(distanceRupParam);
+		meanIndependentParams.addParameter(focalDepthParam);
 		meanIndependentParams.addParameter(vs30Param);
 
 		// params that the stdDev depends upon
@@ -270,7 +278,9 @@ ParameterChangeListener {
 	protected void initParameterEventListeners() {
 
 		magParam.addParameterChangeListener(this);
+		rakeParam.addParameterChangeListener(this);
 		distanceRupParam.addParameterChangeListener(this);
+		focalDepthParam.addParameterChangeListener(this);
 		vs30Param.addParameterChangeListener(this);
 		componentParam.addParameterChangeListener(this);
 		stdDevTypeParam.addParameterChangeListener(this);
@@ -287,10 +297,12 @@ ParameterChangeListener {
 
 		if (pName.equals(MagParam.NAME)) {
 			mag = ((Double) val).doubleValue();
-		} else if (pName.equals(RupTopDepthParam.NAME)) {
-			ztor = ((Double) val).doubleValue();
+		} else if (pName.equals(RakeParam.NAME)) {
+			rake = ((Double) val).doubleValue();
 		} else if (pName.equals(DistanceRupParameter.NAME)) {
 			rrup = ((Double) val).doubleValue();
+		} else if (pName.equals(FocalDepthParam.NAME)) {
+			focaldepth = ((Double) val).doubleValue();
 		} else if (pName.equals(Vs30_Param.NAME)) {
 			vs30 = ((Double) val).doubleValue();
 		} else if (pName.equals(StdDevTypeParam.NAME)) {
@@ -304,8 +316,9 @@ ParameterChangeListener {
 	public void resetParameterEventListeners() {
 
 		magParam.removeParameterChangeListener(this);
-		rupTopDepthParam.removeParameterChangeListener(this);
+		rakeParam.removeParameterChangeListener(this);
 		distanceRupParam.removeParameterChangeListener(this);
+		focalDepthParam.removeParameterChangeListener(this);
 		vs30Param.removeParameterChangeListener(this);
 		stdDevTypeParam.removeParameterChangeListener(this);
 		this.initParameterEventListeners();
@@ -319,9 +332,16 @@ ParameterChangeListener {
 	public final void setEqkRupture(final EqkRupture eqkRupture) {
 
 		magParam.setValueIgnoreWarning(new Double(eqkRupture.getMag()));
-		EvenlyGriddedSurfaceAPI surface = eqkRupture.getRuptureSurface();
-		double depth = surface.getLocation(0, 0).getDepth();
-		rupTopDepthParam.setValueIgnoreWarning(depth);
+		if (!Double.isNaN(eqkRupture.getAveRake())) {
+			rakeParam.setValue(eqkRupture.getAveRake());
+		}
+		if (eqkRupture.getHypocenterLocation() != null) {
+			focalDepthParam.setValueIgnoreWarning(new Double(eqkRupture
+					.getHypocenterLocation().getDepth()));
+		} else {
+			throw new RuntimeException("Hypocenter location not set in"
+					+ " earthquake rupture");
+		}
 		this.eqkRupture = eqkRupture;
 		setPropagationEffectParams();
 	}
@@ -340,7 +360,7 @@ ParameterChangeListener {
 	}
 
 	/**
-	 * This calculates the rupture Distance propagation effect parameter based on the
+	 * This calculates the rupture distance propagation effect parameter based on the
 	 * current site and eqkRupture.
 	 */
 	protected void setPropagationEffectParams() {
@@ -354,14 +374,10 @@ ParameterChangeListener {
 	 * Compute mean.
 	 */
 	public double getMean() {
-
 		if (rrup > USER_MAX_DISTANCE) {
 			return VERY_SMALL_MEAN;
 		} else {
-			/**
-			setPeriodIndex();
-			 */
-			return getMean(mag, rrup, vs30,ztor);
+			return getMean(mag, rrup, vs30, rake,focaldepth);
 		}
 	}
 
@@ -369,10 +385,7 @@ ParameterChangeListener {
 	 * Compute standard deviation.
 	 */
 	public final double getStdDev() {
-		/**
-		setPeriodIndex();
-		 */
-		return getStdDev(stdDevType);
+		return getStdDev(mag,vs30,stdDevType);
 	}
 
 	/**
@@ -382,10 +395,11 @@ ParameterChangeListener {
 	public final void setParamDefaults() {
 
 		magParam.setValueAsDefault();
-		rupTopDepthParam.setValueAsDefault();
+		rakeParam.setValueAsDefault();
 		distanceRupParam.setValueAsDefault();
+		focalDepthParam.setValueAsDefault();
 		vs30Param.setValueAsDefault();
-		rsdParam.setValueAsDefault();
+		aiParam.setValueAsDefault();
 		stdDevTypeParam.setValueAsDefault();
 		sigmaTruncTypeParam.setValueAsDefault();
 		sigmaTruncLevelParam.setValueAsDefault();
@@ -411,46 +425,92 @@ ParameterChangeListener {
 	 * Compute mean (natural logarithm of median ground motion).
 	 */
 	public double getMean( double mag, final double rrup,
-			final double vs30, final double ztor) {
+			final double vs30, final double rake, final double focaldepth) {
 
 		double lnY = Double.NaN;
 
-		double c0=-2.2393;
-		double m1=0.9368;
-		double r1=1.5686;
-		double r2=-0.1953;
-		double h1=2.5;
-		double v1=-0.3478;
-		double z1=-0.0365;
+		/**
+		 * For arithmetic mean
+		 */
+		double c1=-5.6006;	
+		double c2=2.56526;
+		double c3=-3.4648;
+		double c4=0.4939;
+		double c5=0.06033;
+		double c6=0.50144;
+		double c7=0.22579;
+		double c8=-0.168;
+		double c9=0.35859; 
 
-		lnY=c0+m1*mag+(r1+r2*mag)*Math.log(Math.sqrt(rrup*rrup+h1*h1))+v1*Math.log(vs30)+z1*ztor;
+		int[] soilTerms = setSoilTerms(vs30);
+
+		int faultStyleTerms = setFaultStyleTerms(rake);
+
+		double iarock=c1+c2*mag+c3*Math.log(rrup+Math.exp(c4*mag))+c5*focaldepth+c9*faultStyleTerms;
+		lnY = c1+c2*mag+c3*Math.log(rrup+Math.exp(c4*mag))+c5*focaldepth+c6*soilTerms[0]+(c7+c8*iarock)*soilTerms[1]+c9*faultStyleTerms;
 
 		return lnY;
 	}
 
-	public double getStdDev(String stdDevType) {
+	private int setFaultStyleTerms(final double rake) {
+		int faultStyleTerms = 0;
+		boolean reverse = rake > 22.5 && rake < 112.5;
+		if (reverse) {
+			faultStyleTerms = 1;
+		}
+		return faultStyleTerms;
+	}
+
+	private int[] setSoilTerms(final double vs30) {
+		int[] soilTerms = new int[] { 0, 0};
+
+		if (vs30 < TravasarouEtAl2003Constants.SOFT_SOIL_UPPER_BOUND) {
+			/** 
+			 * Class D
+			 */
+			soilTerms[1] = 1;
+		}
+		if (vs30 >= TravasarouEtAl2003Constants.SOFT_SOIL_UPPER_BOUND
+				&& vs30 <= TravasarouEtAl2003Constants.STIFF_SOIL_UPPER_BOUND) {
+			/**
+			 * Class C
+			 */
+			soilTerms[0] = 1;
+		}
+		return soilTerms;
+	}
+
+
+	public double getStdDev(double mag, 
+			final double vs30, String stdDevType) {
+
 		/**
-		 * inter-event
+		 * inter-event (arithmetic mean)
 		 */
-		double tau=0.3252;
-		/**
+		double tau=0.29447;
+
+		/** 
 		 * intra-event
 		 */
-		double sigma=0.346;
-		/**
-		 * sigma for arbitrary component
+		int[] soilTerms = setSoilTerms(vs30);
+
+		/** for arithmetic mean
+		 * 
 		 */
-		double sigmac=0.1114;
+		double sigmar=1.09905;
+		double sigmas=0.90548;
+
+		double sigma=Math.sqrt((1-soilTerms[0])*(1-soilTerms[1])*sigmar*sigmar+(soilTerms[0]+soilTerms[1])*sigmas*sigmas);
 		if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE))
 			return 0;
 		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTER))
 			return tau;
 		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTRA))
-			return Math.sqrt(sigma*sigma-sigmac*sigmac);
+			return sigma;
 		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL))
-			return Math.sqrt(tau*tau+sigma*sigma-sigmac*sigmac);
+			return Math.sqrt(tau*tau+sigma*sigma);
 		else
-			return Double.NaN;
+			throw new RuntimeException("Standard deviation type: "+stdDevType+" not recognized");
 	}
 
 	/**
@@ -460,25 +520,4 @@ ParameterChangeListener {
 	public URL getInfoURL() throws MalformedURLException {
 		return null;
 	}
-//	/**
-//	 * For testing
-//	 * 
-//	 */
-//	public static void main(String[] args) {
-//
-//		Betal_2009_AttenRel ar = new Betal_2009_AttenRel(null);
-//
-//		System.out.println("mean = " + Math.exp(ar.getMean(7.00, 10, 800,5)));
-//		System.out.println("mean = " + Math.exp(ar.getMean(4.00, 10, 800,5)));
-//		System.out.println("mean = " + Math.exp(ar.getMean(9.00, 10, 800,5)));
-//		System.out.println("mean = " + Math.exp(ar.getMean(7.00, 100, 800,5)));
-//		System.out.println("mean = " + Math.exp(ar.getMean(7.00, 10, 100,5)));
-//
-//		System.out.println("s.d. (inter) = " + ar.getStdDev("Inter-Event"));
-//		System.out.println("s.d. (intra) = " + ar.getStdDev("Intra-Event"));
-//		System.out.println("s.d. (total) = " + ar.getStdDev("Total"));
-//		System.out.println("s.d. (total) = " + ar.getStdDev("Total"));
-//		System.out.println("s.d. (total) = " + ar.getStdDev("Total"));
-//
-//	}	
 }

@@ -177,26 +177,5 @@ public class Campbell2003Constants {
 	 * cm/s to g conversion factor.
 	 */
 	public static final double CMS_TO_G_CONVERSION_FACTOR = 1.0/981.0;
-	
-	public static void main(String [] args){
-		System.out.println(PERIOD.length);
-		System.out.println(c1.length);
-		System.out.println(c2.length);
-		System.out.println(c3.length);
-		System.out.println(c4.length);
-		System.out.println(c5.length);
-		System.out.println(c6.length);
-		System.out.println(c7.length);
-		System.out.println(c8.length);
-		System.out.println(c9.length);
-		System.out.println(c10.length);
-		System.out.println(c11.length);
-		System.out.println(c12.length);
-		System.out.println(c13.length);
-		System.out.println(Frss.length);
-		System.out.println(AFrock.length);
-		System.out.println(TOTAL_STD.length + " " + sig_AFrock.length);
-
-		}
 
 }

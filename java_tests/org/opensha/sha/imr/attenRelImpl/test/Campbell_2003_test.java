@@ -19,7 +19,7 @@ import org.opensha.sha.earthquake.rupForecastImpl.GEM1.GEM1ERF;
 import org.opensha.sha.earthquake.rupForecastImpl.GEM1.SourceData.GEMSourceData;
 import org.opensha.sha.imr.attenRelImpl.CF_2008Constants;
 import org.opensha.sha.imr.attenRelImpl.CF_2008_AttenRel;
-import org.opensha.sha.imr.attenRelImpl.Campbell2003_AttenRel;
+import org.opensha.sha.imr.attenRelImpl.Campbell_2003_AttenRel;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PGA_Param;
 import org.opensha.sha.imr.param.OtherParams.StdDevTypeParam;
 import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
@@ -31,7 +31,7 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
 public class Campbell_2003_test implements ParameterChangeWarningListener {
 
 	/** Campbell_2003_AttenRel GMPE (attenuation relationship) */
-	private Campbell2003_AttenRel ca03AttenRel = null;
+	private Campbell_2003_AttenRel ca03AttenRel = null;
 
 	/**
 	 * Table for total standard deviation validation.
@@ -42,11 +42,10 @@ public class Campbell_2003_test implements ParameterChangeWarningListener {
 	 * Table for median ground motion validation. Hard rock median.
 	 */
 	private static final String MEDIAN_HARD_ROCK_TABLE = "Ca03_MEDIAN.OUT";
-	
 
 	/** Header for meadian tables. */
 	private static String[] TABLE_HEADER_MEDIAN = new String[1];
-	
+
 	/** Header for standard deviation tables. */
 	private static String[] TABLE_HEADER_STD = new String[1];
 
@@ -74,7 +73,7 @@ public class Campbell_2003_test implements ParameterChangeWarningListener {
 	 */
 	@Before
 	public final void setUp() throws Exception {
-		ca03AttenRel = new Campbell2003_AttenRel(this);
+		ca03AttenRel = new Campbell_2003_AttenRel(this);
 		ca03AttenRel.setParamDefaults();
 
 		stdTotalTable = new double[TABLE_NUM_ROWS][TABLE_NUM_COL_STD];
@@ -100,84 +99,82 @@ public class Campbell_2003_test implements ParameterChangeWarningListener {
 
 	@Test
 	public void checkStdTotal() {
-		validateStdDev(StdDevTypeParam.STD_DEV_TYPE_TOTAL_MAG_DEP, stdTotalTable);
+		validateStdDev(StdDevTypeParam.STD_DEV_TYPE_TOTAL, stdTotalTable);
 	}
 
 	@Test
 	public void checkMedianEventOnHardRock() {
 		validateMedian(medianHardRockTable);
 	}
-	
 
 	/**
-	 * Check AkB_2010 usage for computing hazard curves using GEM1ERF constructed
-	 * from area source data. Ruptures are treated as
-	 * points.
-	 * @throws Exception 
+	 * Check AkB_2010 usage for computing hazard curves using GEM1ERF
+	 * constructed from area source data. Ruptures are treated as points.
+	 * 
+	 * @throws Exception
 	 */
 	@Test
-	public final void GEM1ERFPointRuptures() throws Exception{
+	public final void GEM1ERFPointRuptures() throws Exception {
 		ca03AttenRel.setIntensityMeasure(PGA_Param.NAME);
 		ArrayList<GEMSourceData> srcDataList = new ArrayList<GEMSourceData>();
-		srcDataList.
-		add(AttenRelTestHelper.getActiveCrustAreaSourceData());
+		srcDataList.add(AttenRelTestHelper.getActiveCrustAreaSourceData());
 		double timeSpan = 50.0;
 		GEM1ERF erf = GEM1ERF.getGEM1ERF(srcDataList, timeSpan);
 		erf.setParameter(GEM1ERF.AREA_SRC_RUP_TYPE_NAME,
 				GEM1ERF.AREA_SRC_RUP_TYPE_POINT);
 		erf.updateForecast();
 		HazardCurveCalculator hazCurveCalculator = new HazardCurveCalculator();
-		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper.setUpHazardCurve();
-		Site site = new Site(new Location(-0.171,-75.555));
+		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper
+				.setUpHazardCurve();
+		Site site = new Site(new Location(-0.171, -75.555));
 		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
-		hazCurveCalculator.getHazardCurve(hazCurve, site, ca03AttenRel,
-				erf);
+		hazCurveCalculator.getHazardCurve(hazCurve, site, ca03AttenRel, erf);
 	}
-	
+
 	/**
-	 * Check Campbell_2003 usage for computing hazard curves using GEM1ERF constructed
-	 * from area source data. Ruptures are treated as
-	 * extended.
-	 * @throws Exception 
+	 * Check Campbell_2003 usage for computing hazard curves using GEM1ERF
+	 * constructed from area source data. Ruptures are treated as extended.
+	 * 
+	 * @throws Exception
 	 */
 	@Test
-	public final void GEM1ERFLineRuptures() throws Exception{
+	public final void GEM1ERFLineRuptures() throws Exception {
 		ca03AttenRel.setIntensityMeasure(PGA_Param.NAME);
 		ArrayList<GEMSourceData> srcDataList = new ArrayList<GEMSourceData>();
-		srcDataList.
-		add(AttenRelTestHelper.getActiveCrustAreaSourceData());
+		srcDataList.add(AttenRelTestHelper.getActiveCrustAreaSourceData());
 		double timeSpan = 50.0;
 		GEM1ERF erf = GEM1ERF.getGEM1ERF(srcDataList, timeSpan);
 		erf.setParameter(GEM1ERF.AREA_SRC_RUP_TYPE_NAME,
 				GEM1ERF.AREA_SRC_RUP_TYPE_LINE);
 		erf.updateForecast();
 		HazardCurveCalculator hazCurveCalculator = new HazardCurveCalculator();
-		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper.setUpHazardCurve();
-		Site site = new Site(new Location(-0.171,-75.555));
+		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper
+				.setUpHazardCurve();
+		Site site = new Site(new Location(-0.171, -75.555));
 		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
-		hazCurveCalculator.getHazardCurve(hazCurve, site, ca03AttenRel,
-				erf);
+		hazCurveCalculator.getHazardCurve(hazCurve, site, ca03AttenRel, erf);
 	}
-	
+
 	/**
 	 * Check AB2003 usage for computing hazard curves using GEM1ERF constructed
 	 * from simple fault source data.
-	 * @throws Exception 
+	 * 
+	 * @throws Exception
 	 */
 	@Test
-	public final void GEM1ERFSimpleFault() throws Exception{
+	public final void GEM1ERFSimpleFault() throws Exception {
 		ca03AttenRel.setIntensityMeasure(PGA_Param.NAME);
 		ArrayList<GEMSourceData> srcDataList = new ArrayList<GEMSourceData>();
-		srcDataList.
-		add(AttenRelTestHelper.getActiveCrustSimpleFaultSourceData());
+		srcDataList.add(AttenRelTestHelper
+				.getActiveCrustSimpleFaultSourceData());
 		double timeSpan = 50.0;
 		GEM1ERF erf = GEM1ERF.getGEM1ERF(srcDataList, timeSpan);
 		HazardCurveCalculator hazCurveCalculator = new HazardCurveCalculator();
-		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper.setUpHazardCurve();
+		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper
+				.setUpHazardCurve();
 		Site site = new Site(new Location(40.2317, 15.8577));
 		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
-		hazCurveCalculator.getHazardCurve(hazCurve, site, ca03AttenRel,
-				erf);
+		hazCurveCalculator.getHazardCurve(hazCurve, site, ca03AttenRel, erf);
 	}
 
 	private void validateMedian(double[][] table) {
@@ -186,13 +183,12 @@ public class Campbell_2003_test implements ParameterChangeWarningListener {
 		for (int i = 3; i < columnDescr.length - 1; i++) {
 			System.out.println(columnDescr.length);
 			for (int j = 0; j < table.length; j++) {
-				int iper = i-2;
-				System.out.println(iper);
-
+				int iper = i - 2;
 				double mag = table[j][0];
 				double rJB = table[j][1];
 				double expectedMedian = table[j][i];
-				double computedMedian = Math.exp(ca03AttenRel.getMean(iper,mag, rJB));
+				double computedMedian = Math.exp(ca03AttenRel.getMean(iper,
+						mag, rJB));
 				assertEquals(expectedMedian, computedMedian, TOLERANCE);
 			}
 		}
@@ -201,8 +197,7 @@ public class Campbell_2003_test implements ParameterChangeWarningListener {
 			double mag = table[j][0];
 			double rJB = table[j][1];
 			double expectedMedian = table[j][columnDescr.length - 1];
-			double computedMedian = Math.exp(ca03AttenRel.getMean(0, mag,
-					rJB));
+			double computedMedian = Math.exp(ca03AttenRel.getMean(0, mag, rJB));
 			assertEquals(expectedMedian, computedMedian, TOLERANCE);
 		}
 	}
@@ -214,7 +209,8 @@ public class Campbell_2003_test implements ParameterChangeWarningListener {
 			for (int j = 0; j < table.length; j++) {
 				double mag = table[j][0];
 				double expectedStd = table[j][i];
-				double computedStd = ca03AttenRel.getStdDev(i-2, mag, stdDevType);
+				double computedStd = ca03AttenRel.getStdDev(i - 2, mag,
+						stdDevType);
 				assertEquals(expectedStd, computedStd, TOLERANCE);
 			}
 		}

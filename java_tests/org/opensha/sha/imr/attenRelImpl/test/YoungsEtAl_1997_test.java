@@ -3,7 +3,6 @@ package org.opensha.sha.imr.attenRelImpl.test;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 
 import org.junit.After;
@@ -13,7 +12,6 @@ import org.opensha.commons.data.Site;
 import org.opensha.commons.data.function.ArbitrarilyDiscretizedFunc;
 import org.opensha.commons.geo.Location;
 import org.opensha.commons.param.DoubleParameter;
-import org.opensha.commons.param.StringParameter;
 import org.opensha.commons.param.event.ParameterChangeWarningEvent;
 import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.calc.HazardCurveCalculator;

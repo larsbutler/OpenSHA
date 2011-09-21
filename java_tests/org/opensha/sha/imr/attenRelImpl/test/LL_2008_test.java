@@ -23,6 +23,10 @@ import org.opensha.sha.imr.param.OtherParams.StdDevTypeParam;
 import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
 import org.opensha.sha.util.TectonicRegionType;
 
+/**
+ * Class implementing tests for {@link LL_2008_AttenRel}.
+ *
+ */
 public class LL_2008_test implements ParameterChangeWarningListener {
 
 	/** LL_2008_AttenRel GMPE (attenuation relationship) */
@@ -43,7 +47,7 @@ public class LL_2008_test implements ParameterChangeWarningListener {
 	 * Table for median ground motion validation. Interface events - median values for rock and soft soil
 	 */
 	private static final String MEDIAN_INTERFACE_ROCK_TABLE = "LL08_MEDIAN_INTERFACE_ROCK.OUT";
-	private static final String MEDIAN_INTERFACE_SOFT_TABLE = "LL08_MEDIAN_INTERFACE_SOIL.TXT";
+	private static final String MEDIAN_INTERFACE_SOFT_TABLE = "LL08_MEDIAN_INTERFACE_SOIL.txt";
 	
 	/** Header for standard deviation tables. */
 	private static String[] TABLE_HEADER_STD = new String[1];
@@ -71,7 +75,6 @@ public class LL_2008_test implements ParameterChangeWarningListener {
 	private static double[][] medianInterfaceSoftTable = null;
 
 	private static final double TOLERANCE = 1e-2;
-	private static final double TOLERANCE_pgv = 1e-2;
 
 
 	/**
@@ -185,10 +188,6 @@ public class LL_2008_test implements ParameterChangeWarningListener {
 				double expectedMedian = table[j][i];
 				double computedMedian = Math.exp(ll08AttenRel.getMean(iper, mag, rJB, 
 						hypoDepth, vs30, tectRegType));
-				System.out.println(iper + " mag = " + mag + "r= "+rJB 
-						+ " expected: "+expectedMedian);
-				System.out.println(iper + " mag = " + mag + "r= "+rJB
-						+ " computed: "+computedMedian);
 				assertEquals(expectedMedian, computedMedian, TOLERANCE);
 
 			}

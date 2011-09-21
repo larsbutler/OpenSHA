@@ -210,22 +210,4 @@ public class AkB2010Constants {
 	 * Sa(4s)/Sa(3sec) to extend the spectral periods to 4sec
 	 */
 	public static final double T3sec_to_T4sec_factor = 0.612;
-	
-	public static void main(String [] args){
-		System.out.println(PERIOD.length);
-		System.out.println(b1.length);
-		System.out.println(b2.length);
-		System.out.println(b3.length);
-		System.out.println(b4.length);
-		System.out.println(b5.length);
-		System.out.println(b6.length);
-		System.out.println(b7.length);
-		System.out.println(b8.length);
-		System.out.println(b8.length);
-		System.out.println(b10.length);
-		System.out.println(INTRA_EVENT_STD.length);
-		System.out.println(INTER_EVENT_STD.length);
-		System.out.println(TOTAL_STD.length);
-
-		}
 }

@@ -20,7 +20,6 @@ import org.opensha.sha.imr.param.EqkRuptureParams.FocalDepthParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.MagParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.DampingParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PGA_Param;
-import org.opensha.sha.imr.param.IntensityMeasureParams.PGV_Param;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PeriodParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.SA_Param;
 import org.opensha.sha.imr.param.OtherParams.ComponentParam;
@@ -156,9 +155,9 @@ public class YoungsEtAl_1997_AttenRel extends AttenuationRelationship implements
 	}
 
 	/**
-	 * Creates the three supported IM parameters (PGA, PGV and SA), as well as the
-	 * independenParameters of SA (periodParam and dampingParam) and adds them
-	 * to the supportedIMParams list. Makes the parameters noneditable.
+	 * Creates the three supported IM parameters (PGA, PGV and SA), as well as
+	 * the independenParameters of SA (periodParam and dampingParam) and adds
+	 * them to the supportedIMParams list. Makes the parameters noneditable.
 	 */
 	protected void initSupportedIntensityMeasureParams() {
 
@@ -244,8 +243,7 @@ public class YoungsEtAl_1997_AttenRel extends AttenuationRelationship implements
 
 		distanceRupParam = new DistanceRupParameter(0.0);
 		distanceRupParam.addParameterChangeWarningListener(warningListener);
-		DoubleConstraint warndistance = new DoubleConstraint(
-				new Double(0.00),
+		DoubleConstraint warndistance = new DoubleConstraint(new Double(0.00),
 				YoungsEtAl1997Constants.DISTANCE_RUP_WARN_MAX);
 		warndistance.setNonEditable();
 		distanceRupParam.setWarningConstraint(warndistance);
@@ -464,19 +462,18 @@ public class YoungsEtAl_1997_AttenRel extends AttenuationRelationship implements
 			double period = saPeriodParam.getValue();
 			// rock
 			if (vs30 > 760.0) {
-				if(period>YoungsEtAl1997Constants.PERIOD_ROCK[YoungsEtAl1997Constants.PERIOD_ROCK.length-1]){
-					throw new
-					RuntimeException(period+" not supported for vs30 > 760.0");
-				}
-				else{
-					iper = ((Integer) indexFromPerHashMapRock.
-							get(period)).intValue();	
+				if (period > YoungsEtAl1997Constants.PERIOD_ROCK[YoungsEtAl1997Constants.PERIOD_ROCK.length - 1]) {
+					throw new RuntimeException(period
+							+ " not supported for vs30 > 760.0");
+				} else {
+					iper = ((Integer) indexFromPerHashMapRock.get(period))
+							.intValue();
 				}
 			}
 			// soil
 			else {
-				iper = ((Integer) indexFromPerHashMapSoil.
-						get(period)).intValue();
+				iper = ((Integer) indexFromPerHashMapSoil.get(period))
+						.intValue();
 			}
 		}
 	}
@@ -501,23 +498,24 @@ public class YoungsEtAl_1997_AttenRel extends AttenuationRelationship implements
 	public double getStdDev() {
 
 		setPeriodIndex();
-		
+
 		double magnitude = mag;
-		if(magnitude>8.0){
+		if (magnitude > 8.0) {
 			magnitude = 8.0;
 		}
-		
+
 		return getStdDev(iper, magnitude, stdDevType);
 	}
 
 	/**
 	 * Compute mean.
 	 */
-	public double getMean(int iper, double mag, double rRup, String tecRegType, 
-			              double vs30, double hypoDep) {
+	public double getMean(int iper, double mag, double rRup, String tecRegType,
+			double vs30, double hypoDep) {
 
 		double Zt, mean, lnY;
-		if (tecRegType.equals(TectonicRegionType.SUBDUCTION_INTERFACE.toString())) {
+		if (tecRegType.equals(TectonicRegionType.SUBDUCTION_INTERFACE
+				.toString())) {
 			Zt = 0;
 		} else {
 			Zt = 1;
@@ -554,19 +552,21 @@ public class YoungsEtAl_1997_AttenRel extends AttenuationRelationship implements
 		return lnY;
 	}
 
-	/** 
+	/**
 	 * Compute standard deviation.
 	 */
 	private double getStdDev(int iper, double mag, String stdDevType) {
 		if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE)) {
 			return 0;
-		} else {
+		}
+		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL)){
 			double sigmaTotal = YoungsEtAl1997Constants.C4_SOIL[iper]
 					+ YoungsEtAl1997Constants.C5_SOIL[iper] * mag;
 			return (sigmaTotal);
 		}
+		throw new RuntimeException("Standard deviation type: "+stdDevType+" not supported");
 	}
-	
+
 	/**
 	 * Returns attenuation relationship full name.
 	 */
@@ -582,27 +582,10 @@ public class YoungsEtAl_1997_AttenRel extends AttenuationRelationship implements
 	}
 
 	/**
-	 * Provides URL with attenuation relationship info. The
-	 * method currently returns null because no url has been created.
+	 * Provides URL with attenuation relationship info. The method currently
+	 * returns null because no url has been created.
 	 */
 	public URL getInfoURL() throws MalformedURLException {
 		return null;
 	}
-	/**
-	 * For testing
-	 * 
-	 */
-
-	public static void main(String[] args) {
-
-		YoungsEtAl_1997_AttenRel ar = new YoungsEtAl_1997_AttenRel(null);
-		ar.setParamDefaults();
-		ar.setIntensityMeasure(SA_Param.NAME);
-
-		for (int i=0; i < 13; i++){
-			System.out.println(YoungsEtAl1997Constants.PERIOD_ROCK[i] + " mean = " + Math.exp(ar.getMean(i, 7.00, 15, 
-					TectonicRegionType.SUBDUCTION_INTERFACE.toString(), 800, 30)));
-			System.out.println("st.dev" + ar.getStdDev(i, 7, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString()));
-		}
-	}	
 }

@@ -15,9 +15,7 @@ import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.earthquake.EqkRupture;
 import org.opensha.sha.imr.AttenuationRelationship;
 import org.opensha.sha.imr.ScalarIntensityMeasureRelationshipAPI;
-import org.opensha.sha.imr.param.EqkRuptureParams.FaultTypeParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.MagParam;
-import org.opensha.sha.imr.param.EqkRuptureParams.RakeParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.DampingParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PGA_Param;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PeriodParam;
@@ -28,39 +26,45 @@ import org.opensha.sha.imr.param.OtherParams.SigmaTruncTypeParam;
 import org.opensha.sha.imr.param.OtherParams.StdDevTypeParam;
 import org.opensha.sha.imr.param.PropagationEffectParams.DistanceRupParameter;
 
-
 /**
- * <b>Title:</b> Campbell_2003_AttenRel<p>
- *
- * <b>Description:</b> This implements the  GMPE developed by K. W. Campbell (2003, BSSA, vol
- * 93, no 3, pp 1012-1033) <p>
+ * <b>Title:</b> Campbell_2003_AttenRel
+ * <p>
  * 
- * Supported Intensity-Measure Parameters:<p>
+ * <b>Description:</b> Class implementing GMPE described in:
+ * Prediction of Strong Ground Motion Using the Hybrid Empirical Method and Its
+ * Use in the Development of Ground-Motion (Attenuation) Relations in Eastern
+ * North America (June 2003, BSSA, vol 93, no 3, pp 1012-1033).
+ * Modifications of the equations according to the ERRATUM (July 2004) are also included.
+ * <p>
+ * 
+ * Supported Intensity-Measure Parameters:
+ * <p>
  * <UL>
  * <LI>PGA - Peak Ground Acceleration
- * <LI>saParam - Response Spectral Acceleration
- * <LI> PSA (in cm/sec)/20;
+ * <LI>SA - Response Spectral Acceleration
  * <LI>
- * </UL><p>
- * Other Independent Parameters:<p>
+ * </UL>
+ * <p>
+ * Other Independent Parameters:
+ * <p>
  * <UL>
- * <LI>magParam - moment Magnitude
+ * <LI>magParam - moment magnitude
  * <LI>distanceRupParam - closest distance to surface projection of fault
- * <LI>componentParam - Component of shaking
- * <LI> stdDevTypeParam - The type of standard deviation (distance dependent)
- * </UL><p>
- *
- * @author     l.danciu
- * @created    October, 2010 - updated July 2011
- * @version    1.01
+ * <LI>componentParam - average horizontal, GMRoti50
+ * <LI>stdDevTypeParam - none, total
+ * </UL>
+ * <p>
+ * 
+ * @author l.danciu
+ * @created October, 2010 - updated July 2011
+ * @version 1.01
  */
 
+public class Campbell_2003_AttenRel extends AttenuationRelationship implements
+		ScalarIntensityMeasureRelationshipAPI, NamedObjectAPI,
+		ParameterChangeListener {
 
-public class Campbell2003_AttenRel extends AttenuationRelationship implements
-ScalarIntensityMeasureRelationshipAPI,
-NamedObjectAPI, ParameterChangeListener {
-
-	/** Short name. */	
+	/** Short name. */
 	public final static String SHORT_NAME = "Campbell_2003";
 
 	/** Full name. */
@@ -78,9 +82,6 @@ NamedObjectAPI, ParameterChangeListener {
 	/** Rupture distance. */
 	private double rRup;
 
-	/** Tectonic region type. */
-	private String tecRegType;
-
 	/** Standard deviation type. */
 	private String stdDevType;
 
@@ -94,8 +95,7 @@ NamedObjectAPI, ParameterChangeListener {
 	 * Construct attenuation relationship. Initialize parameters and parameter
 	 * lists.
 	 */
-	public Campbell2003_AttenRel(ParameterChangeWarningListener
-			warningListener) {
+	public Campbell_2003_AttenRel(ParameterChangeWarningListener warningListener) {
 
 		// creates exceedProbParam
 		super();
@@ -106,38 +106,35 @@ NamedObjectAPI, ParameterChangeListener {
 
 		// Create an Hash map that links the period with its index
 		indexFromPerHashMap = new HashMap<Double, Integer>();
-		for (int i = 2; i < Campbell2003Constants.PERIOD.length; i++) { 
-			indexFromPerHashMap.put(new Double(Campbell2003Constants.PERIOD[i]), 
-					new Integer(i));
+		for (int i = 1; i < Campbell2003Constants.PERIOD.length; i++) {
+			indexFromPerHashMap
+					.put(new Double(Campbell2003Constants.PERIOD[i]),
+							new Integer(i));
 		}
-		// Initialize earthquake Rupture parameters (e.g. magnitude)
 		initEqkRuptureParams();
-		// Initialize Propagation Effect Parameters (e.g. source-site distance)
 		initPropagationEffectParams();
-		// Initialize site parameters (e.g. vs30)
-		initSiteParams();	
-		// Initialize other parameters (e.g. stress drop)
+		initSiteParams();
 		initOtherParams();
-		// Initialize the independent parameters list 
 		initIndependentParamLists();
-		// Initialize the parameter change listeners
 		initParameterEventListeners();
 	}
 
 	/**
-	 * Creates the three supported IM parameters (PGA, PGV and SA), as well as the
-	 * independenParameters of SA (periodParam and dampingParam) and adds them
-	 * to the supportedIMParams list. Makes the parameters non-editable.
+	 * Creates the three supported IM parameters (PGA, PGV and SA), as well as
+	 * the independenParameters of SA (periodParam and dampingParam) and adds
+	 * them to the supportedIMParams list. Makes the parameters non-editable.
 	 */
 	protected final void initSupportedIntensityMeasureParams() {
 
 		// set supported periods for spectral acceleration
 		DoubleDiscreteConstraint periodConstraint = new DoubleDiscreteConstraint();
-		for (int i = 2; i < Campbell2003Constants.PERIOD.length; i++) {
-			periodConstraint.addDouble(new Double(Campbell2003Constants.PERIOD[i]));
+		for (int i = 1; i < Campbell2003Constants.PERIOD.length; i++) {
+			periodConstraint.addDouble(new Double(
+					Campbell2003Constants.PERIOD[i]));
 		}
 		periodConstraint.setNonEditable();
-		// set period param (default is 1s, which is provided by Campbell2003 GMPE)
+		// set period param (default is 1s, which is provided by Campbell2003
+		// GMPE)
 		saPeriodParam = new PeriodParam(periodConstraint);
 
 		// set damping parameter. Empty constructor set damping
@@ -161,12 +158,11 @@ NamedObjectAPI, ParameterChangeListener {
 		supportedIMParams.addParameter(saParam);
 		supportedIMParams.addParameter(pgaParam);
 
-
 	}
 
 	/**
-	 * Initialize earthquake rupture parameter (moment magnitude, rake) 
-	 * and add to eqkRuptureParams list. Makes the parameters non-editable.
+	 * Initialize earthquake rupture parameter (moment magnitude, rake) and add
+	 * to eqkRuptureParams list. Makes the parameters non-editable.
 	 */
 	protected final void initEqkRuptureParams() {
 
@@ -178,11 +174,13 @@ NamedObjectAPI, ParameterChangeListener {
 	}
 
 	/**
-	 * Initialize the style of faulting parameter from the rake angle.
-	 * @param rake                      ave. rake of rupture (degrees)
+	 * Initialize site params. In this case no site params are defined so the
+	 * method is left empty.
 	 */
 	protected final void initSiteParams() {
+		siteParams.clear();
 	}
+
 	/**
 	 * Initialize Propagation Effect parameters (closest distance to rupture)
 	 * and adds them to the propagationEffectParams list. Makes the parameters
@@ -193,8 +191,7 @@ NamedObjectAPI, ParameterChangeListener {
 		distanceRupParam = new DistanceRupParameter(
 				Campbell2003Constants.DISTANCE_RUP_WARN_MIN);
 		distanceRupParam.addParameterChangeWarningListener(warningListener);
-		DoubleConstraint warn = new DoubleConstraint(
-				new Double(0.00),
+		DoubleConstraint warn = new DoubleConstraint(new Double(0.00),
 				Campbell2003Constants.DISTANCE_RUP_WARN_MAX);
 		warn.setNonEditable();
 		distanceRupParam.setWarningConstraint(warn);
@@ -216,19 +213,16 @@ NamedObjectAPI, ParameterChangeListener {
 		StringConstraint stdDevTypeConstraint = new StringConstraint();
 		stdDevTypeConstraint.addString(StdDevTypeParam.STD_DEV_TYPE_TOTAL);
 		stdDevTypeConstraint.addString(StdDevTypeParam.STD_DEV_TYPE_NONE);
-		stdDevTypeConstraint.addString(StdDevTypeParam.STD_DEV_TYPE_INTER);
-		stdDevTypeConstraint.addString(StdDevTypeParam.STD_DEV_TYPE_INTRA);
 		stdDevTypeConstraint.setNonEditable();
 		stdDevTypeParam = new StdDevTypeParam(stdDevTypeConstraint);
 
-        // the Component Parameter
-		// Geometrical Mean (COMPONENT_AVE_HORZ) = Geometrical MeanI50 (COMPONENT_GMRotI50)
-        StringConstraint constraint = new StringConstraint();
-        constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
-        constraint.addString(ComponentParam.COMPONENT_GMRotI50);
-        constraint.setNonEditable();
-//        componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_GMRotI50);
-        componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_AVE_HORZ);
+		// the Component Parameter
+		StringConstraint constraint = new StringConstraint();
+		constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
+		constraint.addString(ComponentParam.COMPONENT_GMRotI50);
+		constraint.setNonEditable();
+		componentParam = new ComponentParam(constraint,
+				ComponentParam.COMPONENT_AVE_HORZ);
 
 		// add these to the list
 		otherParams.clear();
@@ -265,7 +259,7 @@ NamedObjectAPI, ParameterChangeListener {
 
 		// params that the IML at exceed. prob. depends upon
 		imlAtExceedProbIndependentParams
-		.addParameterList(exceedProbIndependentParams);
+				.addParameterList(exceedProbIndependentParams);
 		imlAtExceedProbIndependentParams.addParameter(exceedProbParam);
 	}
 
@@ -276,27 +270,29 @@ NamedObjectAPI, ParameterChangeListener {
 	 * constrains on magnitude and focal depth are ignored.
 	 */
 	public final void setEqkRupture(final EqkRupture eqkRupture) {
-
+		
 		magParam.setValueIgnoreWarning(new Double(eqkRupture.getMag()));
 		this.eqkRupture = eqkRupture;
 		setPropagationEffectParams();
 	}
 
 	/**
-	 * This sets the site-related parameter (vs30) based on what is in the Site
-	 * object passed in. This also sets the internally held Site object as that
-	 * passed in.
+	 * Sets the internally held Site object as that passed in.
 	 */
 	public final void setSite(final Site site) {
+		
+		this.site = site;
+		setPropagationEffectParams();
 	}
 
 	/**
-	 * This calculates the Rupture Distance  propagation effect parameter based
-	 * on the current site and eqkRupture. <P>
+	 * This calculates the Rupture Distance propagation effect parameter based
+	 * on the current site and eqkRupture.
+	 * <P>
 	 */
 	protected void setPropagationEffectParams() {
 
-		if ( (this.site != null) && (this.eqkRupture != null)) {
+		if ((this.site != null) && (this.eqkRupture != null)) {
 			distanceRupParam.setValue(eqkRupture, site);
 		}
 	}
@@ -309,40 +305,38 @@ NamedObjectAPI, ParameterChangeListener {
 			iper = 0;
 		} else {
 			iper = ((Integer) indexFromPerHashMap.get(saPeriodParam.getValue()))
-			.intValue();
+					.intValue();
 		}
 	}
 
-
 	/**
-	 * Compute mean. Applies correction for style of faulting and 
-	 * generic rock - Vs30 >= 800m/s .
+	 * Compute mean. Applies correction for style of faulting and generic rock -
+	 * Vs30 >= 800m/s .
 	 */
-	public double getMean(){
+	public double getMean() {
 		if (rRup > USER_MAX_DISTANCE) {
 			return VERY_SMALL_MEAN;
-		}
-		else{
+		} else {
 			setPeriodIndex();
-			return getMean (iper, mag, rRup);
+			return getMean(iper, mag, rRup);
 		}
 	}
 
 	public double getStdDev() {
-		if (intensityMeasureChanged){
+		if (intensityMeasureChanged) {
 			setPeriodIndex();
 		}
 		return getStdDev(iper, mag, stdDevType);
 	}
 
 	/**
-	 * This computes the mean ln(Y) 
+	 * This computes the mean ln(Y)
+	 * 
 	 * @param iper
 	 * @param rRup
 	 * @param mag
 	 */
-	public double getMean(int iper, double mag, double rRup){
-
+	public double getMean(int iper, double mag, double rRup) {
 
 		double f1 = Double.NaN;
 		double f2 = Double.NaN;
@@ -352,61 +346,68 @@ NamedObjectAPI, ParameterChangeListener {
 		double lnY = Double.NaN;
 
 		/**
-		 * This is to avoid very small values for Rup 
+		 * This is to avoid very small values for Rup
 		 * 
 		 * */
 		if (rRup < 1e-3) {
 			rRup = 1;
 		}
 
-		
-		tmp = Campbell2003Constants.c7[iper] * Math.exp(Campbell2003Constants.c8[iper] * mag);
-		R   = Math.sqrt(rRup*rRup + tmp * tmp);
-		f1  = Campbell2003Constants.c2[iper] * mag + Campbell2003Constants.c3[iper] * Math.pow((8.5-mag),2);
-		f2  = Campbell2003Constants.c4[iper] * Math.log (R) + 
-		(Campbell2003Constants.c5[iper] + Campbell2003Constants.c6[iper] * mag) * rRup;
-		f3  = computedf3(iper, rRup);
+		tmp = Campbell2003Constants.c7[iper]
+				* Math.exp(Campbell2003Constants.c8[iper] * mag);
+		R = Math.sqrt(rRup * rRup + tmp * tmp);
+		f1 = Campbell2003Constants.c2[iper] * mag
+				+ Campbell2003Constants.c3[iper] * Math.pow((8.5 - mag), 2);
+		f2 = Campbell2003Constants.c4[iper]
+				* Math.log(R)
+				+ (Campbell2003Constants.c5[iper] + Campbell2003Constants.c6[iper]
+						* mag) * rRup;
+		f3 = computedf3(iper, rRup);
 
 		lnY = Campbell2003Constants.c1[iper] + f1 + f2 + f3;
 
-		return (lnY);
+		return lnY;
 
-		}
+	}
+
 	/**
-	 * Compute f3 term 
+	 * Compute f3 term
 	 * 
 	 * */
-		private double computedf3(int iper, double rRup) {
-			double f3factor = Double.NaN;
-			if (rRup <= Campbell2003Constants.R1) {
-				f3factor = 0.00;
-			} else if (rRup > Campbell2003Constants.R1 && rRup <= Campbell2003Constants.R2) {
-				f3factor = Campbell2003Constants.c9[iper] * (Math.log(rRup) - 
-						Math.log(Campbell2003Constants.R1));
-			} else if (rRup > Campbell2003Constants.R2) {
-				f3factor = Campbell2003Constants.c9[iper] * (Math.log(rRup) - 
-						Math.log(Campbell2003Constants.R1)) + 
-						Campbell2003Constants.c10[iper] * (Math.log(rRup) - 
-								Math.log(Campbell2003Constants.R2));
-			}
-			return f3factor;
-		};
+	private double computedf3(int iper, double rRup) {
+		double f3factor = Double.NaN;
+		if (rRup <= Campbell2003Constants.R1) {
+			f3factor = 0.00;
+		} else if (rRup > Campbell2003Constants.R1
+				&& rRup <= Campbell2003Constants.R2) {
+			f3factor = Campbell2003Constants.c9[iper]
+					* (Math.log(rRup) - Math.log(Campbell2003Constants.R1));
+		} else if (rRup > Campbell2003Constants.R2) {
+			f3factor = Campbell2003Constants.c9[iper]
+					* (Math.log(rRup) - Math.log(Campbell2003Constants.R1))
+					+ Campbell2003Constants.c10[iper]
+					* (Math.log(rRup) - Math.log(Campbell2003Constants.R2));
+		}
+		return f3factor;
+	}
 
-	public double getStdDev(int iper, double mag, String stdDevType ) {
-		double sigma = Double.NaN;;
+	public double getStdDev(int iper, double mag, String stdDevType) {
 
-		if(stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE))
+		if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE))
 			return 0;
-		else {
-			final double M1 = 7.16; 
-			if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL_MAG_DEP))
+		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL)){
+			final double M1 = 7.16;
+			double sigma = Double.NaN;
 				if (mag < M1) {
-					sigma = (Campbell2003Constants.c11[iper] + Campbell2003Constants.c12[iper] * mag);
-				} 
-				else {
+					sigma = (Campbell2003Constants.c11[iper] + Campbell2003Constants.c12[iper]
+							* mag);
+				} else {
 					sigma = Campbell2003Constants.c13[iper];
 				}
-			return (sigma);
+			return sigma;
+		}
+		else {
+			throw new RuntimeException("Standard deviation type not recognized");
 		}
 	}
 
@@ -427,6 +428,7 @@ NamedObjectAPI, ParameterChangeListener {
 		sigmaTruncLevelParam.setValueAsDefault();
 		componentParam.setValueAsDefault();
 	}
+
 	/**
 	 * This listens for parameter changes and updates the primitive parameters
 	 * accordingly
@@ -444,27 +446,27 @@ NamedObjectAPI, ParameterChangeListener {
 			stdDevType = (String) val;
 		}
 	}
+
 	/**
 	 * Allows to reset the change listeners on the parameters
 	 */
-	public void resetParameterEventListeners(){
+	public void resetParameterEventListeners() {
 		magParam.removeParameterChangeListener(this);
 		distanceRupParam.removeParameterChangeListener(this);
 		stdDevTypeParam.removeParameterChangeListener(this);
-		saPeriodParam.removeParameterChangeListener(this);
 		this.initParameterEventListeners();
 	}
+
 	/**
-	 * Adds the parameter change listeners. This allows to listen to when-ever the
-	 * parameter is changed.
+	 * Adds the parameter change listeners. This allows to listen to when-ever
+	 * the parameter is changed.
 	 */
 	protected void initParameterEventListeners() {
-
 		magParam.addParameterChangeListener(this);
 		distanceRupParam.addParameterChangeListener(this);
 		stdDevTypeParam.addParameterChangeListener(this);
-		saPeriodParam.addParameterChangeListener(this);
 	}
+
 	/**
 	 * Get the name of this IMR.
 	 */
@@ -479,30 +481,12 @@ NamedObjectAPI, ParameterChangeListener {
 	public final String getShortName() {
 		return SHORT_NAME;
 	}
+
 	/**
-	 * This provides a URL where more info on this model can be obtained
-	 * @throws MalformedURLException if returned URL is not a valid URL.
-	 * @returns the URL to the AttenuationRelationship document on the Web.
+	 * This provides a URL where more info on this model can be obtained Returns
+	 * null because no URL has been established
 	 */
-	public URL getInfoURL() throws MalformedURLException{
-		return new URL("http://www.opensha.org/documentation/modelsImplemented/attenRel/Campbell2003.html");
+	public URL getInfoURL() throws MalformedURLException {
+		return null;
 	}
-	/**
-	 * For testing
-	 * 
-	 */
-
-	public static void main(String[] args) {
-		Campbell2003_AttenRel ar = new Campbell2003_AttenRel(null);
-		ar.setParamDefaults();
-		ar.setIntensityMeasure(SA_Param.NAME);
-     		for (int i=1; i < 3; i++){
-			 System.out.println(i + ". T(sec) ="  + Campbell2003Constants.PERIOD[i]);
-			 System.out.println(" mag = 5.00 " + "r =    1.00 " + " SA = " + Math.exp(ar.getMean(i, 5.00, 1.00)));
-			 System.out.println(ar.getStdDev(i, 5.00, StdDevTypeParam.STD_DEV_TYPE_TOTAL_MAG_DEP.toString()));
-//			 System.out.println (ar.getStdDev(i, 7.00, StdDevTypeParam.STD_DEV_TYPE_TOTAL_MAG_DEP.toString()));
-			 
-		 }
-	}	
-
 }

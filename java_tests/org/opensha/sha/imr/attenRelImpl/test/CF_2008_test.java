@@ -407,7 +407,6 @@ public class CF_2008_test implements ParameterChangeWarningListener {
 				double computedMedian = Math.exp(cf2008AttenRel.getMean(iper,
 						mag, rJB, vs30, rake));
 				assertEquals(expectedMedian, computedMedian, TOLERANCE);
-				System.out.println(computedMedian);
 			}
 		}
 		// check for PGA
@@ -417,7 +416,6 @@ public class CF_2008_test implements ParameterChangeWarningListener {
 			double expectedMedian = table[j][columnDescr.length - 2];
 			double computedMedian = Math.exp(cf2008AttenRel.getMean(1, mag,
 					rJB, vs30, rake));
-//			System.out.println("PGA");
 			assertEquals(expectedMedian, computedMedian, TOLERANCE);
 		}
 		// check for PGV
@@ -427,7 +425,6 @@ public class CF_2008_test implements ParameterChangeWarningListener {
 			double expectedMedian = table[j][columnDescr.length - 1];
 			double computedMedian = Math.exp(cf2008AttenRel.getMean(0, mag,
 					rJB, vs30, rake));
-//			System.out.println("PGV");
 			assertEquals(expectedMedian, computedMedian, TOLERANCE);
 		}
 	}

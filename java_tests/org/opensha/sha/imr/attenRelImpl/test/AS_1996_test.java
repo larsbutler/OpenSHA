@@ -190,7 +190,6 @@ public class AS_1996_test implements ParameterChangeWarningListener {
 			double computedMedian_M7 = Math.exp(AS1996AttenRel.getMean(7.0,rrup, vs30));
 			double expectedMedian_M8 = table[j][3];
 			double computedMedian_M8 = Math.exp(AS1996AttenRel.getMean(8.0,rrup, vs30));
-//			System.out.println("RSD");
 			assertEquals(expectedMedian_M5, computedMedian_M5, TOLERANCE);
 			assertEquals(expectedMedian_M6, computedMedian_M6, TOLERANCE);
 			assertEquals(expectedMedian_M7, computedMedian_M7, TOLERANCE);

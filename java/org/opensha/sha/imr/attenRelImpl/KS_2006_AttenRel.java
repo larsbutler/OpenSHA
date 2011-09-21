@@ -336,9 +336,6 @@ ParameterChangeListener {
 		if (rrup > USER_MAX_DISTANCE) {
 			return VERY_SMALL_MEAN;
 		} else {
-			/**
-			setPeriodIndex();
-			 */
 			return getMean(mag, rrup, vs30);
 		}
 	}
@@ -347,9 +344,7 @@ ParameterChangeListener {
 	 * Compute standard deviation.
 	 */
 	public final double getStdDev() {
-		/**
-		setPeriodIndex();
-		 */
+
 		return getStdDev(stdDevType);
 	}
 
@@ -424,7 +419,7 @@ ParameterChangeListener {
 		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL))
 			return Math.sqrt(tau*tau+sigma*sigma);
 		else
-			return Double.NaN;
+			throw new RuntimeException("Standard deviation type: "+stdDevType+" not recognized");
 	}
 
 	/**
@@ -434,25 +429,4 @@ ParameterChangeListener {
 	public URL getInfoURL() throws MalformedURLException {
 		return null;
 	}
-	/**
-	 * For testing
-	 * 
-	 */
-	public static void main(String[] args) {
-
-		KS_2006_AttenRel ar = new KS_2006_AttenRel(null);
-
-		System.out.println("mean = " + Math.exp(ar.getMean(7.00, 10, 800)));
-		System.out.println("mean = " + Math.exp(ar.getMean(4.00, 10, 800)));
-		System.out.println("mean = " + Math.exp(ar.getMean(9.00, 10, 800)));
-		System.out.println("mean = " + Math.exp(ar.getMean(7.00, 100, 800)));
-		System.out.println("mean = " + Math.exp(ar.getMean(7.00, 10, 100)));
-
-		System.out.println("s.d. (inter) = " + ar.getStdDev("Inter-Event"));
-		System.out.println("s.d. (intra) = " + ar.getStdDev("Intra-Event"));
-		System.out.println("s.d. (total) = " + ar.getStdDev("Total"));
-		System.out.println("s.d. (total) = " + ar.getStdDev("Total"));
-		System.out.println("s.d. (total) = " + ar.getStdDev("Total"));
-
-	}	
 }

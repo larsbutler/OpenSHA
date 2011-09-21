@@ -188,9 +188,6 @@ public class ToroEtAl_2002_test implements ParameterChangeWarningListener {
 				double rJB = table[j][1];
 				double expectedMedian = table[j][i];
 				double computedMedian = Math.exp(toro2002AtenRel.getMean(iper, mag, rJB));
-//				System.out.println(i);
-//				System.out.println(expectedMedian);
-//				System.out.println(computedMedian);
 				assertEquals(expectedMedian, computedMedian, TOLERANCE);
 			}
 		}
@@ -214,10 +211,6 @@ public class ToroEtAl_2002_test implements ParameterChangeWarningListener {
 				double expectedStd = table[j][i];
 				double computedStd = toro2002AtenRel.getStdDev(i-2, mag, 
 						rJB, stdDevType);
-				System.out.println(i + " = "+ j);
-				System.out.println(expectedStd);
-				System.out.println(mag + " + " + rJB);
-				System.out.println(computedStd);
 				assertEquals(expectedStd, computedStd, TOLERANCE);
 			}
 		}

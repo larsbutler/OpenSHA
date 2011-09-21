@@ -75,20 +75,4 @@ public class YoungsEtAl1997Constants {
 	 * cm/s/s to g conversion factor.
 	 */
 	public static final double CMS_TO_G_CONVERSION_FACTOR = 1.0/981.0;
-
-	
-	public static void main(String [] args){
-		System.out.println(PERIOD_SOIL.length);
-		System.out.println(C1_SOIL.length);
-		System.out.println(C2_SOIL.length);
-		System.out.println(C3_SOIL.length);
-		System.out.println(C4_SOIL.length);
-		System.out.println(C5_SOIL.length);
-		System.out.println(PERIOD_ROCK.length);
-		System.out.println(C1_ROCK.length);
-		System.out.println(C2_ROCK.length);
-		System.out.println(C3_ROCK.length);
-		System.out.println(C4_ROCK.length);
-		System.out.println(C5_ROCK.length);
-	}
 }

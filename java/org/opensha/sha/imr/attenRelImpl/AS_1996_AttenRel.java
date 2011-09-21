@@ -142,7 +142,7 @@ ParameterChangeListener {
 	}
 
 	/**
-	 * Initialize earthquake rupture parameter (moment magnitude, rake) and add
+	 * Initialize earthquake rupture parameter (moment magnitude) and add
 	 * to eqkRuptureParams list. Makes the parameters non-editable.
 	 */
 	protected final void initEqkRuptureParams() {
@@ -201,8 +201,6 @@ ParameterChangeListener {
 		StringConstraint stdDevTypeConstraint = new StringConstraint();
 		stdDevTypeConstraint.addString(StdDevTypeParam.STD_DEV_TYPE_TOTAL);
 		stdDevTypeConstraint.addString(StdDevTypeParam.STD_DEV_TYPE_NONE);
-		stdDevTypeConstraint.addString(StdDevTypeParam.STD_DEV_TYPE_INTER);
-		stdDevTypeConstraint.addString(StdDevTypeParam.STD_DEV_TYPE_INTRA);
 		stdDevTypeConstraint.setNonEditable();
 		stdDevTypeParam = new StdDevTypeParam(stdDevTypeConstraint);
 
@@ -342,9 +340,6 @@ ParameterChangeListener {
 		if (rrup > USER_MAX_DISTANCE) {
 			return VERY_SMALL_MEAN;
 		} else {
-			/**
-			setPeriodIndex();
-			 */
 			return getMean(mag, rrup, vs30);
 		}
 	}
@@ -353,9 +348,7 @@ ParameterChangeListener {
 	 * Compute standard deviation.
 	 */
 	public final double getStdDev() {
-		/**
-		setPeriodIndex();
-		 */
+
 		return getStdDev(stdDevType);
 	}
 
@@ -421,9 +414,6 @@ ParameterChangeListener {
 		int soilTerms = 0;
 
 		if (vs30 < AS1996Constants.SOIL_UPPER_BOUND) {
-			/** 
-			 * Soil
-			 */
 			soilTerms = 1;
 		}
 		return soilTerms;
@@ -431,20 +421,12 @@ ParameterChangeListener {
 
 
 	public double getStdDev(String stdDevType) {
-		/**
-		 * total
-		 */
+
 		double sigma=0.493;
 		if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE))
 			return 0;
-		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTER))
-			return Double.NaN;
-		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTRA))
-			return Double.NaN;
-		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL))
+		else 
 			return sigma;
-		else
-			return Double.NaN;
 	}
 
 	/**
@@ -454,25 +436,4 @@ ParameterChangeListener {
 	public URL getInfoURL() throws MalformedURLException {
 		return null;
 	}
-//	/**
-//	 * For testing
-//	 * 
-//	 */
-//	public static void main(String[] args) {
-//
-//		AS_1996_AttenRel ar = new AS_1996_AttenRel(null);
-//
-//		System.out.println("mean = " + Math.exp(ar.getMean(7.00, 10, 800)));
-//		System.out.println("mean = " + Math.exp(ar.getMean(4.00, 10, 800)));
-//		System.out.println("mean = " + Math.exp(ar.getMean(9.00, 10, 800)));
-//		System.out.println("mean = " + Math.exp(ar.getMean(7.00, 100, 800)));
-//		System.out.println("mean = " + Math.exp(ar.getMean(7.00, 10, 100)));
-//
-//		System.out.println("s.d. (inter) = " + ar.getStdDev("Inter-Event"));
-//		System.out.println("s.d. (intra) = " + ar.getStdDev("Intra-Event"));
-//		System.out.println("s.d. (total) = " + ar.getStdDev("Total"));
-//		System.out.println("s.d. (total) = " + ar.getStdDev("Total"));
-//		System.out.println("s.d. (total) = " + ar.getStdDev("Total"));
-//
-//	}	
 }

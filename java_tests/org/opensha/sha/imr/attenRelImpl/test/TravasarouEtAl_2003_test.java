@@ -17,18 +17,18 @@ import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.calc.HazardCurveCalculator;
 import org.opensha.sha.earthquake.rupForecastImpl.GEM1.GEM1ERF;
 import org.opensha.sha.earthquake.rupForecastImpl.GEM1.SourceData.GEMSourceData;
-import org.opensha.sha.imr.attenRelImpl.Tetal_2003_AttenRel;
+import org.opensha.sha.imr.attenRelImpl.TravasarouEtAl_2003_AttenRel;
 import org.opensha.sha.imr.param.IntensityMeasureParams.IA_Param;
 import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
 
 /**
- * Class providing methods for testing {@link Tetal_2003_AttenRel}. Tables
+ * Class providing methods for testing {@link TravasarouEtAl_2003_AttenRel}. Tables
  * created from Excel spreadsheet provided by Peter J. Stafford.
  */
-public class Tetal_2003_test implements ParameterChangeWarningListener {
+public class TravasarouEtAl_2003_test implements ParameterChangeWarningListener {
 
 	/** Travasarou et al. (2003) GMPE (attenuation relationship) */
-	private Tetal_2003_AttenRel tetal2003AttenRel = null;
+	private TravasarouEtAl_2003_AttenRel tetal2003AttenRel = null;
 
 	/**
 	 * Strike-slip
@@ -204,7 +204,7 @@ public class Tetal_2003_test implements ParameterChangeWarningListener {
 	 */
 	@Before
 	public final void setUp() throws Exception {
-		tetal2003AttenRel = new Tetal_2003_AttenRel(this);
+		tetal2003AttenRel = new TravasarouEtAl_2003_AttenRel(this);
 		tetal2003AttenRel.setParamDefaults();
 
 		/**

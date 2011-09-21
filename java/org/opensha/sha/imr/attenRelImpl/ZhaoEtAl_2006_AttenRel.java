@@ -595,7 +595,7 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 			else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTRA))
 				return ZhaoEtAl2006Constants.Tau_c[iper];
 			else
-				return Double.NaN;
+				throw new RuntimeException("Standard deviation type: "+stdDevType+" not recognized");
 		} else if (tecRegType.equals(TectonicRegionType.SUBDUCTION_INTERFACE
 				.toString())) {
 			if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL))
@@ -610,7 +610,7 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 			else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTRA))
 				return ZhaoEtAl2006Constants.Tau_i[iper];
 			else
-				return Double.NaN;
+				throw new RuntimeException("Standard deviation type: "+stdDevType+" not recognized");
 		} else if (tecRegType.equals(TectonicRegionType.SUBDUCTION_SLAB
 				.toString())) {
 			if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL))
@@ -625,9 +625,10 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 			else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTRA))
 				return ZhaoEtAl2006Constants.Tau_s[iper];
 			else
-				return Double.NaN;
+				throw new RuntimeException("Standard deviation type: "+stdDevType+" not recognized");
 		}
-		return 0;
+		else
+			throw new RuntimeException("Tectonic region type: "+tecRegType+" not recognized");
 	}
 
 	/**
@@ -680,21 +681,4 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 	public URL getInfoURL() throws MalformedURLException {
 		return null;
 	}
-	/**
-	 * For testing
-	 * 
-	 */
-
-	public static void main(String[] args) {
-
-		ZhaoEtAl_2006_AttenRel ar = new ZhaoEtAl_2006_AttenRel(null);
-		ar.setParamDefaults();
-		ar.setIntensityMeasure(SA_Param.NAME);
-
-		for (int i=0; i < 13; i++){
-			System.out.println(ZhaoEtAl2006Constants.PERIOD[i] + " mean = " + 
-					Math.exp(ar.getMean(i, 7.00, 15, 20, -90, 800, TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
-			System.out.println("st.dev" + ar.getStdDev(i, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString(), TectonicRegionType.ACTIVE_SHALLOW.toString()));
-		}
-	}	
 }

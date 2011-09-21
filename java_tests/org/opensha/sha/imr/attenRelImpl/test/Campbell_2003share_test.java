@@ -27,7 +27,7 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  * Class providing methods for testing {@link Campbell_2003_AttenRel}. Tables
  * provided by the original authors.
  */
-public class Campbell2003share_test implements ParameterChangeWarningListener {
+public class Campbell_2003share_test implements ParameterChangeWarningListener {
 
 	/** Campbell_2003_AttenRel GMPE (attenuation relationship) */
 	private Campbell2003share_AttenRel ca03AttenRel = null;
@@ -99,7 +99,7 @@ public class Campbell2003share_test implements ParameterChangeWarningListener {
 
 	@Test
 	public void checkStdTotal() {
-		validateStdDev(StdDevTypeParam.STD_DEV_TYPE_TOTAL_MAG_DEP, stdTotalTable);
+		validateStdDev(StdDevTypeParam.STD_DEV_TYPE_TOTAL, stdTotalTable);
 	}
 
 	@Test
@@ -184,11 +184,8 @@ public class Campbell2003share_test implements ParameterChangeWarningListener {
 		String[] columnDescr = TABLE_HEADER_MEDIAN[0].trim().split("\\s+");
 		// check for SA
 		for (int i = 3; i < columnDescr.length - 1; i++) {
-			System.out.println(columnDescr.length);
 			for (int j = 0; j < table.length; j++) {
 				int iper = i-2;
-				System.out.println(iper);
-
 				double mag = table[j][0];
 				double rJB = table[j][1];
 				double expectedMedian = table[j][i];

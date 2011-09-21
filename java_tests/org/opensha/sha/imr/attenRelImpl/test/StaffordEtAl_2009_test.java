@@ -17,18 +17,18 @@ import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.calc.HazardCurveCalculator;
 import org.opensha.sha.earthquake.rupForecastImpl.GEM1.GEM1ERF;
 import org.opensha.sha.earthquake.rupForecastImpl.GEM1.SourceData.GEMSourceData;
-import org.opensha.sha.imr.attenRelImpl.Setal_2009_AttenRel;
+import org.opensha.sha.imr.attenRelImpl.StaffordEtAl_2009_AttenRel;
 import org.opensha.sha.imr.param.IntensityMeasureParams.IA_Param;
 import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
 
 /**
- * Class providing methods for testing {@link Setal_2009_AttenRel}. Tables
+ * Class providing methods for testing {@link StaffordEtAl_2009_AttenRel}. Tables
  * created from Excel spreadsheet provided by Peter J. Stafford.
  */
-public class Setal_2009_test implements ParameterChangeWarningListener {
+public class StaffordEtAl_2009_test implements ParameterChangeWarningListener {
 
 	/** Stafford et al. (2009) GMPE (attenuation relationship) */
-	private Setal_2009_AttenRel Setal2009AttenRel = null;
+	private StaffordEtAl_2009_AttenRel Setal2009AttenRel = null;
 
 	/**
 	 * Strike-slip
@@ -204,7 +204,7 @@ public class Setal_2009_test implements ParameterChangeWarningListener {
 	 */
 	@Before
 	public final void setUp() throws Exception {
-		Setal2009AttenRel = new Setal_2009_AttenRel(this);
+		Setal2009AttenRel = new StaffordEtAl_2009_AttenRel(this);
 		Setal2009AttenRel.setParamDefaults();
 
 		/**
@@ -486,7 +486,6 @@ public class Setal_2009_test implements ParameterChangeWarningListener {
 			double computedMedian_R30 = Math.exp(Setal2009AttenRel.getMean(mag,30.0, vs30, rake, focaldepth));
 			double expectedMedian_R100 = table[j][2];
 			double computedMedian_R100 = Math.exp(Setal2009AttenRel.getMean(mag,100.0, vs30, rake, focaldepth));
-//			System.out.println("IA");
 			assertEquals(expectedMedian_R1, computedMedian_R1, TOLERANCE);
 			assertEquals(expectedMedian_R30, computedMedian_R30, TOLERANCE);
 			assertEquals(expectedMedian_R100, computedMedian_R100, TOLERANCE);
@@ -503,7 +502,6 @@ public class Setal_2009_test implements ParameterChangeWarningListener {
 			double computedMedian_M65 = Math.exp(Setal2009AttenRel.getMean(6.5,rrup, vs30, rake, focaldepth));
 			double expectedMedian_M75 = table[j][2];
 			double computedMedian_M75 = Math.exp(Setal2009AttenRel.getMean(7.5,rrup, vs30, rake, focaldepth));
-//			System.out.println("IA");
 			assertEquals(expectedMedian_M55, computedMedian_M55, TOLERANCE);
 			assertEquals(expectedMedian_M65, computedMedian_M65, TOLERANCE);
 			assertEquals(expectedMedian_M75, computedMedian_M75, TOLERANCE);

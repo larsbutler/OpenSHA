@@ -15,6 +15,7 @@ import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.earthquake.EqkRupture;
 import org.opensha.sha.imr.AttenuationRelationship;
 import org.opensha.sha.imr.ScalarIntensityMeasureRelationshipAPI;
+import org.opensha.sha.imr.attenRelImpl.test.AkB_2010_test;
 import org.opensha.sha.imr.param.EqkRuptureParams.MagParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.RakeParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.DampingParam;
@@ -58,17 +59,14 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  * <LI>vs30Param - shear wave velocity (m/s) averaged over the top 30 m of the
  * soil profile; The model assumes the following classification: vs30 < 360 m/s
  * -> soft soil, 360 <= vs30 <= 750 -> stiff soil, vs30 > 750 -> rock.
- * <LI>componentParam - average horizontal
+ * <LI>componentParam - average horizontal, GMRoti50
  * <LI>stdDevTypeParam - total, inter-event, intra-event, none
  * </UL>
  * <p>
  * 
  * <p>
- * 
- * Verification -
- * 
- * 
- * 
+ * Verification - Class tested (see {@link AkB_2010_test}) using tables provided
+ * by the original authors
  * </p>
  * 
  ** 
@@ -256,14 +254,13 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 		stdDevTypeConstraint.setNonEditable();
 		stdDevTypeParam = new StdDevTypeParam(stdDevTypeConstraint);
 
-        // the Component Parameter
-		// Geometrical Mean (COMPONENT_AVE_HORZ) = Geometrical MeanI50 (COMPONENT_GMRotI50)
-        StringConstraint constraint = new StringConstraint();
-        constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
-        constraint.addString(ComponentParam.COMPONENT_GMRotI50);
-        constraint.setNonEditable();
-//        componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_GMRotI50);
-        componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_AVE_HORZ);
+		// the Component Parameter
+		StringConstraint constraint = new StringConstraint();
+		constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
+		constraint.addString(ComponentParam.COMPONENT_GMRotI50);
+		constraint.setNonEditable();
+		componentParam = new ComponentParam(constraint,
+				ComponentParam.COMPONENT_AVE_HORZ);
 
 		// add these to the list
 		otherParams.clear();
@@ -318,7 +315,7 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 		vs30Param.addParameterChangeListener(this);
 		componentParam.addParameterChangeListener(this);
 		stdDevTypeParam.addParameterChangeListener(this);
-        saPeriodParam.addParameterChangeListener(this);
+		saPeriodParam.addParameterChangeListener(this);
 
 	}
 
@@ -354,7 +351,6 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 		distanceJBParam.removeParameterChangeListener(this);
 		vs30Param.removeParameterChangeListener(this);
 		stdDevTypeParam.removeParameterChangeListener(this);
-        saPeriodParam.removeParameterChangeListener(this);
 		this.initParameterEventListeners();
 	}
 
@@ -495,7 +491,7 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 		if (iper == 0) {
 			logY = Math.log(Math.exp(logY));
 		} else {
-			logY = Math.log(Math.exp(logY) 
+			logY = Math.log(Math.exp(logY)
 					* AkB2010Constants.CMS2_TO_G_CONVERSION_FACTOR);
 		}
 
@@ -562,11 +558,9 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTRA))
 			return AkB2010Constants.LOG10_2_LN
 					* AkB2010Constants.INTRA_EVENT_STD[iper];
-		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL))
+		else
 			return AkB2010Constants.LOG10_2_LN
 					* AkB2010Constants.TOTAL_STD[iper];
-		else
-			return Double.NaN;
 	}
 
 	/**
@@ -576,57 +570,5 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 	public URL getInfoURL() throws MalformedURLException {
 		return null;
 	}
-	/**
-	 * For testing
-	 * 
-	 */
-
-	public static void main(String[] args) {
-
-		AkB_2010_AttenRel ar = new AkB_2010_AttenRel(null);
-		ar.setParamDefaults();
-		ar.setIntensityMeasure(SA_Param.NAME);
-
-				 for (int i=1; i < 2; i++){
-					 System.out.println("iper ="  + AkB2010Constants.PERIOD[i]);
-					 System.out.println(5.00 + " " + 5.00 + " " + Math.exp(ar.getMean(i, 5.00, 5.00, 800, 15)));
-					 System.out.println(6.00 + " " + 5.00 + " " + Math.exp(ar.getMean(i, 6.00, 5.00, 800, 15)));
-					 System.out.println(6.50 + " " + 5.00 + " " + Math.exp(ar.getMean(i, 6.50, 5.00, 800, 15)));
-					 System.out.println(7.00 + " " + 5.00 + " " + Math.exp(ar.getMean(i, 7.00, 5.00, 800, 15)));
-					 System.out.println(7.50 + " " + 5.00 + " " + Math.exp(ar.getMean(i, 7.50, 5.00, 800, 15)));
-					 System.out.println(5.00 + " " + 10.0 + " " + Math.exp(ar.getMean(i, 5.00, 10.0, 800, 15)));
-					 System.out.println(6.00 + " " + 10.0 + " " + Math.exp(ar.getMean(i, 6.00, 10.0, 800, 15)));
-					 System.out.println(6.50 + " " + 10.0 + " " + Math.exp(ar.getMean(i, 6.50, 10.0, 800, 15)));
-					 System.out.println(7.00 + " " + 10.0 + " " + Math.exp(ar.getMean(i, 7.00, 10.0, 800, 15)));
-					 System.out.println(7.50 + " " + 10.0 + " " + Math.exp(ar.getMean(i, 7.50, 10.0, 800, 15)));
-					 System.out.println(5.00 + " " + 15.0 + " " + Math.exp(ar.getMean(i, 5.00, 15.0, 800, 15)));
-					 System.out.println(6.00 + " " + 15.0 + " " + Math.exp(ar.getMean(i, 6.00, 15.0, 800, 15)));
-					 System.out.println(6.50 + " " + 15.0 + " " + Math.exp(ar.getMean(i, 6.50, 15.0, 800, 15)));
-					 System.out.println(7.00 + " " + 15.0 + " " + Math.exp(ar.getMean(i, 7.00, 15.0, 800, 15)));
-					 System.out.println(7.50 + " " + 15.0 + " " + Math.exp(ar.getMean(i, 7.50, 15.0, 800, 15)));
-					 System.out.println(5.00 + " " + 25.0 + " " + Math.exp(ar.getMean(i, 5.00, 25.0, 800, 15)));
-					 System.out.println(6.00 + " " + 25.0 + " " + Math.exp(ar.getMean(i, 6.00, 25.0, 800, 15)));
-					 System.out.println(6.50 + " " + 25.0 + " " + Math.exp(ar.getMean(i, 6.50, 25.0, 800, 15)));
-					 System.out.println(7.00 + " " + 25.0 + " " + Math.exp(ar.getMean(i, 7.00, 25.0, 800, 15)));
-					 System.out.println(7.50 + " " + 25.0 + " " + Math.exp(ar.getMean(i, 7.50, 25.0, 800, 15)));
-					 System.out.println(5.00 + " " + 50.0 + " " + Math.exp(ar.getMean(i, 5.00, 50.0, 800, 15)));
-					 System.out.println(6.00 + " " + 50.0 + " " + Math.exp(ar.getMean(i, 6.00, 50.0, 800, 15)));
-					 System.out.println(6.50 + " " + 50.0 + " " + Math.exp(ar.getMean(i, 6.50, 50.0, 800, 15)));
-					 System.out.println(7.00 + " " + 50.0 + " " + Math.exp(ar.getMean(i, 7.00, 50.0, 800, 15)));
-					 System.out.println(7.50 + " " + 50.0 + " " + Math.exp(ar.getMean(i, 7.50, 50.0, 800, 15)));
-					 System.out.println(5.00 + " " + 75.0 + " " + Math.exp(ar.getMean(i, 5.00, 75.0, 800, 15)));
-					 System.out.println(6.00 + " " + 75.0 + " " + Math.exp(ar.getMean(i, 6.00, 75.0, 800, 15)));
-					 System.out.println(6.50 + " " + 75.0 + " " + Math.exp(ar.getMean(i, 6.50, 75.0, 800, 15)));
-					 System.out.println(7.00 + " " + 75.0 + " " + Math.exp(ar.getMean(i, 7.00, 75.0, 800, 15)));
-					 System.out.println(7.50 + " " + 75.0 + " " + Math.exp(ar.getMean(i, 7.50, 75.0, 800, 15)));
-					 System.out.println(5.00 + " " + 100. + " " + Math.exp(ar.getMean(i, 5.00, 100., 800, 15)));
-					 System.out.println(6.00 + " " + 100. + " " + Math.exp(ar.getMean(i, 6.00, 100., 800, 15)));
-					 System.out.println(6.50 + " " + 100. + " " + Math.exp(ar.getMean(i, 6.50, 100., 800, 15)));
-					 System.out.println(7.00 + " " + 100. + " " + Math.exp(ar.getMean(i, 7.00, 100., 800, 15))); 
-					 System.out.println(7.50 + " " + 100. + " " + Math.exp(ar.getMean(i, 7.50, 100., 800, 15))); 
-				 }
-
-	}	
-
 
 }

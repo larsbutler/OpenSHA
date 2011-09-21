@@ -33,7 +33,7 @@ public class ToroEtAlshare_2002_test implements ParameterChangeWarningListener {
 	/**
 	 * Table for total standard deviation validation.
 	 */
-	private static final String SIGMA_TOTAL_HARD_ROCK_TABLE = "Toro02_SIGMAT.TXT";
+	private static final String SIGMA_TOTAL_HARD_ROCK_TABLE = "Toro02_SIGMAT.txt";
 
 	/**
 	 * Table for median ground motion validation. Hard rock median.
@@ -187,9 +187,6 @@ public class ToroEtAlshare_2002_test implements ParameterChangeWarningListener {
 				double computedMedian = Math.exp(toro2002AtenRel.getMean(iper,mag, rJB, rake));
 				computedMedian = computedMedian / (ToroEtAl2002Constants.AFrock[iper] 
 				                 * toro2002AtenRel.computeStyleOfFaultingTerm(iper, rake)[2]);
-				System.out.println(i);
-				System.out.println(expectedMedian);
-				System.out.println(computedMedian);
 				assertEquals(expectedMedian, computedMedian, TOLERANCE);
 			}
 		}

@@ -34,6 +34,7 @@ import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.earthquake.EqkRupture;
 import org.opensha.sha.imr.AttenuationRelationship;
 import org.opensha.sha.imr.ScalarIntensityMeasureRelationshipAPI;
+import org.opensha.sha.imr.attenRelImpl.test.CF_2008_test;
 import org.opensha.sha.imr.param.EqkRuptureParams.FaultTypeParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.MagParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.RakeParam;
@@ -50,52 +51,53 @@ import org.opensha.sha.imr.param.PropagationEffectParams.DistanceHypoParameter;
 import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
 
 /**
- * <b>Title:</b> CF_2008_AttenRel<p>
- *
- * <b>Description:</b> This implements the GMPE published by Cauzzi & Faccioli (2008,
- * "Broadband (0.05 to 20s) prediction of displacement response spectra based on worldwide digital records", 
- * journal of Seismology, Volume 12,pp. 453-475)
- * This implements only horizontal components and the equation (2) page 462.
+ * <b>Title:</b> CF_2008_AttenRel
+ * <p>
  * 
- *
- * Supported Intensity-Measure Parameters:<p>
+ * <b>Description:</b> This implements the GMPE published by Cauzzi & Faccioli
+ * (2008,"Broadband (0.05 to 20s) prediction of displacement response spectra based on worldwide digital records"
+ * , journal of Seismology, Volume 12,pp. 453-475) This implements only
+ * horizontal components and the equation (2) page 462.
+ * 
+ * 
+ * Supported Intensity-Measure Parameters:
+ * <p>
  * <UL>
  * <LI>pgaParam - Peak Ground Acceleration
  * <LI>pgvParam - Peak Ground Velocity
  * <LI>sdParam - Default values are for Displacement Response Spectra
  * <LI>saParam = ((2*pi/T)^2)*sdParam Convert to Acceleration Response Spectra
- * Other Independent Parameters:<p>
+ * Other Independent Parameters:
+ * <p>
  * <UL>
  * <LI>magParam - moment Magnitude
  * <LI>distanceHypo - hypocentral(focal) distance;
- * <LI>vs30Param [>= 800m/sec]  default 30-meter shear wave velocity;
- *     The model assumes the following classification (based on EC 8 scheme):
- *     vs30 >= 800 -> Class A (rock-like); 360 <= vs30 <800 -> Class B (Stiff Soil); 
- *     180 <= vs30 < 360 -> Class C (Soft Soil); vs30 < 180 -> Class D (Very Soft Soil);
- * <LI>soilTypeParam - Local soil conditions; default values are for rock-type 
+ * <LI>vs30Param [>= 800m/sec] default 30-meter shear wave velocity; The model
+ * assumes the following classification (based on EC 8 scheme): vs30 >= 800 ->
+ * Class A (rock-like); 360 <= vs30 <800 -> Class B (Stiff Soil); 180 <= vs30 <
+ * 360 -> Class C (Soft Soil); vs30 < 180 -> Class D (Very Soft Soil);
  * <LI>fltTypeParam - Style of faulting
- * <LI>componentParam - [geometric mean] default component of shaking 
- * <LI>stdDevTypeParam - The type of standard deviation
- * </UL></p>
+ * <LI>componentParam - [geometric mean] default component of shaking
+ * <LI>stdDevTypeParam - total and none
+ * </UL>
+ * </p>
  * 
  *<p>
- *
- * Verification - This model has been tested against: 
- * 1) 
- * 2) 
+ * 
+ * Verification - This model has been tested (see {@link CF_2008_test} using
+ * tables from original authors)
  * 
  *</p>
- *
- *
- * @author     L. Danciu alias Ciccio 
- * @created    August, 2010
- * @version    1.0
+ * 
+ * 
+ * @author L. Danciu
+ * @created August, 2010
+ * @version 1.0
  */
 
-
 public class CF_2008_AttenRel extends AttenuationRelationship implements
-ScalarIntensityMeasureRelationshipAPI,
-NamedObjectAPI, ParameterChangeListener {
+		ScalarIntensityMeasureRelationshipAPI, NamedObjectAPI,
+		ParameterChangeListener {
 
 	/** Short name. */
 	public static final String SHORT_NAME = "CF2008";
@@ -132,6 +134,7 @@ NamedObjectAPI, ParameterChangeListener {
 
 	/** For issuing warnings. */
 	private transient ParameterChangeWarningListener warningListener = null;
+
 	/**
 	 * Construct attenuation relationship. Initialize parameters and parameter
 	 * lists.
@@ -156,10 +159,10 @@ NamedObjectAPI, ParameterChangeListener {
 		// Initialize Propagation Effect Parameters (e.g. source-site distance)
 		initPropagationEffectParams();
 		// Initialize site parameters (e.g. vs30)
-		initSiteParams();	
+		initSiteParams();
 		// Initialize other parameters (e.g. stress drop)
 		initOtherParams();
-		// Initialize the independent parameters list 
+		// Initialize the independent parameters list
 		initIndependentParamLists();
 		// Initialize the parameter change listeners
 		initParameterEventListeners();
@@ -209,9 +212,10 @@ NamedObjectAPI, ParameterChangeListener {
 		supportedIMParams.addParameter(pgvParam);
 
 	}
+
 	/**
-	 * Initialize earthquake rupture parameter (moment magnitude, rake) 
-	 * and add to eqkRuptureParams list. Makes the parameters non-editable.
+	 * Initialize earthquake rupture parameter (moment magnitude, rake) and add
+	 * to eqkRuptureParams list. Makes the parameters non-editable.
 	 */
 	protected final void initEqkRuptureParams() {
 
@@ -219,15 +223,18 @@ NamedObjectAPI, ParameterChangeListener {
 		magParam = new MagParam(CF_2008Constants.MAG_WARN_MIN,
 				CF_2008Constants.MAG_WARN_MAX);
 		// Focal mechanism
-		rakeParam = new RakeParam(); 
+		rakeParam = new RakeParam();
 		eqkRuptureParams.clear();
 		eqkRuptureParams.addParameter(magParam);
 		eqkRuptureParams.addParameter(rakeParam);
 
 	}
+
 	/**
 	 * Initialize the site type geology from the Vs30 value.
-	 * @param vs30   default 30-meter shear wave velocity                  
+	 * 
+	 * @param vs30
+	 *            default 30-meter shear wave velocity
 	 */
 	protected final void initSiteParams() {
 
@@ -236,6 +243,7 @@ NamedObjectAPI, ParameterChangeListener {
 		siteParams.clear();
 		siteParams.addParameter(vs30Param);
 	}
+
 	/**
 	 * Initialize Propagation Effect parameters (closest distance to rupture)
 	 * and adds them to the propagationEffectParams list. Makes the parameters
@@ -246,7 +254,7 @@ NamedObjectAPI, ParameterChangeListener {
 		distanceHypoParam = new DistanceHypoParameter(
 				CF_2008Constants.DISTANCE_HYPO_WARN_MIN);
 		distanceHypoParam.addParameterChangeWarningListener(warningListener);
-		DoubleConstraint warn = new DoubleConstraint( new Double(0.00),
+		DoubleConstraint warn = new DoubleConstraint(new Double(0.00),
 				CF_2008Constants.DISTANCE_HYPO_WARN_MAX);
 		warn.setNonEditable();
 		distanceHypoParam.setWarningConstraint(warn);
@@ -285,6 +293,7 @@ NamedObjectAPI, ParameterChangeListener {
 		otherParams.addParameter(stdDevTypeParam);
 		otherParams.addParameter(componentParam);
 	}
+
 	/**
 	 * This creates the lists of independent parameters that the various
 	 * dependent parameters (mean, standard deviation, exceedance probability,
@@ -313,14 +322,13 @@ NamedObjectAPI, ParameterChangeListener {
 
 		// params that the IML at exceed. prob. depends upon
 		imlAtExceedProbIndependentParams
-		.addParameterList(exceedProbIndependentParams);
+				.addParameterList(exceedProbIndependentParams);
 		imlAtExceedProbIndependentParams.addParameter(exceedProbParam);
 	}
 
-
 	/**
-	 * Adds the parameter change listeners. This allows to listen to when-ever the
-	 * parameter is changed.
+	 * Adds the parameter change listeners. This allows to listen to when-ever
+	 * the parameter is changed.
 	 */
 	protected void initParameterEventListeners() {
 
@@ -329,8 +337,8 @@ NamedObjectAPI, ParameterChangeListener {
 		vs30Param.addParameterChangeListener(this);
 		distanceHypoParam.addParameterChangeListener(this);
 		stdDevTypeParam.addParameterChangeListener(this);
-		saPeriodParam.addParameterChangeListener(this);
 	}
+
 	/**
 	 * This listens for parameter changes and updates the primitive parameters
 	 * accordingly
@@ -345,7 +353,7 @@ NamedObjectAPI, ParameterChangeListener {
 		} else if (pName.equals(Vs30_Param.NAME)) {
 			vs30 = ((Double) val).doubleValue();
 		} else if (pName.equals(DistanceHypoParameter.NAME)) {
-			rhypo = ( (Double) val).doubleValue();
+			rhypo = ((Double) val).doubleValue();
 		} else if (pName.equals(StdDevTypeParam.NAME)) {
 			stdDevType = (String) val;
 		} else if (pName.equals(FaultTypeParam.NAME)) {
@@ -356,28 +364,20 @@ NamedObjectAPI, ParameterChangeListener {
 	/**
 	 * Allows to reset the change listeners on the parameters
 	 */
-	public void resetParameterEventListeners(){
+	public void resetParameterEventListeners() {
 		magParam.removeParameterChangeListener(this);
 		rakeParam.removeParameterChangeListener(this);
 		vs30Param.removeParameterChangeListener(this);
 		distanceHypoParam.removeParameterChangeListener(this);
 		stdDevTypeParam.removeParameterChangeListener(this);
-		saPeriodParam.removeParameterChangeListener(this);
 		this.initParameterEventListeners();
 	}
 
-//	/**
-//	 * This sets the eqkRupture related parameters (moment magnitude, tectonic
-//	 * region type, focal depth) based on the eqkRupture passed in. The
-//	 * internally held eqkRupture object is also set as that passed in. Warning
-//	 * constrains on magnitude and focal depth are ignored.
-//	 */
-//	public final void setEqkRupture(final EqkRupture eqkRupture) {
-//
-//		magParam.setValueIgnoreWarning(new Double(eqkRupture.getMag()));
-//		this.eqkRupture = eqkRupture;
-//		setPropagationEffectParams();
-//	}
+	/**
+	 * This sets the eqkRupture related parameters (moment magnitude, rake)
+	 * based on the eqkRupture passed in. The internally held eqkRupture object
+	 * is also set.
+	 */
 	public final void setEqkRupture(final EqkRupture eqkRupture) {
 
 		magParam.setValueIgnoreWarning(new Double(eqkRupture.getMag()));
@@ -387,6 +387,7 @@ NamedObjectAPI, ParameterChangeListener {
 		this.eqkRupture = eqkRupture;
 		setPropagationEffectParams();
 	}
+
 	/**
 	 * This sets the site-related parameter (vs30) based on what is in the Site
 	 * object passed in. This also sets the internally held Site object as that
@@ -400,12 +401,13 @@ NamedObjectAPI, ParameterChangeListener {
 	}
 
 	/**
-	 * This calculates the Hypocentral Distance  propagation effect parameter based
-	 * on the current site and eqkRupture. <P>
+	 * This calculates the Hypocentral Distance propagation effect parameter
+	 * based on the current site and eqkRupture.
+	 * <P>
 	 */
 	protected void setPropagationEffectParams() {
 
-		if ( (this.site != null) && (this.eqkRupture != null)) {
+		if ((this.site != null) && (this.eqkRupture != null)) {
 			distanceHypoParam.setValue(this.eqkRupture, this.site);
 		}
 	}
@@ -420,20 +422,19 @@ NamedObjectAPI, ParameterChangeListener {
 			iper = 1;
 		} else {
 			iper = ((Integer) indexFromPerHashMap.get(saPeriodParam.getValue()))
-			.intValue();
+					.intValue();
 		}
 	}
 
 	/**
-	 * Compute mean. 
+	 * Compute mean.
 	 */
-	public double getMean(){
+	public double getMean() {
 		if (rhypo > USER_MAX_DISTANCE) {
 			return VERY_SMALL_MEAN;
-		}
-		else{
+		} else {
 			setPeriodIndex();
-			return getMean (iper, mag, rhypo, vs30, rake);
+			return getMean(iper, mag, rhypo, vs30, rake);
 		}
 	}
 
@@ -443,7 +444,6 @@ NamedObjectAPI, ParameterChangeListener {
 	public final double getStdDev() {
 
 		setPeriodIndex();
-
 		return getStdDev(iper, stdDevType);
 	}
 
@@ -483,22 +483,18 @@ NamedObjectAPI, ParameterChangeListener {
 		return SHORT_NAME;
 	}
 
-
-
 	/**
-	 * This computes the mean log10(Y) 
+	 * This computes the mean log10(Y)
+	 * 
 	 * @param iper
 	 * @param rhypo
 	 * @param mag
 	 */
-	public double getMean(int iper, double mag, double rhypo, final double vs30, final double rake){
+	public double getMean(int iper, double mag, double rhypo,
+			final double vs30, final double rake) {
 
 		double logY;
 
-//		// This is to avoid rhypo == 0 distances
-//		if (rhypo < 1e-3) {
-//			rhypo = 1;
-//		}
 		// This is to avoid rhypo == 0 distances
 		if (rhypo < CF_2008Constants.DISTANCE_HYPO_WARN_MIN) {
 			rhypo = CF_2008Constants.DISTANCE_HYPO_WARN_MIN;
@@ -507,7 +503,8 @@ NamedObjectAPI, ParameterChangeListener {
 		double[] s = computeSiteTerm(iper, vs30);
 		double[] f = computeStyleOfFaultingTerm(iper, rake);
 
-		double term1 = CF_2008Constants.a1[iper] + CF_2008Constants.a2[iper] * mag;
+		double term1 = CF_2008Constants.a1[iper] + CF_2008Constants.a2[iper]
+				* mag;
 
 		double term2 = CF_2008Constants.a3[iper] * Math.log10(rhypo);
 
@@ -515,22 +512,17 @@ NamedObjectAPI, ParameterChangeListener {
 
 		logY *= CF_2008Constants.LOG10_2_LN;
 
-		//tmp variable to convert to DRS to mean PSA(g);
-		double tmp1 = Math.pow((2 * Math.PI)/CF_2008Constants.PERIOD[iper], 2);
+		// tmp variable to convert to DRS to mean PSA(g);
+		double tmp1 = Math
+				.pow((2 * Math.PI) / CF_2008Constants.PERIOD[iper], 2);
 
-		if (iper == 0 ) {
+		if (iper == 0) {
 			logY = Math.exp(logY);
-			//			System.out.println("pgv_case in cm/sec ");
-
-		} else if (iper == 1){
-
-			//			System.out.println("pga_case");
-
+		} else if (iper == 1) {
 			logY = Math.exp(logY) * CF_2008Constants.MSS_TO_G_CONVERSION_FACTOR;
-
 		} else {
-			logY = Math.exp(logY) * tmp1 * CF_2008Constants.CMS_TO_G_CONVERSION_FACTOR;
-			//			System.out.println("Sa_case");
+			logY = Math.exp(logY) * tmp1
+					* CF_2008Constants.CMS_TO_G_CONVERSION_FACTOR;
 		}
 		return Math.log(logY);
 	}
@@ -545,12 +537,12 @@ NamedObjectAPI, ParameterChangeListener {
 				&& vs30 < CF_2008Constants.SOIL_TYPE_ROCK_UPPER_BOUND) {
 			s[0] = 1.00;
 			s[1] = 0.00;
-			s[2] = s[0]*CF_2008Constants.aB[iper];
+			s[2] = s[0] * CF_2008Constants.aB[iper];
 		} else if (vs30 >= CF_2008Constants.SITE_TYPE_SOFT_UPPER_BOUND
 				&& vs30 < CF_2008Constants.SITE_TYPE_STIFF_SOIL_UPPER_BOUND) {
 			s[0] = 0.00;
 			s[1] = 1.00;
-			s[2] = s[1]*CF_2008Constants.aC[iper];
+			s[2] = s[1] * CF_2008Constants.aC[iper];
 		} else if (vs30 < CF_2008Constants.SITE_TYPE_SOFT_UPPER_BOUND) {
 			s[0] = 0.00;
 			s[1] = 0.00;
@@ -558,20 +550,22 @@ NamedObjectAPI, ParameterChangeListener {
 		}
 		return s;
 	}
-	// set fault mechanism 
-	private double[] computeStyleOfFaultingTerm(final int iper, final double rake) {
+
+	// set fault mechanism
+	private double[] computeStyleOfFaultingTerm(final int iper,
+			final double rake) {
 		double[] f = new double[3];
 		double faultTerm = Double.NaN;
 		if (rake > CF_2008Constants.FLT_TYPE_NORMAL_RAKE_LOWER
-				&& rake <= CF_2008Constants.FLT_TYPE_NORMAL_RAKE_UPPER){
+				&& rake <= CF_2008Constants.FLT_TYPE_NORMAL_RAKE_UPPER) {
 			f[0] = 1.00;
 			f[1] = 0.00;
-			f[2] = f[0]*CF_2008Constants.aN[iper];
+			f[2] = f[0] * CF_2008Constants.aN[iper];
 		} else if (rake > CF_2008Constants.FLT_TYPE_REVERSE_RAKE_LOWER
 				&& rake <= CF_2008Constants.FLT_TYPE_REVERSE_RAKE_UPPER) {
 			f[0] = 0.00;
 			f[1] = 1.00;
-			f[2] = f[1]*CF_2008Constants.aR[iper];
+			f[2] = f[1] * CF_2008Constants.aR[iper];
 		} else {
 			f[0] = 0.00;
 			f[1] = 0.00;
@@ -580,72 +574,21 @@ NamedObjectAPI, ParameterChangeListener {
 		return f;
 	}
 
-
 	public double getStdDev(int iper, String stdDevType) {
-		if(stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE))
+		if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE))
 			return 0;
-		else if(stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL))
-			return CF_2008Constants.LOG10_2_LN*CF_2008Constants.TOTAL_STD[iper];
-		else 
+		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL))
+			return CF_2008Constants.LOG10_2_LN
+					* CF_2008Constants.TOTAL_STD[iper];
+		else
 			return Double.NaN;
 	}
 
 	/**
-	 * This provides a URL where more info on this model can be obtained.
-	 * It currently returns null because no URL has been set up.
+	 * This provides a URL where more info on this model can be obtained. It
+	 * currently returns null because no URL has been set up.
 	 */
 	public final URL getInfoURL() throws MalformedURLException {
 		return null;
 	}
-	/**
-	 * For testing
-	 * 
-	 */
-
-	public static void main(String[] args) {
-
-		CF_2008_AttenRel ar = new CF_2008_AttenRel(null);
-		ar.setParamDefaults();
-		ar.setIntensityMeasure(SA_Param.NAME);
-				for (int i=1; i < 2; i++){
-					System.out.println("iper = " + CF_2008Constants.PERIOD[i]);
-					System.out.println(5.00 + " " + 10.47  + " " + Math.exp(ar.getMean(i, 5.00, 10.47 , 800, 15)));
-					System.out.println(6.00 + " " + 10.47  + " " + Math.exp(ar.getMean(i, 6.00, 10.47 , 800, 15)));
-					System.out.println(6.50 + " " + 10.47  + " " + Math.exp(ar.getMean(i, 6.50, 10.47 , 800, 15)));
-					System.out.println(7.00 + " " + 10.47  + " " + Math.exp(ar.getMean(i, 7.00, 10.47 , 800, 15)));
-					System.out.println(7.50 + " " + 10.47  + " " + Math.exp(ar.getMean(i, 7.50, 10.47 , 800, 15)));
-					System.out.println(5.00 + " " + 13.59  + " " + Math.exp(ar.getMean(i, 5.00, 13.59 , 800, 15)));
-					System.out.println(6.00 + " " + 13.59  + " " + Math.exp(ar.getMean(i, 6.00, 13.59 , 800, 15)));
-					System.out.println(6.50 + " " + 13.59  + " " + Math.exp(ar.getMean(i, 6.50, 13.59 , 800, 15)));
-					System.out.println(7.00 + " " + 13.59  + " " + Math.exp(ar.getMean(i, 7.00, 13.59 , 800, 15)));
-					System.out.println(7.50 + " " + 13.59  + " " + Math.exp(ar.getMean(i, 7.50, 13.59 , 800, 15)));
-					System.out.println(5.00 + " " + 17.60  + " " + Math.exp(ar.getMean(i, 5.00, 17.60 , 800, 15)));
-					System.out.println(6.00 + " " + 17.60  + " " + Math.exp(ar.getMean(i, 6.00, 17.60 , 800, 15)));           
-					System.out.println(6.50 + " " + 17.60  + " " + Math.exp(ar.getMean(i, 6.50, 17.60 , 800, 15)));
-					System.out.println(7.00 + " " + 17.60  + " " + Math.exp(ar.getMean(i, 7.00, 17.60 , 800, 15)));
-					System.out.println(7.50 + " " + 17.60  + " " + Math.exp(ar.getMean(i, 7.50, 17.60 , 800, 15)));
-					System.out.println(5.00 + " " + 26.64  + " " + Math.exp(ar.getMean(i, 5.00, 26.64 , 800, 15)));
-					System.out.println(6.00 + " " + 26.64  + " " + Math.exp(ar.getMean(i, 6.00, 26.64 , 800, 15)));
-					System.out.println(6.50 + " " + 26.64  + " " + Math.exp(ar.getMean(i, 6.50, 26.64 , 800, 15)));
-					System.out.println(7.00 + " " + 26.64  + " " + Math.exp(ar.getMean(i, 7.00, 26.64 , 800, 15)));
-					System.out.println(7.50 + " " + 26.64  + " " + Math.exp(ar.getMean(i, 7.50, 26.64 , 800, 15)));
-					System.out.println(5.00 + " " + 50.84  + " " + Math.exp(ar.getMean(i, 5.00, 50.84 , 800, 15)));
-					System.out.println(6.00 + " " + 50.84  + " " + Math.exp(ar.getMean(i, 6.00, 50.84 , 800, 15)));
-					System.out.println(6.50 + " " + 50.84  + " " + Math.exp(ar.getMean(i, 6.50, 50.84 , 800, 15)));
-					System.out.println(7.00 + " " + 50.84  + " " + Math.exp(ar.getMean(i, 7.00, 50.84 , 800, 15)));
-					System.out.println(7.50 + " " + 50.84  + " " + Math.exp(ar.getMean(i, 7.50, 50.84 , 800, 15)));
-					System.out.println(5.00 + " " + 75.56  + " " + Math.exp(ar.getMean(i, 5.00, 75.56 , 800, 15)));
-					System.out.println(6.00 + " " + 75.56  + " " + Math.exp(ar.getMean(i, 6.00, 75.56 , 800, 15)));
-					System.out.println(6.50 + " " + 75.56  + " " + Math.exp(ar.getMean(i, 6.50, 75.56 , 800, 15)));
-					System.out.println(7.00 + " " + 75.56  + " " + Math.exp(ar.getMean(i, 7.00, 75.56 , 800, 15)));
-					System.out.println(7.50 + " " + 75.56  + " " + Math.exp(ar.getMean(i, 7.50, 75.56 , 800, 15)));
-					System.out.println(5.00 + " " + 100.42 + " " + Math.exp(ar.getMean(i, 5.00, 100.42, 800, 15)));
-					System.out.println(6.00 + " " + 100.42 + " " + Math.exp(ar.getMean(i, 6.00, 100.42, 800, 15)));
-					System.out.println(6.50 + " " + 100.42 + " " + Math.exp(ar.getMean(i, 6.50, 100.42, 800, 15)));
-					System.out.println(7.00 + " " + 100.42 + " " + Math.exp(ar.getMean(i, 7.00, 100.42, 800, 15))); 
-					System.out.println(7.50 + " " + 100.42 + " " + Math.exp(ar.getMean(i, 7.50, 100.42, 800, 15))); 
-				}
-//		System.out.println("normal " + "5.00 " + "3.00 " + "SA(4s/3s) =  " + Math.exp(ar.getMean(62, 5.00, 3.00, 800, -90))/
-//				Math.exp(ar.getMean(40, 5.00, 3.00, 800, -90)));
-	}	
 }

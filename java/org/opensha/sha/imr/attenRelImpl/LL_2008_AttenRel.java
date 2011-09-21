@@ -15,6 +15,8 @@ import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.earthquake.EqkRupture;
 import org.opensha.sha.imr.AttenuationRelationship;
 import org.opensha.sha.imr.ScalarIntensityMeasureRelationshipAPI;
+import org.opensha.sha.imr.attenRelImpl.test.LL_2008_test;
+import org.opensha.sha.imr.param.EqkRuptureParams.FocalDepthParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.MagParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.DampingParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PGA_Param;
@@ -28,14 +30,14 @@ import org.opensha.sha.imr.param.OtherParams.TectonicRegionTypeParam;
 import org.opensha.sha.imr.param.PropagationEffectParams.DistanceHypoParameter;
 import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
 import org.opensha.sha.util.TectonicRegionType;
+
 /**
- * <b>Title:</b> AB_2003_AttenRel
+ * <b>Title:</b> LL_2008_AttenRel
  * <p>
- * <b>Description:</b> Class implementing attenuation relationship described in:
- * "Ground-Motion Attenuation Relationships for Subduction-Zone Earthquakes in Northeastern Taiwan", 
- *  Po-Shen Lin and Chyi-Tyi Lee, 
- *  Bulletin of the Seismological Society of America,
- *  Vol. 98, No. 1, pp 220-240, 2008.
+ * <b>Description:</b> Class implementing attenuation relationship described
+ * in:Ground-Motion Attenuation Relationships for Subduction-Zone Earthquakes in
+ * Northeastern Taiwan , Po-Shen Lin and Chyi-Tyi Lee, Bulletin of the
+ * Seismological Society of America, Vol. 98, No. 1, pp 220-240, 2008.
  * <p>
  * Supported Intensity-Measure Parameters:
  * <p>
@@ -48,33 +50,31 @@ import org.opensha.sha.util.TectonicRegionType;
  * <p>
  * <UL>
  * <LI>magParam - moment magnitude
- * <LI>distancehypoParam - Hypocentral Distance
+ * <LI>distancehypoParam - hypocentral distance
  * <LI>vs30Param - shear wave velocity (m/s) averaged over the top 30 m of the
- * soil profile; The model assumes the following classification:
- * vs30 > 360 -> ROCK SITES (Class NEHRP B+C); vs30 < 360 -> SOIl SITES (Class NEHRP D+E); 
+ * soil profile; The model assumes the following classification: vs30 > 360 ->
+ * ROCK SITES (Class NEHRP B+C); vs30 < 360 -> SOIl SITES (Class NEHRP D+E);
  * <LI>tectonicRegionTypeParam - interface or intra slab
  * <LI>focalDepthParam - depth to the earthquake rupture hypocenter
- * <LI>componentParam - random horizontal component
+ * <LI>componentParam - average horizontal
  * <LI>stdDevTypeParam - total, none
  * </UL>
  * <p>
  * 
  * <p>
  * 
- * Verification - This model has been validated 
- * (a)
- * (b)
+ * Verification - This model has been validated (see {@link LL_2008_test}) using
+ * tables from ??
  * </p>
  * 
  ** 
- * @author L. Danciu, 
+ * @author L. Danciu,
  * @version 1.0, December 2010
  */
-public class LL_2008_AttenRel extends AttenuationRelationship 
-implements ScalarIntensityMeasureRelationshipAPI,
+public class LL_2008_AttenRel extends AttenuationRelationship implements
+		ScalarIntensityMeasureRelationshipAPI,
 
-NamedObjectAPI, ParameterChangeListener {
-
+		NamedObjectAPI, ParameterChangeListener {
 
 	/** Short name. */
 	public static final String SHORT_NAME = "LL2008";
@@ -92,7 +92,7 @@ NamedObjectAPI, ParameterChangeListener {
 	private String tecRegType;
 
 	/** Focal depth. */
-	private double hypoDepth;
+	private double focalDepth;
 
 	/** Vs 30. */
 	private double vs30;
@@ -103,9 +103,8 @@ NamedObjectAPI, ParameterChangeListener {
 	/** Standard deviation type. */
 	private String stdDevType;
 
-	/** Map period-value/period-index/per Soil Type. */
-	private HashMap<Double,Integer> indexFromPerHashMapRock;
-	private HashMap<Double,Integer> indexFromPerHashMapSoil;
+	/** Map period-value/period-index. */
+	private HashMap<Double, Integer> indexFromPerHashMap;
 
 	/** Period index. */
 	private int iper;
@@ -126,17 +125,10 @@ NamedObjectAPI, ParameterChangeListener {
 
 		initSupportedIntensityMeasureParams();
 
-
-		// Init the hashmap for rock
-		indexFromPerHashMapRock = new HashMap<Double, Integer>();
+		// init the period hashmap
+		indexFromPerHashMap = new HashMap<Double, Integer>();
 		for (int i = 1; i < LL2008Constants.PERIOD.length; i++) {
-			indexFromPerHashMapRock.put(new Double(LL2008Constants.PERIOD[i]), 
-					new Integer(i));
-		}
-		// Init the hashmap for soil
-		indexFromPerHashMapSoil = new HashMap<Double, Integer>();
-		for (int i = 1; i < LL2008Constants.PERIOD.length; i++) {
-			indexFromPerHashMapSoil.put(new Double(LL2008Constants.PERIOD[i]), 
+			indexFromPerHashMap.put(new Double(LL2008Constants.PERIOD[i]),
 					new Integer(i));
 		}
 
@@ -161,7 +153,7 @@ NamedObjectAPI, ParameterChangeListener {
 			periodConstraint.addDouble(new Double(LL2008Constants.PERIOD[i]));
 		}
 		periodConstraint.setNonEditable();
-		// set period param (default is 1s, which is provided byLL2008 GMPE)
+		// set period param (default is 1s, which is provided by LL2008 GMPE)
 		saPeriodParam = new PeriodParam(periodConstraint);
 
 		// set damping parameter. Empty constructor set damping
@@ -197,16 +189,19 @@ NamedObjectAPI, ParameterChangeListener {
 		magParam = new MagParam(LL2008Constants.MAG_WARN_MIN,
 				LL2008Constants.MAG_WARN_MAX);
 
-		// tectonic region type
 		StringConstraint options = new StringConstraint();
 		options.addString(TectonicRegionType.SUBDUCTION_INTERFACE.toString());
 		options.addString(TectonicRegionType.SUBDUCTION_SLAB.toString());
 		tectonicRegionTypeParam = new TectonicRegionTypeParam(options,
 				TectonicRegionType.SUBDUCTION_INTERFACE.toString());
 
+		// default value is 0
+		focalDepthParam = new FocalDepthParam();
+
 		eqkRuptureParams.clear();
 		eqkRuptureParams.addParameter(magParam);
 		eqkRuptureParams.addParameter(tectonicRegionTypeParam);
+		eqkRuptureParams.addParameter(focalDepthParam);
 	}
 
 	/**
@@ -221,6 +216,7 @@ NamedObjectAPI, ParameterChangeListener {
 		siteParams.clear();
 		siteParams.addParameter(vs30Param);
 	}
+
 	/**
 	 * Initialize Propagation Effect parameters (closest distance to rupture)
 	 * and adds them to the propagationEffectParams list. Makes the parameters
@@ -231,8 +227,7 @@ NamedObjectAPI, ParameterChangeListener {
 		distanceHypoParam = new DistanceHypoParameter(
 				LL2008Constants.DISTANCE_HYPO_WARN_MIN);
 		distanceHypoParam.addParameterChangeWarningListener(warningListener);
-		DoubleConstraint warn = new DoubleConstraint(
-				new Double(0.0),
+		DoubleConstraint warn = new DoubleConstraint(new Double(0.0),
 				LL2008Constants.DISTANCE_HYPO_WARN_MAX);
 		warn.setNonEditable();
 		distanceHypoParam.setWarningConstraint(warn);
@@ -257,15 +252,12 @@ NamedObjectAPI, ParameterChangeListener {
 		stdDevTypeConstraint.setNonEditable();
 		stdDevTypeParam = new StdDevTypeParam(stdDevTypeConstraint);
 
-		// the Component Parameter
-		// Geometrical Mean (COMPONENT_AVE_HORZ) = Geometrical MeanI50 (COMPONENT_GMRotI50)
+		// component Parameter
 		StringConstraint constraint = new StringConstraint();
 		constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
-		constraint.addString(ComponentParam.COMPONENT_RANDOM_HORZ);
 		constraint.setNonEditable();
-		componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_RANDOM_HORZ);
-		componentParam = new ComponentParam(constraint, ComponentParam.COMPONENT_AVE_HORZ);
-
+		componentParam = new ComponentParam(constraint,
+				ComponentParam.COMPONENT_AVE_HORZ);
 
 		// add these to the list
 		otherParams.clear();
@@ -290,6 +282,7 @@ NamedObjectAPI, ParameterChangeListener {
 		meanIndependentParams.addParameter(tectonicRegionTypeParam);
 		meanIndependentParams.addParameter(vs30Param);
 		meanIndependentParams.addParameter(distanceHypoParam);
+		meanIndependentParams.addParameter(focalDepthParam);
 
 		// params that the stdDev depends upon
 		stdDevIndependentParams.clear();
@@ -305,7 +298,7 @@ NamedObjectAPI, ParameterChangeListener {
 
 		// params that the IML at exceed. prob. depends upon
 		imlAtExceedProbIndependentParams
-		.addParameterList(exceedProbIndependentParams);
+				.addParameterList(exceedProbIndependentParams);
 		imlAtExceedProbIndependentParams.addParameter(exceedProbParam);
 	}
 
@@ -318,6 +311,7 @@ NamedObjectAPI, ParameterChangeListener {
 		// earthquake rupture params
 		magParam.addParameterChangeListener(this);
 		tectonicRegionTypeParam.addParameterChangeListener(this);
+		focalDepthParam.addParameterChangeListener(this);
 
 		// site params
 		vs30Param.addParameterChangeListener(this);
@@ -342,10 +336,12 @@ NamedObjectAPI, ParameterChangeListener {
 			mag = ((Double) val).doubleValue();
 		} else if (pName.equals(TectonicRegionTypeParam.NAME)) {
 			tecRegType = (String) val;
+		} else if (pName.equals(FocalDepthParam.NAME)) {
+			focalDepth = ((Double) val).doubleValue();
 		} else if (pName.equals(Vs30_Param.NAME)) {
 			vs30 = ((Double) val).doubleValue();
 		} else if (pName.equals(DistanceHypoParameter.NAME)) {
-			rhypo = ( (Double) val).doubleValue();
+			rhypo = ((Double) val).doubleValue();
 		} else if (pName.equals(StdDevTypeParam.NAME)) {
 			stdDevType = (String) val;
 		}
@@ -357,6 +353,7 @@ NamedObjectAPI, ParameterChangeListener {
 	public final void resetParameterEventListeners() {
 		magParam.removeParameterChangeListener(this);
 		tectonicRegionTypeParam.removeParameterChangeListener(this);
+		focalDepthParam.removeParameterChangeListener(this);
 		vs30Param.removeParameterChangeListener(this);
 		distanceHypoParam.removeParameterChangeListener(this);
 		stdDevTypeParam.removeParameterChangeListener(this);
@@ -373,19 +370,26 @@ NamedObjectAPI, ParameterChangeListener {
 
 		magParam.setValueIgnoreWarning(new Double(eqkRupture.getMag()));
 
-		if(eqkRupture.getTectRegType()!=null){
-			tectonicRegionTypeParam
-			.setValue(eqkRupture.getTectRegType().toString());
+		if (eqkRupture.getTectRegType() != null) {
+			tectonicRegionTypeParam.setValue(eqkRupture.getTectRegType()
+					.toString());
+		} else {
+			throw new RuntimeException("Tectonic region type not set in "
+					+ " earthquake rupture");
 		}
-		else{
-			throw new RuntimeException("Tectonic region type not set in " +
-			" earthquake rupture");
+		
+		if (eqkRupture.getHypocenterLocation() != null) {
+			focalDepthParam.setValue(eqkRupture.getHypocenterLocation().getDepth());
+		} else {
+			throw new RuntimeException("Hypocenter not set in "
+					+ " earthquake rupture");
 		}
 
 		this.eqkRupture = eqkRupture;
 
 		setPropagationEffectParams();
 	}
+
 	/**
 	 * This sets the site-related parameter (vs30) based on what is in the Site
 	 * object passed in. This also sets the internally held Site object as that
@@ -405,7 +409,7 @@ NamedObjectAPI, ParameterChangeListener {
 
 	public final void setPropagationEffectParams() {
 		if ((this.site != null) && (this.eqkRupture != null)) {
-			distanceHypoParam.setValue(eqkRupture,site);
+			distanceHypoParam.setValue(eqkRupture, site);
 		}
 	}
 
@@ -416,26 +420,20 @@ NamedObjectAPI, ParameterChangeListener {
 		if (im.getName().equalsIgnoreCase(PGA_Param.NAME)) {
 			iper = 0;
 		} else {
-			if (vs30Param.getValue()>=LL2008Constants.SOIL_TYPE_SOFT_UPPER_BOUND){
-				iper = ( (Integer) indexFromPerHashMapRock.get(saPeriodParam.getValue()))
-				.intValue();
-			} else {
-				iper = ( (Integer) indexFromPerHashMapSoil.get(saPeriodParam.getValue()))
-				.intValue();
-			}
+			iper = ((Integer) indexFromPerHashMap.get(saPeriodParam.getValue()))
+					.intValue();
 		}
 	}
 
 	/**
-	 * Compute mean. 
+	 * Compute mean.
 	 */
-	public double getMean(){
+	public double getMean() {
 		if (rhypo > USER_MAX_DISTANCE) {
 			return VERY_SMALL_MEAN;
-		}
-		else{
+		} else {
 			setPeriodIndex();
-			return getMean (iper, mag, rhypo, hypoDepth, vs30, tecRegType);
+			return getMean(iper, mag, rhypo, focalDepth, vs30, tecRegType);
 		}
 	}
 
@@ -457,6 +455,7 @@ NamedObjectAPI, ParameterChangeListener {
 
 		magParam.setValueAsDefault();
 		tectonicRegionTypeParam.setValueAsDefault();
+		focalDepthParam.setValueAsDefault();
 		vs30Param.setValueAsDefault();
 		distanceHypoParam.setValueAsDefault();
 		saPeriodParam.setValueAsDefault();
@@ -488,113 +487,65 @@ NamedObjectAPI, ParameterChangeListener {
 	 * Compute mean (natural logarithm of median ground motion).
 	 */
 
-	public double getMean(int iper, double mag, double rhypo, double hypoDepth, final double vs30, final String tecRegType) {
+	public double getMean(int iper, double mag, double rhypo, double hypoDepth,
+			final double vs30, final String tecRegType) {
 
 		double Zt;
 		double logY;
-		double mean; 
 
-
-		if (tecRegType.equals(TectonicRegionType.SUBDUCTION_INTERFACE.toString())) {
+		if (tecRegType.equals(TectonicRegionType.SUBDUCTION_INTERFACE
+				.toString())) {
 			Zt = 0;
 		} else {
 			Zt = 1;
 		}
-		
-		if (vs30 >= LL2008Constants.SOIL_TYPE_SOFT_UPPER_BOUND){
+
+		if (vs30 >= LL2008Constants.SOIL_TYPE_SOFT_UPPER_BOUND) {
 			double term1 = LL2008Constants.rock_C2[iper] * mag;
-//			System.out.println("term1 " + term1);
-			double r = rhypo + LL2008Constants.rock_C4[iper] * Math.exp(LL2008Constants.rock_C5[iper] * mag);
-//			System.out.println("r " + r);
+			double r = rhypo + LL2008Constants.rock_C4[iper]
+					* Math.exp(LL2008Constants.rock_C5[iper] * mag);
 			double term2 = LL2008Constants.rock_C3[iper] * Math.log(r);
-//			System.out.println("term2 " + term2);
 			double term3 = LL2008Constants.rock_C6[iper] * hypoDepth;
-//			System.out.println("term3 " + term3);
-			logY = LL2008Constants.rock_C1[iper] + term1 + term2 + term3 + LL2008Constants.rock_C7[iper] * Zt;
-		}
-		else {
+			logY = LL2008Constants.rock_C1[iper] + term1 + term2 + term3
+					+ LL2008Constants.rock_C7[iper] * Zt;
+		} else {
 			double term1 = LL2008Constants.soil_C2[iper] * mag;
-			
-			double r = rhypo + LL2008Constants.soil_C4[iper]*Math.exp(LL2008Constants.soil_C5[iper] * mag);
-			
+			double r = rhypo + LL2008Constants.soil_C4[iper]
+					* Math.exp(LL2008Constants.soil_C5[iper] * mag);
 			double term2 = LL2008Constants.soil_C3[iper] * Math.log(r);
-			
 			double term3 = LL2008Constants.soil_C6[iper] * hypoDepth;
-			
-			logY = LL2008Constants.soil_C1[iper] + term1 + term2 + term3 + LL2008Constants.soil_C7[iper] * Zt;
+			logY = LL2008Constants.soil_C1[iper] + term1 + term2 + term3
+					+ LL2008Constants.soil_C7[iper] * Zt;
 		}
 
 		return logY;
 	}
+
 	/**
 	 * @return The stdDev value
 	 */
-	public  double getStdDev(int iper, String stdDevType, double vs30) {
+	public double getStdDev(int iper, String stdDevType, double vs30) {
 		double sigmaR, sigmaS;
-		if(stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE)) {
+		if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE)) {
 			return 0.0;
-		}
-		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL)) {
-			if(vs30 >= LL2008Constants.SOIL_TYPE_SOFT_UPPER_BOUND) {
+		} else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL)) {
+			if (vs30 >= LL2008Constants.SOIL_TYPE_SOFT_UPPER_BOUND) {
 				sigmaR = LL2008Constants.ROCK_TOTAL_STD[iper];
 				return (sigmaR);
-			}
-			else {
+			} else {
 				sigmaS = LL2008Constants.soil_TOTAL_STD[iper];
 				return (sigmaS);
 			}
-		}
-		else { 
-			return Double.NaN;
+		} else {
+			throw new RuntimeException("Standard deviation type: "+stdDevType+" not recognized");
 		}
 	}
 
-
 	/**
-	 * This provides a URL where more info on this model can be obtained
-	 * @throws MalformedURLException if returned URL is not a valid URL.
-	 * @returns the URL to the AttenuationRelationship document on the Web.
+	 * This provides a URL where more info on this model can be obtained return
+	 * null because no URL has been created.
 	 */
-	// URL Info String
-	public URL getInfoURL() throws MalformedURLException{
-		return new URL("http://www.opensha.org/documentation/modelsImplemented/attenRel/LL_2008AttenRel.html");
+	public URL getInfoURL() throws MalformedURLException {
+		return null;
 	}
-	/**
-	 * For testing
-	 * 
-	 */
-
-	public static void main(String[] args) {
-
-		LL_2008_AttenRel ar = new LL_2008_AttenRel(null);
-		ar.setParamDefaults();
-		ar.setIntensityMeasure(SA_Param.NAME);
-		for (int i=1; i < 3; i++){
-//			System.out.print("  "+ LL2008Constants.PERIOD[i] + " ");
-			
-			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 4.00, 15, 30, 200, 
-					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
-			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 4.00, 20, 30, 200, 
-					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
-			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 4.00, 30, 30, 200, 
-					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
-			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 4.00, 50, 30, 200, 
-					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
-			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 4.00, 75, 30, 200, 
-					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
-			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 4.00, 100, 30, 200, 
-					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
-			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 4.00, 200, 30, 200, 
-					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
-			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 4.00, 500, 30, 200, 
-					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
-			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 4.00, 600, 30, 200, 
-					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
-//			System.out.println(LL2008Constants.PERIOD[i] + " mean = " + Math.exp(ar.getMean(i, 7.00, 15, 30, 800, 
-//					TectonicRegionType.SUBDUCTION_INTERFACE.toString())));
-//			System.out.println(getStdDev(i, StdDevTypeParam.STD_DEV_TYPE_TOTAL.toString(), 200));
-
-		}
-	}	
-
 }
