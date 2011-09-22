@@ -22,7 +22,7 @@ import org.opensha.sha.util.TectonicRegionType;
  */
 public class FloatingPoissonFaultSourceTest {
 
-	private static final double TOLERANCE = 1e-2;
+	private static final double TOLERANCE = 1e-3;
 	
 	@Test
 	public void checkSetTectonicRegionTypeWithGetRupture(){
@@ -225,14 +225,14 @@ public class FloatingPoissonFaultSourceTest {
 		// site 7
 		ArbitrarilyDiscretizedFunc hazCurveSite7 = 
 			new ArbitrarilyDiscretizedFunc();
-		hazCurveSite6.set(Math.log(0.001), 4.00E-02);
-		hazCurveSite6.set(Math.log(0.01), 4.00E-02);
-		hazCurveSite6.set(Math.log(0.05), 4.00E-02);
-		hazCurveSite6.set(Math.log(0.1), 3.31E-02);
-		hazCurveSite6.set(Math.log(0.15), 1.22E-02);
-		hazCurveSite6.set(Math.log(0.2), 4.85E-03);
-		hazCurveSite6.set(Math.log(0.25), 1.76E-03);
-		hazCurveSite6.set(Math.log(0.3), 2.40E-04);
+		hazCurveSite7.set(Math.log(0.001), 4.00E-02);
+		hazCurveSite7.set(Math.log(0.01), 4.00E-02);
+		hazCurveSite7.set(Math.log(0.05), 4.00E-02);
+		hazCurveSite7.set(Math.log(0.1), 3.31E-02);
+		hazCurveSite7.set(Math.log(0.15), 1.22E-02);
+		hazCurveSite7.set(Math.log(0.2), 4.85E-03);
+		hazCurveSite7.set(Math.log(0.25), 1.76E-03);
+		hazCurveSite7.set(Math.log(0.3), 2.40E-04);
 		Site site7 = new Site(new Location(38.113,-121.886));
 		site7.addParameter(sadighSiteType);
 		expectedResults.put(site7, hazCurveSite7);

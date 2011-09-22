@@ -25,7 +25,7 @@ import org.opensha.sha.imr.param.PropagationEffectParams.DistanceRupParameter;
 import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
 
 /**
- * <b>Title:</b> Betal_2009_AttenRel
+ * <b>Title:</b> BommerEtAl_2009_AttenRel
  * <p>
  * 
  * <b>Description:</b> Class implementing attenuation relationship (horizontal component)
