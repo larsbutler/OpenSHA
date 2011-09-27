@@ -17,7 +17,7 @@ import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.calc.HazardCurveCalculator;
 import org.opensha.sha.earthquake.rupForecastImpl.GEM1.GEM1ERF;
 import org.opensha.sha.earthquake.rupForecastImpl.GEM1.SourceData.GEMSourceData;
-import org.opensha.sha.imr.attenRelImpl.ToroEtAl2002_AttenRel;
+import org.opensha.sha.imr.attenRelImpl.ToroEtAl_2002_AttenRel;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PGA_Param;
 import org.opensha.sha.imr.param.OtherParams.StdDevTypeParam;
 import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
@@ -29,7 +29,7 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
 public class ToroEtAl_2002_test implements ParameterChangeWarningListener {
 
 	/** ToroEtAl_2002_AttenRel GMPE (attenuation relationship) */
-	private ToroEtAl2002_AttenRel toro2002AtenRel = null;
+	private ToroEtAl_2002_AttenRel toro2002AtenRel = null;
 
 	/**
 	 * Table for total standard deviation validation.
@@ -72,7 +72,7 @@ public class ToroEtAl_2002_test implements ParameterChangeWarningListener {
 	 */
 	@Before
 	public final void setUp() throws Exception {
-		toro2002AtenRel = new ToroEtAl2002_AttenRel(this);
+		toro2002AtenRel = new ToroEtAl_2002_AttenRel(this);
 		toro2002AtenRel.setParamDefaults();
 
 		stdTotalTable = new double[TABLE_NUM_ROWS][TABLE_NUM_COL_STD];

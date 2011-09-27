@@ -15,10 +15,12 @@ import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.earthquake.EqkRupture;
 import org.opensha.sha.imr.AttenuationRelationship;
 import org.opensha.sha.imr.ScalarIntensityMeasureRelationshipAPI;
+import org.opensha.sha.imr.param.EqkRuptureParams.FaultTypeParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.MagParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.RakeParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.DampingParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PGA_Param;
+import org.opensha.sha.imr.param.IntensityMeasureParams.PGV_Param;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PeriodParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.SA_Param;
 import org.opensha.sha.imr.param.OtherParams.ComponentParam;
@@ -27,22 +29,15 @@ import org.opensha.sha.imr.param.OtherParams.SigmaTruncTypeParam;
 import org.opensha.sha.imr.param.OtherParams.StdDevTypeParam;
 import org.opensha.sha.imr.param.PropagationEffectParams.DistanceJBParameter;
 import org.opensha.sha.imr.param.PropagationEffectParams.DistanceRupParameter;
+import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
 
 /**
  * <b>Title:</b> Toro_2002_AttenRel
  * <p>
  * 
  * <b>Description:</b> This implements the updated GMPE developed by Toro et al
- * - 2002, (www.riskeng.com/PDF/atten_toro_extended.pdf) The GMPE is adjusted to
- * account the style -of faulting and a default rock soil (Vs30 >=800m/sec) The
- * adjustment coefficients were proposed by S. Drouet [2010]; Supported period
- * values (s). Period 0.5s was obtained as a linear interpolation between 0.4
- * and 1.0s; Warning: The coefficients for periods 3.00 and 4.00sec were
- * obtained as a function of SA(2sec) and ratios between SA(3)/SA(4sec) and
- * SA(2)/SA(4sec) Disclaimer: The adjustment of the SA(3sec) and SA(4sec) are
- * obtained in the framework of SHARE project. Supported Intensity-Measure
- * Parameters:
- * <p>
+ * (1997) with the distance term proposed by Toro (2002)
+ * (www.riskeng.com/PDF/atten_toro_extended.pdf)
  * <UL>
  * <LI>saParam - Response Spectral Acceleration
  * <LI>PGA - Peak Ground Acceleration
@@ -53,8 +48,7 @@ import org.opensha.sha.imr.param.PropagationEffectParams.DistanceRupParameter;
  * <UL>
  * <LI>magParam - moment magnitude
  * <LI>distanceJBParam - JB distance
- * <LI>componentParam - average horizontal, average horizontal (GMRoti50)
- * <LI>rakeParam - rake angle
+ * <LI>componentParam - average horizontal , average horizontal (GMRoti50)
  * <LI>stdDevTypeParam - total, none
  * </UL>
  * <p>
@@ -64,32 +58,33 @@ import org.opensha.sha.imr.param.PropagationEffectParams.DistanceRupParameter;
  * @version 1.0
  */
 
-public class ToroEtAl2002share_AttenRel extends AttenuationRelationship
-		implements ScalarIntensityMeasureRelationshipAPI, NamedObjectAPI,
+public class ToroEtAl_2002_AttenRel extends AttenuationRelationship implements
+		ScalarIntensityMeasureRelationshipAPI, NamedObjectAPI,
 		ParameterChangeListener {
 
-	public final static String SHORT_NAME = "ToroEtAl2002";
-	private static final long serialVersionUID = 1234567890987654353L;
+	// Debugging stuff
+	private static String C = "ToroEtAl_2002_AttenRel";
+	private static boolean D = false;
+	public static String SHORT_NAME = "ToroEtAl2002";
+	private static long serialVersionUID = 1234567890987654353L;
 
-	public final static String NAME = "Toro et al. (2002)";
+	// Name of IMR
+	public static String NAME = "Toro et al. (2002)";
 
 	/** Period index. */
-	private int iper;
+	protected int iper;
 
 	/** Moment magnitude. */
-	private double mag;
-
-	/** rake angle. */
-	private double rake;
+	protected double mag;
 
 	/** Rupture distance. */
-	private double rJB;
+	protected double rJB;
 
 	/** Standard deviation type. */
-	private String stdDevType;
+	protected String stdDevType;
 
 	/** Map period-value/period-index. */
-	private HashMap<Double, Integer> indexFromPerHashMap;
+	protected HashMap<Double, Integer> indexFromPerHashMap;
 
 	/** For issuing warnings. */
 	private transient ParameterChangeWarningListener warningListener = null;
@@ -98,8 +93,7 @@ public class ToroEtAl2002share_AttenRel extends AttenuationRelationship
 	 * Construct attenuation relationship. Initialize parameters and parameter
 	 * lists.
 	 */
-	public ToroEtAl2002share_AttenRel(
-			ParameterChangeWarningListener warningListener) {
+	public ToroEtAl_2002_AttenRel(ParameterChangeWarningListener warningListener) {
 
 		super();
 
@@ -108,9 +102,9 @@ public class ToroEtAl2002share_AttenRel extends AttenuationRelationship
 		initSupportedIntensityMeasureParams();
 		indexFromPerHashMap = new HashMap<Double, Integer>();
 		for (int i = 1; i < ToroEtAl2002Constants.PERIOD.length; i++) {
-			indexFromPerHashMap
-					.put(new Double(ToroEtAl2002Constants.PERIOD[i]),
-							new Integer(i));
+			indexFromPerHashMap.put(
+					new Double(ToroEtAl2002Constants.PERIOD[i]),
+					new Integer(i));
 		}
 
 		initEqkRuptureParams();
@@ -126,7 +120,7 @@ public class ToroEtAl2002share_AttenRel extends AttenuationRelationship
 	 * independenParameters of SA (periodParam and dampingParam) and adds them
 	 * to the supportedIMParams list. Makes the parameters non-editable.
 	 */
-	protected final void initSupportedIntensityMeasureParams() {
+	protected void initSupportedIntensityMeasureParams() {
 
 		// set supported periods for spectral acceleration
 		DoubleDiscreteConstraint periodConstraint = new DoubleDiscreteConstraint();
@@ -166,24 +160,21 @@ public class ToroEtAl2002share_AttenRel extends AttenuationRelationship
 	 * Initialize earthquake rupture parameter (moment magnitude, rake) and add
 	 * to eqkRuptureParams list. Makes the parameters non-editable.
 	 */
-	protected final void initEqkRuptureParams() {
+	protected void initEqkRuptureParams() {
 
 		// moment magnitude (default 5.0)
 		magParam = new MagParam(ToroEtAl2002Constants.MAG_WARN_MIN,
 				ToroEtAl2002Constants.MAG_WARN_MAX);
-		// Focal mechanism
-		rakeParam = new RakeParam();
-
 		eqkRuptureParams.clear();
 		eqkRuptureParams.addParameter(magParam);
-		eqkRuptureParams.addParameter(rakeParam);
 
 	}
 
 	/**
-	 * Initialize site parameters.
+	 * Initialize site parameters. No site parameters are defined so the site
+	 * parameter list is made empty.
 	 */
-	protected final void initSiteParams() {
+	protected void initSiteParams() {
 		siteParams.clear();
 	}
 
@@ -191,7 +182,7 @@ public class ToroEtAl2002share_AttenRel extends AttenuationRelationship
 	 * Initialize Propagation Effect parameters (JB distance) and adds them to
 	 * the propagationEffectParams list. Makes the parameters non-editable.
 	 */
-	protected final void initPropagationEffectParams() {
+	protected void initPropagationEffectParams() {
 
 		distanceJBParam = new DistanceJBParameter(
 				ToroEtAl2002Constants.DISTANCE_JB_WARN_MIN);
@@ -209,7 +200,7 @@ public class ToroEtAl2002share_AttenRel extends AttenuationRelationship
 	 * Initialize other Parameters (standard deviation type, component, sigma
 	 * truncation type, sigma truncation level).
 	 */
-	protected final void initOtherParams() {
+	protected void initOtherParams() {
 
 		sigmaTruncTypeParam = new SigmaTruncTypeParam();
 		sigmaTruncLevelParam = new SigmaTruncLevelParam();
@@ -221,7 +212,7 @@ public class ToroEtAl2002share_AttenRel extends AttenuationRelationship
 		stdDevTypeConstraint.setNonEditable();
 		stdDevTypeParam = new StdDevTypeParam(stdDevTypeConstraint);
 
-		// component Parameter
+		// the component Parameter
 		StringConstraint constraint = new StringConstraint();
 		constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
 		constraint.addString(ComponentParam.COMPONENT_GMRotI50);
@@ -244,7 +235,7 @@ public class ToroEtAl2002share_AttenRel extends AttenuationRelationship
 	 * include anything about the intensity-measure parameters or any of their
 	 * internal independentParamaters.
 	 */
-	protected final void initIndependentParamLists() {
+	protected void initIndependentParamLists() {
 
 		// params that the mean depends upon
 		meanIndependentParams.clear();
@@ -269,16 +260,14 @@ public class ToroEtAl2002share_AttenRel extends AttenuationRelationship
 	}
 
 	/**
-	 * This sets the eqkRupture related parameters (moment magnitude, rake)
-	 * based on the eqkRupture passed in. The internally held eqkRupture object
-	 * is also set as that passed in.
+	 * This sets the eqkRupture related parameters (moment magnitude, tectonic
+	 * region type, focal depth) based on the eqkRupture passed in. The
+	 * internally held eqkRupture object is also set as that passed in. Warning
+	 * constrains on magnitude and focal depth are ignored.
 	 */
-	public final void setEqkRupture(final EqkRupture eqkRupture) {
+	public void setEqkRupture(EqkRupture eqkRupture) {
 
 		magParam.setValueIgnoreWarning(new Double(eqkRupture.getMag()));
-		if (!Double.isNaN(eqkRupture.getAveRake())) {
-			rakeParam.setValue(eqkRupture.getAveRake());
-		}
 		this.eqkRupture = eqkRupture;
 		setPropagationEffectParams();
 	}
@@ -286,7 +275,7 @@ public class ToroEtAl2002share_AttenRel extends AttenuationRelationship
 	/**
 	 * Sets the internally held Site object as that passed in.
 	 */
-	public final void setSite(final Site site) {
+	public void setSite(Site site) {
 		this.site = site;
 		setPropagationEffectParams();
 	}
@@ -294,6 +283,7 @@ public class ToroEtAl2002share_AttenRel extends AttenuationRelationship
 	/**
 	 * This calculates the Rupture Distance propagation effect parameter based
 	 * on the current site and eqkRupture.
+	 * <P>
 	 */
 	protected void setPropagationEffectParams() {
 
@@ -305,7 +295,7 @@ public class ToroEtAl2002share_AttenRel extends AttenuationRelationship
 	/**
 	 * Set period index.
 	 */
-	protected final void setPeriodIndex() {
+	protected void setPeriodIndex() {
 		if (im.getName().equalsIgnoreCase(PGA_Param.NAME)) {
 			iper = 0;
 		} else {
@@ -315,15 +305,15 @@ public class ToroEtAl2002share_AttenRel extends AttenuationRelationship
 	}
 
 	/**
-	 * Compute mean. Applies correction for style of faulting and generic rock -
-	 * Vs30 >= 800m/s .
+	 * Compute mean.
+	 * 
 	 */
 	public double getMean() {
 		if (rJB > USER_MAX_DISTANCE) {
 			return VERY_SMALL_MEAN;
 		} else {
 			setPeriodIndex();
-			return getMean(iper, mag, rJB, rake);
+			return getMean(iper, mag, rJB);
 		}
 	}
 
@@ -336,8 +326,14 @@ public class ToroEtAl2002share_AttenRel extends AttenuationRelationship
 
 	/**
 	 * This computes the mean ln(Y)
+	 * 
+	 * @param iper
+	 * @param rJB
+	 * @param mag
+	 * @param vs30
+	 * @param rake
 	 */
-	public double getMean(final int iper, double mag, double rJB, double rake) {
+	public double getMean(int iper, double mag, double rJB) {
 		/**
 		 * This is to avoid very small values for rJB
 		 * 
@@ -345,38 +341,6 @@ public class ToroEtAl2002share_AttenRel extends AttenuationRelationship
 		if (rJB < 1e-3) {
 			rJB = 1;
 		}
-
-		double lnY_rock_adj = Double.NaN;
-		double[] f = computeStyleOfFaultingTerm(iper, rake);
-		double lnY_Hrock = computeHardRockResponse(iper, mag, rJB);
-
-		/**
-		 * This extends the model to SA(3sec) by multiplying the SA(2sec) with
-		 * the ratio SA(3sec)/SA(2sec) obtained as an average from the following
-		 * GMPEs: CF2008 CY2008 ZH2006 Campbell2003 AkB2010
-		 * */
-		if (ToroEtAl2002Constants.PERIOD[iper] == 3.00) {
-			lnY_rock_adj = Math.exp(lnY_Hrock)
-					* ToroEtAl2002Constants.T2sec_TO_T3sec_factor * f[2]
-					* ToroEtAl2002Constants.AFrock[iper];
-			/**
-			 * This extends the model to SA(4sec) by multiplying the SA(3sec)
-			 * with the ratio SA(4sec)/SA(3sec) obtained as an average from the
-			 * following GMPEs: CF2008 CY2008 ZH2006 Campbell2003
-			 * 
-			 * */
-		} else if (ToroEtAl2002Constants.PERIOD[iper] == 4.00) {
-			lnY_rock_adj = Math.exp(lnY_Hrock)
-					* ToroEtAl2002Constants.T3sec_TO_T4sec_factor * f[2]
-					* ToroEtAl2002Constants.AFrock[iper];
-		} else {
-			lnY_rock_adj = Math.exp(lnY_Hrock) * f[2]
-					* ToroEtAl2002Constants.AFrock[iper];
-		}
-		return Math.log(lnY_rock_adj);
-	}
-
-	private double computeHardRockResponse(int iper, double mag, double rJB) {
 
 		double magDiff = mag - 6.0;
 
@@ -398,40 +362,7 @@ public class ToroEtAl2002share_AttenRel extends AttenuationRelationship
 		double lnY = f1 - f2 - f3 - f4;
 
 		return lnY;
-	}
 
-	/**
-	 * Compute style-of-faulting adjustment
-	 **/
-	public double[] computeStyleOfFaultingTerm(final int iper, final double rake) {
-		double[] f = new double[3];
-		if (rake > ToroEtAl2002Constants.FLT_TYPE_NORMAL_RAKE_LOWER
-				&& rake <= ToroEtAl2002Constants.FLT_TYPE_NORMAL_RAKE_UPPER) {
-			f[0] = 1.0;
-			f[1] = 0.0;
-			f[2] = f[0]
-					* Math.pow(ToroEtAl2002Constants.Frss[iper],
-							(1 - ToroEtAl2002Constants.pR))
-					* Math.pow(ToroEtAl2002Constants.Fnss,
-							-ToroEtAl2002Constants.pN);
-		} else if (rake > ToroEtAl2002Constants.FLT_TYPE_REVERSE_RAKE_LOWER
-				&& rake <= ToroEtAl2002Constants.FLT_TYPE_REVERSE_RAKE_UPPER) {
-			f[0] = 0.0;
-			f[1] = 1.0;
-			f[2] = f[1]
-					* Math.pow(ToroEtAl2002Constants.Frss[iper],
-							-ToroEtAl2002Constants.pR)
-					* Math.pow(ToroEtAl2002Constants.Fnss,
-							(1 - ToroEtAl2002Constants.pN));
-		} else {
-			f[0] = 0.0;
-			f[1] = 0.0;
-			f[2] = Math.pow(ToroEtAl2002Constants.Frss[iper],
-					-ToroEtAl2002Constants.pR)
-					* Math.pow(ToroEtAl2002Constants.Fnss,
-							-ToroEtAl2002Constants.pN);
-		}
-		return f;
 	}
 
 	public double getStdDev(int iper, double mag, double rJB, String stdDevType) {
@@ -474,8 +405,7 @@ public class ToroEtAl2002share_AttenRel extends AttenuationRelationship
 			}
 			double sigmaatot = Math.sqrt(sigmaaM * sigmaaM + sigmaaR * sigmaaR);
 
-			sigmatot = (Math.sqrt(sigmaatot * sigmaatot + sigmae * sigmae))
-					* ToroEtAl2002Constants.sig_AFrock[iper];
+			sigmatot = (Math.sqrt(sigmaatot * sigmaatot + sigmae * sigmae));
 
 			return sigmatot;
 		} else
@@ -487,10 +417,9 @@ public class ToroEtAl2002share_AttenRel extends AttenuationRelationship
 	 * Allows the user to set the default parameter values for the selected
 	 * Attenuation Relationship.
 	 */
-	public final void setParamDefaults() {
+	public void setParamDefaults() {
 
 		magParam.setValueAsDefault();
-		rakeParam.setValueAsDefault();
 		distanceJBParam.setValueAsDefault();
 		saPeriodParam.setValueAsDefault();
 		saDampingParam.setValueAsDefault();
@@ -506,15 +435,13 @@ public class ToroEtAl2002share_AttenRel extends AttenuationRelationship
 	 * This listens for parameter changes and updates the primitive parameters
 	 * accordingly
 	 */
-	public final void parameterChange(final ParameterChangeEvent e) {
+	public void parameterChange(ParameterChangeEvent e) {
 
 		String pName = e.getParameterName();
 		Object val = e.getNewValue();
 
 		if (pName.equals(MagParam.NAME)) {
 			mag = ((Double) val).doubleValue();
-		} else if (pName.equals(RakeParam.NAME)) {
-			rake = ((Double) val).doubleValue();
 		} else if (pName.equals(DistanceRupParameter.NAME)) {
 			rJB = ((Double) val).doubleValue();
 		} else if (pName.equals(StdDevTypeParam.NAME)) {
@@ -527,9 +454,9 @@ public class ToroEtAl2002share_AttenRel extends AttenuationRelationship
 	 */
 	public void resetParameterEventListeners() {
 		magParam.removeParameterChangeListener(this);
-		rakeParam.removeParameterChangeListener(this);
 		distanceJBParam.removeParameterChangeListener(this);
 		stdDevTypeParam.removeParameterChangeListener(this);
+		saPeriodParam.removeParameterChangeListener(this);
 		this.initParameterEventListeners();
 	}
 
@@ -540,15 +467,15 @@ public class ToroEtAl2002share_AttenRel extends AttenuationRelationship
 	protected void initParameterEventListeners() {
 
 		magParam.addParameterChangeListener(this);
-		rakeParam.addParameterChangeListener(this);
 		distanceJBParam.addParameterChangeListener(this);
 		stdDevTypeParam.addParameterChangeListener(this);
+		saPeriodParam.addParameterChangeListener(this);
 	}
 
 	/**
 	 * Get the name of this IMR.
 	 */
-	public final String getName() {
+	public String getName() {
 		return NAME;
 	}
 
@@ -556,13 +483,13 @@ public class ToroEtAl2002share_AttenRel extends AttenuationRelationship
 	 * Returns the Short Name of each AttenuationRelationship
 	 * 
 	 */
-	public final String getShortName() {
+	public String getShortName() {
 		return SHORT_NAME;
 	}
 
 	/**
-	 * Returns the URL of the AttenuationRelationship documentation.
-	 * Currently returns null because not URL has been created.
+	 * Returns the URL of the AttenuationRelationship documentation. Currently
+	 * returns null because no URL has been created yet.
 	 */
 	public URL getAttenuationRelationshipURL() throws MalformedURLException {
 		return null;
