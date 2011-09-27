@@ -454,7 +454,8 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 
 		// if period corresponds to 5 Hz (PERIOD[3]) or 2.5 (PERIOD[4]) Hz
 		// and tectonic region type is interface applies correction.
-		if ((saPeriodParam.getValue() == AB2003Constants.PERIOD[3] || saPeriodParam
+		if (im.getName().equalsIgnoreCase(SA_Param.NAME) 
+				&& (saPeriodParam.getValue() == AB2003Constants.PERIOD[3] || saPeriodParam
 				.getValue() == AB2003Constants.PERIOD[4])
 				&& tecRegType
 						.equalsIgnoreCase(TectonicRegionType.SUBDUCTION_INTERFACE
