@@ -34,6 +34,7 @@ import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.earthquake.EqkRupture;
 import org.opensha.sha.imr.AttenuationRelationship;
 import org.opensha.sha.imr.ScalarIntensityMeasureRelationshipAPI;
+import org.opensha.sha.imr.attenRelImpl.constants.CF2008Constants;
 import org.opensha.sha.imr.param.EqkRuptureParams.FaultTypeParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.MagParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.RakeParam;
@@ -148,8 +149,8 @@ public class CF_2008_AttenRel extends AttenuationRelationship implements
 		initSupportedIntensityMeasureParams();
 
 		indexFromPerHashMap = new HashMap<Double, Integer>();
-		for (int i = 2; i < CF_2008Constants.PERIOD.length; i++) {
-			indexFromPerHashMap.put(new Double(CF_2008Constants.PERIOD[i]),
+		for (int i = 2; i < CF2008Constants.PERIOD.length; i++) {
+			indexFromPerHashMap.put(new Double(CF2008Constants.PERIOD[i]),
 					new Integer(i));
 		}
 
@@ -176,8 +177,8 @@ public class CF_2008_AttenRel extends AttenuationRelationship implements
 
 		// set supported periods for spectral acceleration
 		DoubleDiscreteConstraint periodConstraint = new DoubleDiscreteConstraint();
-		for (int i = 2; i < CF_2008Constants.PERIOD.length; i++) {
-			periodConstraint.addDouble(new Double(CF_2008Constants.PERIOD[i]));
+		for (int i = 2; i < CF2008Constants.PERIOD.length; i++) {
+			periodConstraint.addDouble(new Double(CF2008Constants.PERIOD[i]));
 		}
 		periodConstraint.setNonEditable();
 		// set period param (default is 1s, which is provided by CF2008 GMPE)
@@ -219,8 +220,8 @@ public class CF_2008_AttenRel extends AttenuationRelationship implements
 	protected final void initEqkRuptureParams() {
 
 		// moment magnitude (default 5.0)
-		magParam = new MagParam(CF_2008Constants.MAG_WARN_MIN,
-				CF_2008Constants.MAG_WARN_MAX);
+		magParam = new MagParam(CF2008Constants.MAG_WARN_MIN,
+				CF2008Constants.MAG_WARN_MAX);
 		// Focal mechanism
 		rakeParam = new RakeParam();
 		eqkRuptureParams.clear();
@@ -251,10 +252,10 @@ public class CF_2008_AttenRel extends AttenuationRelationship implements
 	protected final void initPropagationEffectParams() {
 
 		distanceHypoParam = new DistanceHypoParameter(
-				CF_2008Constants.DISTANCE_HYPO_WARN_MIN);
+				CF2008Constants.DISTANCE_HYPO_WARN_MIN);
 		distanceHypoParam.addParameterChangeWarningListener(warningListener);
 		DoubleConstraint warn = new DoubleConstraint(new Double(0.00),
-				CF_2008Constants.DISTANCE_HYPO_WARN_MAX);
+				CF2008Constants.DISTANCE_HYPO_WARN_MAX);
 		warn.setNonEditable();
 		distanceHypoParam.setWarningConstraint(warn);
 		distanceHypoParam.setNonEditable();
@@ -495,57 +496,57 @@ public class CF_2008_AttenRel extends AttenuationRelationship implements
 		double logY;
 
 		// This is to avoid rhypo == 0 distances
-		if (rhypo < CF_2008Constants.DISTANCE_HYPO_WARN_MIN) {
-			rhypo = CF_2008Constants.DISTANCE_HYPO_WARN_MIN;
+		if (rhypo < CF2008Constants.DISTANCE_HYPO_WARN_MIN) {
+			rhypo = CF2008Constants.DISTANCE_HYPO_WARN_MIN;
 		}
 
 		double[] s = computeSiteTerm(iper, vs30);
 		double[] f = computeStyleOfFaultingTerm(iper, rake);
 
-		double term1 = CF_2008Constants.a1[iper] + CF_2008Constants.a2[iper]
+		double term1 = CF2008Constants.a1[iper] + CF2008Constants.a2[iper]
 				* mag;
 
-		double term2 = CF_2008Constants.a3[iper] * Math.log10(rhypo);
+		double term2 = CF2008Constants.a3[iper] * Math.log10(rhypo);
 
 		logY = term1 + term2 + s[2] + f[2];
 
-		logY *= CF_2008Constants.LOG10_2_LN;
+		logY *= CF2008Constants.LOG10_2_LN;
 
 		// tmp variable to convert to DRS to mean PSA(g);
 		double tmp1 = Math
-				.pow((2 * Math.PI) / CF_2008Constants.PERIOD[iper], 2);
+				.pow((2 * Math.PI) / CF2008Constants.PERIOD[iper], 2);
 
 		if (iper == 0) {
 			logY = Math.exp(logY);
 		} else if (iper == 1) {
-			logY = Math.exp(logY) * CF_2008Constants.MSS_TO_G_CONVERSION_FACTOR;
+			logY = Math.exp(logY) * CF2008Constants.MSS_TO_G_CONVERSION_FACTOR;
 		} else {
 			logY = Math.exp(logY) * tmp1
-					* CF_2008Constants.CMS_TO_G_CONVERSION_FACTOR;
+					* CF2008Constants.CMS_TO_G_CONVERSION_FACTOR;
 		}
 		return Math.log(logY);
 	}
 
 	private double[] computeSiteTerm(final int iper, final double vs30) {
 		double[] s = new double[3];
-		if (vs30 > CF_2008Constants.SOIL_TYPE_ROCK_UPPER_BOUND) {
+		if (vs30 > CF2008Constants.SOIL_TYPE_ROCK_UPPER_BOUND) {
 			s[0] = 0.0;
 			s[1] = 0.0;
 			s[2] = 0.0;
-		} else if (vs30 >= CF_2008Constants.SITE_TYPE_STIFF_SOIL_UPPER_BOUND
-				&& vs30 < CF_2008Constants.SOIL_TYPE_ROCK_UPPER_BOUND) {
+		} else if (vs30 >= CF2008Constants.SITE_TYPE_STIFF_SOIL_UPPER_BOUND
+				&& vs30 < CF2008Constants.SOIL_TYPE_ROCK_UPPER_BOUND) {
 			s[0] = 1.00;
 			s[1] = 0.00;
-			s[2] = s[0] * CF_2008Constants.aB[iper];
-		} else if (vs30 >= CF_2008Constants.SITE_TYPE_SOFT_UPPER_BOUND
-				&& vs30 < CF_2008Constants.SITE_TYPE_STIFF_SOIL_UPPER_BOUND) {
+			s[2] = s[0] * CF2008Constants.aB[iper];
+		} else if (vs30 >= CF2008Constants.SITE_TYPE_SOFT_UPPER_BOUND
+				&& vs30 < CF2008Constants.SITE_TYPE_STIFF_SOIL_UPPER_BOUND) {
 			s[0] = 0.00;
 			s[1] = 1.00;
-			s[2] = s[1] * CF_2008Constants.aC[iper];
-		} else if (vs30 < CF_2008Constants.SITE_TYPE_SOFT_UPPER_BOUND) {
+			s[2] = s[1] * CF2008Constants.aC[iper];
+		} else if (vs30 < CF2008Constants.SITE_TYPE_SOFT_UPPER_BOUND) {
 			s[0] = 0.00;
 			s[1] = 0.00;
-			s[2] = CF_2008Constants.aD[iper];
+			s[2] = CF2008Constants.aD[iper];
 		}
 		return s;
 	}
@@ -555,20 +556,20 @@ public class CF_2008_AttenRel extends AttenuationRelationship implements
 			final double rake) {
 		double[] f = new double[3];
 		double faultTerm = Double.NaN;
-		if (rake > CF_2008Constants.FLT_TYPE_NORMAL_RAKE_LOWER
-				&& rake <= CF_2008Constants.FLT_TYPE_NORMAL_RAKE_UPPER) {
+		if (rake > CF2008Constants.FLT_TYPE_NORMAL_RAKE_LOWER
+				&& rake <= CF2008Constants.FLT_TYPE_NORMAL_RAKE_UPPER) {
 			f[0] = 1.00;
 			f[1] = 0.00;
-			f[2] = f[0] * CF_2008Constants.aN[iper];
-		} else if (rake > CF_2008Constants.FLT_TYPE_REVERSE_RAKE_LOWER
-				&& rake <= CF_2008Constants.FLT_TYPE_REVERSE_RAKE_UPPER) {
+			f[2] = f[0] * CF2008Constants.aN[iper];
+		} else if (rake > CF2008Constants.FLT_TYPE_REVERSE_RAKE_LOWER
+				&& rake <= CF2008Constants.FLT_TYPE_REVERSE_RAKE_UPPER) {
 			f[0] = 0.00;
 			f[1] = 1.00;
-			f[2] = f[1] * CF_2008Constants.aR[iper];
+			f[2] = f[1] * CF2008Constants.aR[iper];
 		} else {
 			f[0] = 0.00;
 			f[1] = 0.00;
-			f[2] = CF_2008Constants.aS[iper];
+			f[2] = CF2008Constants.aS[iper];
 		}
 		return f;
 	}
@@ -577,8 +578,8 @@ public class CF_2008_AttenRel extends AttenuationRelationship implements
 		if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE))
 			return 0;
 		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL))
-			return CF_2008Constants.LOG10_2_LN
-					* CF_2008Constants.TOTAL_STD[iper];
+			return CF2008Constants.LOG10_2_LN
+					* CF2008Constants.TOTAL_STD[iper];
 		else
 			return Double.NaN;
 	}

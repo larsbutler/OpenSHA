@@ -3,23 +3,13 @@ package org.opensha.sha.imr.attenRelImpl.test;
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.util.ArrayList;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.opensha.commons.data.Site;
-import org.opensha.commons.data.function.ArbitrarilyDiscretizedFunc;
-import org.opensha.commons.geo.Location;
-import org.opensha.commons.param.DoubleParameter;
 import org.opensha.commons.param.event.ParameterChangeWarningEvent;
 import org.opensha.commons.param.event.ParameterChangeWarningListener;
-import org.opensha.sha.calc.HazardCurveCalculator;
-import org.opensha.sha.earthquake.rupForecastImpl.GEM1.GEM1ERF;
-import org.opensha.sha.earthquake.rupForecastImpl.GEM1.SourceData.GEMSourceData;
 import org.opensha.sha.imr.attenRelImpl.TravasarouEtAl_2003_AttenRel;
-import org.opensha.sha.imr.param.IntensityMeasureParams.IA_Param;
-import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
 
 /**
  * Class providing methods for testing {@link TravasarouEtAl_2003_AttenRel}. Tables
@@ -398,78 +388,6 @@ public class TravasarouEtAl_2003_test implements ParameterChangeWarningListener 
 		validateMedian_2(vs30, rake, medianTable_N_B_2);
 	}
 
-
-	/**
-	 * Check Tetal_2003 usage for computing hazard curves using GEM1ERF constructed
-	 * from area source data. Ruptures are treated as
-	 * points.
-	 * @throws Exception
-	 */
-	@Test
-	public final void GEM1ERFPointRuptures() throws Exception{
-		tetal2003AttenRel.setIntensityMeasure(IA_Param.NAME);
-		ArrayList<GEMSourceData> srcDataList = new ArrayList<GEMSourceData>();
-		srcDataList.
-		add(AttenRelTestHelper.getActiveCrustAreaSourceData());
-		double timeSpan = 50.0;
-		GEM1ERF erf = GEM1ERF.getGEM1ERF(srcDataList, timeSpan);
-		erf.setParameter(GEM1ERF.AREA_SRC_RUP_TYPE_NAME,
-				GEM1ERF.AREA_SRC_RUP_TYPE_POINT);
-		erf.updateForecast();
-		HazardCurveCalculator hazCurveCalculator = new HazardCurveCalculator();
-		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper.setUpHazardCurve();
-		Site site = new Site(new Location(-0.171,-75.555));
-		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
-		hazCurveCalculator.getHazardCurve(hazCurve, site, tetal2003AttenRel,
-				erf);
-	}
-
-	/**
-	 * Check Tetal_2003 usage for computing hazard curves using GEM1ERF constructed
-	 * from area source data. Ruptures are treated as
-	 * extended.
-	 * @throws Exception
-	 */
-	@Test
-	public final void GEM1ERFLineRuptures() throws Exception{
-		tetal2003AttenRel.setIntensityMeasure(IA_Param.NAME);
-		ArrayList<GEMSourceData> srcDataList = new ArrayList<GEMSourceData>();
-		srcDataList.
-		add(AttenRelTestHelper.getActiveCrustAreaSourceData());
-		double timeSpan = 50.0;
-		GEM1ERF erf = GEM1ERF.getGEM1ERF(srcDataList, timeSpan);
-		erf.setParameter(GEM1ERF.AREA_SRC_RUP_TYPE_NAME,
-				GEM1ERF.AREA_SRC_RUP_TYPE_LINE);
-		erf.updateForecast();
-		HazardCurveCalculator hazCurveCalculator = new HazardCurveCalculator();
-		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper.setUpHazardCurve();
-		Site site = new Site(new Location(-0.171,-75.555));
-		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
-		hazCurveCalculator.getHazardCurve(hazCurve, site, tetal2003AttenRel,
-				erf);
-	}
-
-	/**
-	 * Check Tetal_2003 usage for computing hazard curves using GEM1ERF constructed
-	 * from simple fault source data.
-	 * @throws Exception
-	 */
-	@Test
-	public final void GEM1ERFSimpleFault() throws Exception{
-		tetal2003AttenRel.setIntensityMeasure(IA_Param.NAME);
-		ArrayList<GEMSourceData> srcDataList = new ArrayList<GEMSourceData>();
-		srcDataList.
-		add(AttenRelTestHelper.getActiveCrustSimpleFaultSourceData());
-		double timeSpan = 50.0;
-		GEM1ERF erf = GEM1ERF.getGEM1ERF(srcDataList, timeSpan);
-		HazardCurveCalculator hazCurveCalculator = new HazardCurveCalculator();
-		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper.setUpHazardCurve();
-		Site site = new Site(new Location(40.2317, 15.8577));
-		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
-		hazCurveCalculator.getHazardCurve(hazCurve, site, tetal2003AttenRel,
-				erf);
-	}
-
 	private void validateMedian_1(double vs30, double rake, double[][] table) {
 		// check for IA
 		for (int j = 0; j < table.length; j++) {
@@ -480,7 +398,6 @@ public class TravasarouEtAl_2003_test implements ParameterChangeWarningListener 
 			double computedMedian_R30 = Math.exp(tetal2003AttenRel.getMean(mag,30.0, vs30, rake));
 			double expectedMedian_R100 = table[j][2];
 			double computedMedian_R100 = Math.exp(tetal2003AttenRel.getMean(mag,100.0, vs30, rake));
-//			System.out.println("IA");
 			assertEquals(expectedMedian_R1, computedMedian_R1, TOLERANCE);
 			assertEquals(expectedMedian_R30, computedMedian_R30, TOLERANCE);
 			assertEquals(expectedMedian_R100, computedMedian_R100, TOLERANCE);
@@ -497,7 +414,6 @@ public class TravasarouEtAl_2003_test implements ParameterChangeWarningListener 
 			double computedMedian_M65 = Math.exp(tetal2003AttenRel.getMean(6.5,rrup, vs30, rake));
 			double expectedMedian_M75 = table[j][2];
 			double computedMedian_M75 = Math.exp(tetal2003AttenRel.getMean(7.5,rrup, vs30, rake));
-//			System.out.println("IA");
 			assertEquals(expectedMedian_M55, computedMedian_M55, TOLERANCE);
 			assertEquals(expectedMedian_M65, computedMedian_M65, TOLERANCE);
 			assertEquals(expectedMedian_M75, computedMedian_M75, TOLERANCE);

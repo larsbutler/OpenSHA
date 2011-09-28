@@ -1,7 +1,7 @@
-package org.opensha.sha.imr.attenRelImpl;
+package org.opensha.sha.imr.attenRelImpl.constants;
 
 
-public class CF_2008Constants {
+public class CF2008Constants {
 
 		/**
 		 * Supported period values (s).

@@ -1,27 +1,16 @@
 package org.opensha.sha.imr.attenRelImpl.test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.util.ArrayList;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.opensha.commons.data.Site;
-import org.opensha.commons.data.function.ArbitrarilyDiscretizedFunc;
-import org.opensha.commons.geo.Location;
-import org.opensha.commons.param.DoubleParameter;
 import org.opensha.commons.param.event.ParameterChangeWarningEvent;
 import org.opensha.commons.param.event.ParameterChangeWarningListener;
-import org.opensha.sha.calc.HazardCurveCalculator;
-import org.opensha.sha.earthquake.rupForecastImpl.GEM1.GEM1ERF;
-import org.opensha.sha.earthquake.rupForecastImpl.GEM1.SourceData.GEMSourceData;
 import org.opensha.sha.imr.attenRelImpl.ZhaoEtAl_2006_AttenRel;
-import org.opensha.sha.imr.param.IntensityMeasureParams.PGA_Param;
 import org.opensha.sha.imr.param.OtherParams.StdDevTypeParam;
-import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
 import org.opensha.sha.util.TectonicRegionType;
 
 public class ZhaoEtAl_2006_test implements ParameterChangeWarningListener {
@@ -245,101 +234,6 @@ public class ZhaoEtAl_2006_test implements ParameterChangeWarningListener {
 		compareMeanAndStd(mag, rRup, hypodepth, rake, vs30, tectRegType,
 				verificationTable);
 	}
-
-	/**
-	 * Check ZhaoEtAl_2006_AttenRel usage for computing hazard curves using
-	 * GEM1ERF constructed from area source data for intraslab events. Ruptures
-	 * are treated as points.
-	 * 
-	 * @throws Exception
-	 */
-	@Test
-	public final void zhaoEtAl2006WithGEM1ERFPointRuptures() throws Exception{
-		zhaoEtAlAttenRel.setIntensityMeasure(PGA_Param.NAME);
-		ArrayList<GEMSourceData> srcDataList = new ArrayList<GEMSourceData>();
-		srcDataList.
-		add(AttenRelTestHelper.getSubductionIntraSlabAreaSourceData());
-		double timeSpan = 50.0;
-		GEM1ERF erf = GEM1ERF.getGEM1ERF(srcDataList, timeSpan);
-		erf.setParameter(GEM1ERF.AREA_SRC_RUP_TYPE_NAME,
-				GEM1ERF.AREA_SRC_RUP_TYPE_POINT);
-		erf.updateForecast();
-		HazardCurveCalculator hazCurveCalculator = new HazardCurveCalculator();
-		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper.setUpHazardCurve();;
-		Site site = new Site(new Location(-0.171,-75.555));
-		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
-		hazCurveCalculator.getHazardCurve(hazCurve, site, zhaoEtAlAttenRel,
-				erf);
-	}
-	
-	/**
-	 * Check ZhaoEtAl_2006_AttenRel usage for computing hazard curves using
-	 * GEM1ERF constructed from area source data for intraslab events. Ruptures
-	 * are treated as lines.
-	 * 
-	 * @throws Exception
-	 */
-	@Test
-	public final void zhaoEtAl2006WithGEM1ERFLineRuptures() throws Exception{
-		zhaoEtAlAttenRel.setIntensityMeasure(PGA_Param.NAME);
-		ArrayList<GEMSourceData> srcDataList = new ArrayList<GEMSourceData>();
-		srcDataList.
-		add(AttenRelTestHelper.getSubductionIntraSlabAreaSourceData());
-		double timeSpan = 50.0;
-		GEM1ERF erf = GEM1ERF.getGEM1ERF(srcDataList, timeSpan);
-		erf.setParameter(GEM1ERF.AREA_SRC_RUP_TYPE_NAME,
-				GEM1ERF.AREA_SRC_RUP_TYPE_LINE);
-		erf.updateForecast();
-		HazardCurveCalculator hazCurveCalculator = new HazardCurveCalculator();
-		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper.setUpHazardCurve();;
-		Site site = new Site(new Location(-0.171,-75.555));
-		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
-		hazCurveCalculator.getHazardCurve(hazCurve, site, zhaoEtAlAttenRel,
-				erf);
-	}
-	
-	/**
-	 * Check ZhaoEtAl_2006_AttenRel usage for computing hazard curves using GEM1ERF constructed
-	 * from simple fault source data for interface events.
-	 * @throws Exception 
-	 */
-	@Test
-	public final void zhaoEtAl2006WithGEM1ERFInterfaceSimpleFault() throws Exception{
-		zhaoEtAlAttenRel.setIntensityMeasure(PGA_Param.NAME);
-		ArrayList<GEMSourceData> srcDataList = new ArrayList<GEMSourceData>();
-		srcDataList.
-		add(AttenRelTestHelper.getSubductionInterfaceSimpleFaultData());
-		double timeSpan = 50.0;
-		GEM1ERF erf = GEM1ERF.getGEM1ERF(srcDataList, timeSpan);
-		HazardCurveCalculator hazCurveCalculator = new HazardCurveCalculator();
-		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper.setUpHazardCurve();
-		Site site = new Site(new Location(-1.515,-81.456));
-		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
-		hazCurveCalculator.getHazardCurve(hazCurve, site, zhaoEtAlAttenRel,
-				erf);
-	}
-	
-	/**
-	 * Check ZhaoEtAl_2006_AttenRel usage for computing hazard curves using GEM1ERF constructed
-	 * from area source data for shallow crust events.
-	 * @throws Exception 
-	 */
-	@Test
-	public final void zhaoEtAl2006WithGEM1ERFShallowCrustAreaSource() throws Exception{
-		zhaoEtAlAttenRel.setIntensityMeasure(PGA_Param.NAME);
-		ArrayList<GEMSourceData> srcDataList = new ArrayList<GEMSourceData>();
-		srcDataList.
-		add(AttenRelTestHelper.getActiveCrustAreaSourceData());
-		double timeSpan = 50.0;
-		GEM1ERF erf = GEM1ERF.getGEM1ERF(srcDataList, timeSpan);
-		HazardCurveCalculator hazCurveCalculator = new HazardCurveCalculator();
-		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper.setUpHazardCurve();
-		Site site = new Site(new Location(-3.78,-81.18));
-		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
-		hazCurveCalculator.getHazardCurve(hazCurve, site, zhaoEtAlAttenRel,
-				erf);
-	}
-	
 
 	private void compareMeanAndStd(double mag, double rRup, double hypodepth,
 			double rake, double vs30, String tectRegType,

@@ -15,6 +15,7 @@ import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.earthquake.EqkRupture;
 import org.opensha.sha.imr.AttenuationRelationship;
 import org.opensha.sha.imr.ScalarIntensityMeasureRelationshipAPI;
+import org.opensha.sha.imr.attenRelImpl.constants.ToroEtAl2002Constants;
 import org.opensha.sha.imr.param.EqkRuptureParams.FaultTypeParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.MagParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.RakeParam;

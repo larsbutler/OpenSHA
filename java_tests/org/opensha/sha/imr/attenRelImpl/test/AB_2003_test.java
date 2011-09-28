@@ -2,81 +2,56 @@ package org.opensha.sha.imr.attenRelImpl.test;
 
 import static org.junit.Assert.assertTrue;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.StringTokenizer;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.opensha.commons.data.Site;
-import org.opensha.commons.data.function.ArbitrarilyDiscretizedFunc;
-import org.opensha.commons.geo.Location;
-import org.opensha.commons.param.DoubleParameter;
-import org.opensha.commons.param.StringParameter;
 import org.opensha.commons.param.event.ParameterChangeWarningEvent;
 import org.opensha.commons.param.event.ParameterChangeWarningListener;
-import org.opensha.sha.calc.HazardCurveCalculator;
-import org.opensha.sha.earthquake.rupForecastImpl.GEM1.GEM1ERF;
-import org.opensha.sha.earthquake.rupForecastImpl.GEM1.SourceData.GEMSourceData;
 import org.opensha.sha.imr.attenRelImpl.AB_2003_AttenRel;
-import org.opensha.sha.imr.param.IntensityMeasureParams.PGA_Param;
-import org.opensha.sha.imr.param.IntensityMeasureParams.SA_Param;
-import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
 import org.opensha.sha.util.TectonicRegionType;
 
 /**
- * Class providing methods for testing {@link AB_2003_AttenRel}. 
- * Tables (for the global model, without corrections for Japan/Cascadia)
- * were provided by Celine Beauval (<celine.beauval@obs.ujf-grenoble.fr>)
- * using matSHA.
+ * Class providing methods for testing {@link AB_2003_AttenRel}. Tables (for the
+ * global model, without corrections for Japan/Cascadia) were provided by Celine
+ * Beauval (<celine.beauval@obs.ujf-grenoble.fr>) using matSHA.
  */
 public class AB_2003_test implements ParameterChangeWarningListener {
 
 	/** Atkinson and Boore 2003 attenuation relationship. */
 	private AB_2003_AttenRel ab2003AttenRel = null;
 
-	/** Table for peak ground acceleration interface test.
-	 * 1st column: rupture distance.
-	 * 2nd column: PGA (g), for M=8.5, site class B
-	 * 3rd column: PGA (g), for M=7.5, site class C
-	 * 4th column: PGA (g), for M=6.5, site class D
+	/**
+	 * Table for peak ground acceleration interface test. 1st column: rupture
+	 * distance. 2nd column: PGA (g), for M=8.5, site class B 3rd column: PGA
+	 * (g), for M=7.5, site class C 4th column: PGA (g), for M=6.5, site class D
 	 * Hypocentral depth = 20 km
 	 */
-	private static final String PGA_INTERFACE_TABLE_FILE = 
-		"AtkinsonBoore2003Global-Interface-PGA-g.dat";
+	private static final String PGA_INTERFACE_TABLE_FILE = "AtkinsonBoore2003Global-Interface-PGA-g.dat";
 
-	/** Table for spectral acceleration interface test.
-	 * 1st column: rupture distance.
-	 * 2nd column: SA-1Hz (g), for M=8.5, site class B
-	 * 3rd column: SA-1Hz (g), for M=7.5, site class C
-	 * 4th column: SA-1Hz (g), for M=6.5, site class D 
-	 * Hypocentral depth = 20 km
+	/**
+	 * Table for spectral acceleration interface test. 1st column: rupture
+	 * distance. 2nd column: SA-1Hz (g), for M=8.5, site class B 3rd column:
+	 * SA-1Hz (g), for M=7.5, site class C 4th column: SA-1Hz (g), for M=6.5,
+	 * site class D Hypocentral depth = 20 km
 	 */
-	private static final String SA_INTERFACE_TABLE_FILE = 
-		"AtkinsonBoore2003Global-Interface-1Hz-g.dat";
+	private static final String SA_INTERFACE_TABLE_FILE = "AtkinsonBoore2003Global-Interface-1Hz-g.dat";
 
-	/** Table for peak ground acceleration intraslab test. 
-	 * 1st column: rupture distance.
-	 * 2nd column: PGA (g), for M=8.0, site class B
-	 * 3rd column: PGA (g), for M=7.0, site class C
-	 * 4th column: PGA (g), for M=6.0, site class D 
+	/**
+	 * Table for peak ground acceleration intraslab test. 1st column: rupture
+	 * distance. 2nd column: PGA (g), for M=8.0, site class B 3rd column: PGA
+	 * (g), for M=7.0, site class C 4th column: PGA (g), for M=6.0, site class D
 	 * Hypocentral depth = 60 km
 	 */
-	private static final String PGA_INTRASLAB_TABLE_FILE = 
-		"AtkinsonBoore2003Global-M876-PGA-INTRASLAB-g.dat";
+	private static final String PGA_INTRASLAB_TABLE_FILE = "AtkinsonBoore2003Global-M876-PGA-INTRASLAB-g.dat";
 
-	/** Table for spectral acceleration intraslab test. 
-	 * 2nd column: SA-1Hz (g), for M=8.0, site class B
-	 * 3rd column: SA-1Hz (g), for M=7.0, site class C
-	 * 4th column: SA-1Hz (g), for M=6.0, site class D 
-	 * Hypocentral depth = 60 km
+	/**
+	 * Table for spectral acceleration intraslab test. 2nd column: SA-1Hz (g),
+	 * for M=8.0, site class B 3rd column: SA-1Hz (g), for M=7.0, site class C
+	 * 4th column: SA-1Hz (g), for M=6.0, site class D Hypocentral depth = 60 km
 	 */
-	private static final String SA_INTRASLAB_TABLE_FILE = 
-		"AtkinsonBoore2003Global-M876-1Hz-INTRASLAB-g.dat";
+	private static final String SA_INTRASLAB_TABLE_FILE = "AtkinsonBoore2003Global-M876-1Hz-INTRASLAB-g.dat";
 
 	/** Number of columns in test tables. */
 	private static final int TABLE_NUM_COL = 4;
@@ -87,40 +62,40 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 	/** Number of rows in intraslab test table. */
 	private static final int INTRA_SLAB_TABLE_NUM_ROWS = 20;
 
-	/** Vs30 values for interface/intraSlab tests. 
-	 * Values corresponding to class B,C, and D respectively.
+	/**
+	 * Vs30 values for interface/intraSlab tests. Values corresponding to class
+	 * B,C, and D respectively.
 	 */
 	private static final double[] VS_30 = new double[] { 800.0, 500.0, 200.0 };
 	/**
 	 * Magnitude values for interface tests.
 	 */
-	private static final double[] INTERFACE_MAGNITUDE_VALUES =
-		new double[] { 8.5, 7.5, 6.5 };
+	private static final double[] INTERFACE_MAGNITUDE_VALUES = new double[] {
+			8.5, 7.5, 6.5 };
 	/**
 	 * Magnitude values for intraslab tests.
 	 */
-	private static final double[] INTRASLAB_MAGNITUDE_VALUES =
-		new double[] { 8.0, 7.0, 6.0 };
-	
-	
+	private static final double[] INTRASLAB_MAGNITUDE_VALUES = new double[] {
+			8.0, 7.0, 6.0 };
+
 	/** Peak ground acceleration table for interface test. */
 	private static double[][] pgaInterfaceTable = null;
-	
+
 	/** Spectral acceleration table for interface test. */
 	private static double[][] saInterfaceTable = null;
-	
+
 	/** Peak ground acceleration table for intraSlab test. */
 	private static double[][] pgaIntraSlabTable = null;
-	
+
 	/** Spectral acceleration table for intraSlab test. */
 	private static double[][] saIntraSlabTable = null;
 
 	/** Hypocentral depth for interface test. */
 	private static final double INTERFACE_HYPO_DEPTH = 20.0;
-	
+
 	/** Hypocentral depth for intraSlab test. */
 	private static final double INTRA_SLAB_HYPO_DEPTH = 60.0;
-	
+
 	/** Tolerance level (expressed in percentage). */
 	private static final double TOLERANCE = 1e-3;
 
@@ -133,33 +108,21 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 	public final void setUp() throws Exception {
 		ab2003AttenRel = new AB_2003_AttenRel(this);
 		ab2003AttenRel.setParamDefaults();
-		pgaInterfaceTable = 
-			new double[INTERFACE_TABLE_NUM_ROWS]
-			           [TABLE_NUM_COL];
-		AttenRelTestHelper.readNumericTable(
-				new File(ClassLoader.getSystemResource(
-						PGA_INTERFACE_TABLE_FILE).toURI()),
+		pgaInterfaceTable = new double[INTERFACE_TABLE_NUM_ROWS][TABLE_NUM_COL];
+		AttenRelTestHelper.readNumericTable(new File(ClassLoader
+				.getSystemResource(PGA_INTERFACE_TABLE_FILE).toURI()),
 				pgaInterfaceTable);
-		saInterfaceTable = 
-			new double[INTERFACE_TABLE_NUM_ROWS]
-			           [TABLE_NUM_COL];
-		AttenRelTestHelper.readNumericTable(
-				new File(ClassLoader.getSystemResource(
-						SA_INTERFACE_TABLE_FILE).toURI()),
+		saInterfaceTable = new double[INTERFACE_TABLE_NUM_ROWS][TABLE_NUM_COL];
+		AttenRelTestHelper.readNumericTable(new File(ClassLoader
+				.getSystemResource(SA_INTERFACE_TABLE_FILE).toURI()),
 				saInterfaceTable);
-		pgaIntraSlabTable =
-			new double[INTRA_SLAB_TABLE_NUM_ROWS]
-			           [TABLE_NUM_COL];
-		AttenRelTestHelper.readNumericTable(
-				new File(ClassLoader.getSystemResource(
-						PGA_INTRASLAB_TABLE_FILE).toURI()),
+		pgaIntraSlabTable = new double[INTRA_SLAB_TABLE_NUM_ROWS][TABLE_NUM_COL];
+		AttenRelTestHelper.readNumericTable(new File(ClassLoader
+				.getSystemResource(PGA_INTRASLAB_TABLE_FILE).toURI()),
 				pgaIntraSlabTable);
-		saIntraSlabTable =
-			new double[INTRA_SLAB_TABLE_NUM_ROWS]
-			           [TABLE_NUM_COL];
-		AttenRelTestHelper.readNumericTable(
-				new File(ClassLoader.getSystemResource(
-						SA_INTRASLAB_TABLE_FILE).toURI()),
+		saIntraSlabTable = new double[INTRA_SLAB_TABLE_NUM_ROWS][TABLE_NUM_COL];
+		AttenRelTestHelper.readNumericTable(new File(ClassLoader
+				.getSystemResource(SA_INTRASLAB_TABLE_FILE).toURI()),
 				saIntraSlabTable);
 	}
 
@@ -181,7 +144,7 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 	 */
 	@Test
 	public final void sa1HzMw8IntraSlabNerphBHypodepth60() {
-		
+
 		String tectonicRegionType = TectonicRegionType.SUBDUCTION_SLAB
 				.toString();
 		double hypocentralDepth = INTRA_SLAB_HYPO_DEPTH;
@@ -193,8 +156,7 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 		int expectedResultIndex = 1;
 
 		validateAgainstTable(tectonicRegionType, hypocentralDepth, periodIndex,
-				magnitude, vs30, expectedResultIndex,
-				saIntraSlabTable);
+				magnitude, vs30, expectedResultIndex, saIntraSlabTable);
 	}
 
 	/**
@@ -213,11 +175,9 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 		double magnitude = INTRASLAB_MAGNITUDE_VALUES[magnitudeIndex];
 		double vs30 = VS_30[siteTypeIndex];
 		int expectedResultIndex = 2;
-		
 
 		validateAgainstTable(tectonicRegionType, hypocentralDepth, periodIndex,
-				magnitude, vs30, expectedResultIndex,
-				saIntraSlabTable);
+				magnitude, vs30, expectedResultIndex, saIntraSlabTable);
 	}
 
 	/**
@@ -238,8 +198,7 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 		int expectedResultIndex = 3;
 
 		validateAgainstTable(tectonicRegionType, hypocentralDepth, periodIndex,
-				magnitude, vs30, expectedResultIndex,
-				saIntraSlabTable);
+				magnitude, vs30, expectedResultIndex, saIntraSlabTable);
 	}
 
 	/**
@@ -260,8 +219,7 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 		int expectedResultIndex = 1;
 
 		validateAgainstTable(tectonicRegionType, hypocentralDepth, periodIndex,
-				magnitude, vs30, expectedResultIndex,
-				pgaIntraSlabTable);
+				magnitude, vs30, expectedResultIndex, pgaIntraSlabTable);
 	}
 
 	/**
@@ -282,8 +240,7 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 		int expectedResultIndex = 2;
 
 		validateAgainstTable(tectonicRegionType, hypocentralDepth, periodIndex,
-				magnitude, vs30, expectedResultIndex,
-				pgaIntraSlabTable);
+				magnitude, vs30, expectedResultIndex, pgaIntraSlabTable);
 	}
 
 	/**
@@ -304,8 +261,7 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 		int expectedResultIndex = 3;
 
 		validateAgainstTable(tectonicRegionType, hypocentralDepth, periodIndex,
-				magnitude, vs30, expectedResultIndex,
-				pgaIntraSlabTable);
+				magnitude, vs30, expectedResultIndex, pgaIntraSlabTable);
 	}
 
 	/**
@@ -326,8 +282,7 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 		int expectedResultIndex = 1;
 
 		validateAgainstTable(tectonicRegionType, hypocentralDepth, periodIndex,
-				magnitude, vs30, expectedResultIndex,
-				saInterfaceTable);
+				magnitude, vs30, expectedResultIndex, saInterfaceTable);
 	}
 
 	/**
@@ -348,8 +303,7 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 		int expectedResultIndex = 2;
 
 		validateAgainstTable(tectonicRegionType, hypocentralDepth, periodIndex,
-				magnitude, vs30, expectedResultIndex,
-				saInterfaceTable);
+				magnitude, vs30, expectedResultIndex, saInterfaceTable);
 	}
 
 	/**
@@ -370,8 +324,7 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 		int expectedResultIndex = 3;
 
 		validateAgainstTable(tectonicRegionType, hypocentralDepth, periodIndex,
-				magnitude, vs30, expectedResultIndex,
-				saInterfaceTable);
+				magnitude, vs30, expectedResultIndex, saInterfaceTable);
 	}
 
 	/**
@@ -392,13 +345,12 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 		int expectedResultIndex = 1;
 
 		validateAgainstTable(tectonicRegionType, hypocentralDepth, periodIndex,
-				magnitude, vs30, expectedResultIndex,
-				pgaInterfaceTable);
+				magnitude, vs30, expectedResultIndex, pgaInterfaceTable);
 	}
 
 	/**
-	 * Check median pga for Mw7.5, interface event, site type Nerph C, hypocentral
-	 * depth 20 km.
+	 * Check median pga for Mw7.5, interface event, site type Nerph C,
+	 * hypocentral depth 20 km.
 	 */
 	@Test
 	public final void pgaMw75InterfaceNerphCHypodepth20() {
@@ -414,8 +366,7 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 		int expectedResultIndex = 2;
 
 		validateAgainstTable(tectonicRegionType, hypocentralDepth, periodIndex,
-				magnitude, vs30, expectedResultIndex,
-				pgaInterfaceTable);
+				magnitude, vs30, expectedResultIndex, pgaInterfaceTable);
 	}
 
 	/**
@@ -436,84 +387,12 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 		int expectedResultIndex = 3;
 
 		validateAgainstTable(tectonicRegionType, hypocentralDepth, periodIndex,
-				magnitude, vs30, expectedResultIndex,
-				pgaInterfaceTable);
+				magnitude, vs30, expectedResultIndex, pgaInterfaceTable);
 	}
-	
-	/**
-	 * Check AB2003 usage for computing hazard curves using GEM1ERF constructed
-	 * from area source data for intraslab events. Ruptures are treated as
-	 * points.
-	 * @throws Exception 
-	 */
-	@Test
-	public final void ab2003WithGEM1ERFPointRuptures() throws Exception{
-		ab2003AttenRel.setIntensityMeasure(PGA_Param.NAME);
-		ArrayList<GEMSourceData> srcDataList = new ArrayList<GEMSourceData>();
-		srcDataList.
-		add(AttenRelTestHelper.getSubductionIntraSlabAreaSourceData());
-		double timeSpan = 50.0;
-		GEM1ERF erf = GEM1ERF.getGEM1ERF(srcDataList, timeSpan);
-		erf.setParameter(GEM1ERF.AREA_SRC_RUP_TYPE_NAME,
-				GEM1ERF.AREA_SRC_RUP_TYPE_POINT);
-		erf.updateForecast();
-		HazardCurveCalculator hazCurveCalculator = new HazardCurveCalculator();
-		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper.setUpHazardCurve();
-		Site site = new Site(new Location(-0.171,-75.555));
-		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
-		hazCurveCalculator.getHazardCurve(hazCurve, site, ab2003AttenRel,
-				erf);
-	}
-	
-	/**
-	 * Check AB2003 usage for computing hazard curves using GEM1ERF constructed
-	 * from area source data for intraslab events. Ruptures are treated as
-	 * extended.
-	 * @throws Exception 
-	 */
-	@Test
-	public final void ab2003WithGEM1ERFLineRuptures() throws Exception{
-		ab2003AttenRel.setIntensityMeasure(PGA_Param.NAME);
-		ArrayList<GEMSourceData> srcDataList = new ArrayList<GEMSourceData>();
-		srcDataList.
-		add(AttenRelTestHelper.getSubductionIntraSlabAreaSourceData());
-		double timeSpan = 50.0;
-		GEM1ERF erf = GEM1ERF.getGEM1ERF(srcDataList, timeSpan);
-		erf.setParameter(GEM1ERF.AREA_SRC_RUP_TYPE_NAME,
-				GEM1ERF.AREA_SRC_RUP_TYPE_LINE);
-		erf.updateForecast();
-		HazardCurveCalculator hazCurveCalculator = new HazardCurveCalculator();
-		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper.setUpHazardCurve();
-		Site site = new Site(new Location(-0.171,-75.555));
-		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
-		hazCurveCalculator.getHazardCurve(hazCurve, site, ab2003AttenRel,
-				erf);
-	}
-	
-	/**
-	 * Check AB2003 usage for computing hazard curves using GEM1ERF constructed
-	 * from simple fault source data for interface events.
-	 * @throws Exception 
-	 */
-	@Test
-	public final void ab2003WithGEM1ERFInterfaceSimpleFault() throws Exception{
-		ab2003AttenRel.setIntensityMeasure(PGA_Param.NAME);
-		ArrayList<GEMSourceData> srcDataList = new ArrayList<GEMSourceData>();
-		srcDataList.
-		add(AttenRelTestHelper.getSubductionInterfaceSimpleFaultData());
-		double timeSpan = 50.0;
-		GEM1ERF erf = GEM1ERF.getGEM1ERF(srcDataList, timeSpan);
-		HazardCurveCalculator hazCurveCalculator = new HazardCurveCalculator();
-		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper.setUpHazardCurve();
-		Site site = new Site(new Location(-1.515,-81.456));
-		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
-		hazCurveCalculator.getHazardCurve(hazCurve, site, ab2003AttenRel,
-				erf);
-	}
-	
+
 	/**
 	 * Compare median ground motion againt values in table.
-	 *
+	 * 
 	 * @param tectonicRegionType
 	 * @param hypocentralDepth
 	 * @param periodIndex
@@ -524,8 +403,8 @@ public class AB_2003_test implements ParameterChangeWarningListener {
 	 */
 	private void validateAgainstTable(final String tectonicRegionType,
 			final double hypocentralDepth, final int periodIndex,
-			final double mag, final double vs30,
-			final int expectedResultIndex, final double[][] table) {
+			final double mag, final double vs30, final int expectedResultIndex,
+			final double[][] table) {
 		for (int i = 0; i < table.length; i++) {
 
 			double distance = table[i][0];

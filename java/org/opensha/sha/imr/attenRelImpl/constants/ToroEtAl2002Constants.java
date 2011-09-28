@@ -1,4 +1,4 @@
-package org.opensha.sha.imr.attenRelImpl;
+package org.opensha.sha.imr.attenRelImpl.constants;
 /**
  * <b>Title:</b> Toro_2002_Constants<p>
  *

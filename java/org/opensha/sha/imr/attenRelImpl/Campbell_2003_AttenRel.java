@@ -15,6 +15,7 @@ import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.earthquake.EqkRupture;
 import org.opensha.sha.imr.AttenuationRelationship;
 import org.opensha.sha.imr.ScalarIntensityMeasureRelationshipAPI;
+import org.opensha.sha.imr.attenRelImpl.constants.Campbell2003Constants;
 import org.opensha.sha.imr.param.EqkRuptureParams.MagParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.DampingParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.PGA_Param;
@@ -30,11 +31,11 @@ import org.opensha.sha.imr.param.PropagationEffectParams.DistanceRupParameter;
  * <b>Title:</b> Campbell_2003_AttenRel
  * <p>
  * 
- * <b>Description:</b> Class implementing GMPE described in:
- * Prediction of Strong Ground Motion Using the Hybrid Empirical Method and Its
- * Use in the Development of Ground-Motion (Attenuation) Relations in Eastern
- * North America (June 2003, BSSA, vol 93, no 3, pp 1012-1033).
- * Modifications of the equations according to the ERRATUM (July 2004) are also included.
+ * <b>Description:</b> Class implementing GMPE described in: Prediction of
+ * Strong Ground Motion Using the Hybrid Empirical Method and Its Use in the
+ * Development of Ground-Motion (Attenuation) Relations in Eastern North America
+ * (June 2003, BSSA, vol 93, no 3, pp 1012-1033). Modifications of the equations
+ * according to the ERRATUM (July 2004) are also included.
  * <p>
  * 
  * Supported Intensity-Measure Parameters:
@@ -65,25 +66,25 @@ public class Campbell_2003_AttenRel extends AttenuationRelationship implements
 		ParameterChangeListener {
 
 	/** Short name. */
-	public final static String SHORT_NAME = "Campbell_2003";
+	public static String SHORT_NAME = "Campbell_2003";
 
 	/** Full name. */
-	public final static String NAME = "Campbell (2003)";
+	public static String NAME = "Campbell (2003)";
 
 	/** Version number. */
-	private static final long serialVersionUID = 007L;
+	private static long serialVersionUID = 007L;
 
 	/** Period index. */
-	private int iper;
+	protected int iper;
 
 	/** Moment magnitude. */
-	private double mag;
+	protected double mag;
 
 	/** Rupture distance. */
-	private double rRup;
+	protected double rRup;
 
 	/** Standard deviation type. */
-	private String stdDevType;
+	protected String stdDevType;
 
 	/** Map period-value/period-index. */
 	private HashMap<Double, Integer> indexFromPerHashMap;
@@ -124,7 +125,7 @@ public class Campbell_2003_AttenRel extends AttenuationRelationship implements
 	 * the independenParameters of SA (periodParam and dampingParam) and adds
 	 * them to the supportedIMParams list. Makes the parameters non-editable.
 	 */
-	protected final void initSupportedIntensityMeasureParams() {
+	protected void initSupportedIntensityMeasureParams() {
 
 		// set supported periods for spectral acceleration
 		DoubleDiscreteConstraint periodConstraint = new DoubleDiscreteConstraint();
@@ -164,7 +165,7 @@ public class Campbell_2003_AttenRel extends AttenuationRelationship implements
 	 * Initialize earthquake rupture parameter (moment magnitude, rake) and add
 	 * to eqkRuptureParams list. Makes the parameters non-editable.
 	 */
-	protected final void initEqkRuptureParams() {
+	protected void initEqkRuptureParams() {
 
 		// moment magnitude (default 5.0)
 		magParam = new MagParam(Campbell2003Constants.MAG_WARN_MIN,
@@ -177,7 +178,7 @@ public class Campbell_2003_AttenRel extends AttenuationRelationship implements
 	 * Initialize site params. In this case no site params are defined so the
 	 * method is left empty.
 	 */
-	protected final void initSiteParams() {
+	protected void initSiteParams() {
 		siteParams.clear();
 	}
 
@@ -186,7 +187,7 @@ public class Campbell_2003_AttenRel extends AttenuationRelationship implements
 	 * and adds them to the propagationEffectParams list. Makes the parameters
 	 * non-editable.
 	 */
-	protected final void initPropagationEffectParams() {
+	protected void initPropagationEffectParams() {
 
 		distanceRupParam = new DistanceRupParameter(
 				Campbell2003Constants.DISTANCE_RUP_WARN_MIN);
@@ -204,7 +205,7 @@ public class Campbell_2003_AttenRel extends AttenuationRelationship implements
 	 * Initialize other Parameters (standard deviation type, component, sigma
 	 * truncation type, sigma truncation level).
 	 */
-	protected final void initOtherParams() {
+	protected void initOtherParams() {
 
 		sigmaTruncTypeParam = new SigmaTruncTypeParam();
 		sigmaTruncLevelParam = new SigmaTruncLevelParam();
@@ -239,7 +240,7 @@ public class Campbell_2003_AttenRel extends AttenuationRelationship implements
 	 * include anything about the intensity-measure parameters or any of their
 	 * internal independentParamaters.
 	 */
-	protected final void initIndependentParamLists() {
+	protected void initIndependentParamLists() {
 
 		// params that the mean depends upon
 		meanIndependentParams.clear();
@@ -269,8 +270,8 @@ public class Campbell_2003_AttenRel extends AttenuationRelationship implements
 	 * internally held eqkRupture object is also set as that passed in. Warning
 	 * constrains on magnitude and focal depth are ignored.
 	 */
-	public final void setEqkRupture(final EqkRupture eqkRupture) {
-		
+	public void setEqkRupture(EqkRupture eqkRupture) {
+
 		magParam.setValueIgnoreWarning(new Double(eqkRupture.getMag()));
 		this.eqkRupture = eqkRupture;
 		setPropagationEffectParams();
@@ -279,8 +280,8 @@ public class Campbell_2003_AttenRel extends AttenuationRelationship implements
 	/**
 	 * Sets the internally held Site object as that passed in.
 	 */
-	public final void setSite(final Site site) {
-		
+	public void setSite(Site site) {
+
 		this.site = site;
 		setPropagationEffectParams();
 	}
@@ -300,7 +301,7 @@ public class Campbell_2003_AttenRel extends AttenuationRelationship implements
 	/**
 	 * Set period index.
 	 */
-	protected final void setPeriodIndex() {
+	protected void setPeriodIndex() {
 		if (im.getName().equalsIgnoreCase(PGA_Param.NAME)) {
 			iper = 0;
 		} else {
@@ -395,18 +396,17 @@ public class Campbell_2003_AttenRel extends AttenuationRelationship implements
 
 		if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE))
 			return 0;
-		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL)){
-			final double M1 = 7.16;
+		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL)) {
+			double M1 = 7.16;
 			double sigma = Double.NaN;
-				if (mag < M1) {
-					sigma = (Campbell2003Constants.c11[iper] + Campbell2003Constants.c12[iper]
-							* mag);
-				} else {
-					sigma = Campbell2003Constants.c13[iper];
-				}
+			if (mag < M1) {
+				sigma = (Campbell2003Constants.c11[iper] + Campbell2003Constants.c12[iper]
+						* mag);
+			} else {
+				sigma = Campbell2003Constants.c13[iper];
+			}
 			return sigma;
-		}
-		else {
+		} else {
 			throw new RuntimeException("Standard deviation type not recognized");
 		}
 	}
@@ -415,7 +415,7 @@ public class Campbell_2003_AttenRel extends AttenuationRelationship implements
 	 * Allows the user to set the default parameter values for the selected
 	 * Attenuation Relationship.
 	 */
-	public final void setParamDefaults() {
+	public void setParamDefaults() {
 
 		magParam.setValueAsDefault();
 		distanceRupParam.setValueAsDefault();
@@ -433,7 +433,7 @@ public class Campbell_2003_AttenRel extends AttenuationRelationship implements
 	 * This listens for parameter changes and updates the primitive parameters
 	 * accordingly
 	 */
-	public final void parameterChange(final ParameterChangeEvent e) {
+	public void parameterChange(ParameterChangeEvent e) {
 
 		String pName = e.getParameterName();
 		Object val = e.getNewValue();
@@ -470,7 +470,7 @@ public class Campbell_2003_AttenRel extends AttenuationRelationship implements
 	/**
 	 * Get the name of this IMR.
 	 */
-	public final String getName() {
+	public String getName() {
 		return NAME;
 	}
 
@@ -478,7 +478,7 @@ public class Campbell_2003_AttenRel extends AttenuationRelationship implements
 	 * Returns the Short Name of each AttenuationRelationship
 	 * 
 	 */
-	public final String getShortName() {
+	public String getShortName() {
 		return SHORT_NAME;
 	}
 

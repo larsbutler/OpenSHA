@@ -3,24 +3,14 @@ package org.opensha.sha.imr.attenRelImpl.test;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
-import java.util.ArrayList;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.opensha.commons.data.Site;
-import org.opensha.commons.data.function.ArbitrarilyDiscretizedFunc;
-import org.opensha.commons.geo.Location;
-import org.opensha.commons.param.DoubleParameter;
 import org.opensha.commons.param.event.ParameterChangeWarningEvent;
 import org.opensha.commons.param.event.ParameterChangeWarningListener;
-import org.opensha.sha.calc.HazardCurveCalculator;
-import org.opensha.sha.earthquake.rupForecastImpl.GEM1.GEM1ERF;
-import org.opensha.sha.earthquake.rupForecastImpl.GEM1.SourceData.GEMSourceData;
 import org.opensha.sha.imr.attenRelImpl.LL_2008_AttenRel;
-import org.opensha.sha.imr.param.IntensityMeasureParams.PGA_Param;
 import org.opensha.sha.imr.param.OtherParams.StdDevTypeParam;
-import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
 import org.opensha.sha.util.TectonicRegionType;
 
 /**
@@ -221,78 +211,6 @@ public class LL_2008_test implements ParameterChangeWarningListener {
 
 			assertEquals(expectedStd, computedStd, TOLERANCE);
 		}
-	}
-	/**
-	 * Check LL_2008_AttenRel usage for computing hazard curves using
-	 * GEM1ERF constructed from area source data for intraslab events. Ruptures
-	 * are treated as lines.
-	 * 
-	 * @throws Exception
-	 */
-	@Test
-	public final void ll2008WithGEM1ERFLineRuptures() throws Exception{
-		ll08AttenRel.setIntensityMeasure(PGA_Param.NAME);
-		ArrayList<GEMSourceData> srcDataList = new ArrayList<GEMSourceData>();
-		srcDataList.
-		add(AttenRelTestHelper.getSubductionIntraSlabAreaSourceData());
-		double timeSpan = 50.0;
-		GEM1ERF erf = GEM1ERF.getGEM1ERF(srcDataList, timeSpan);
-		erf.setParameter(GEM1ERF.AREA_SRC_RUP_TYPE_NAME,
-				GEM1ERF.AREA_SRC_RUP_TYPE_LINE);
-		erf.updateForecast();
-		HazardCurveCalculator hazCurveCalculator = new HazardCurveCalculator();
-		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper.setUpHazardCurve();;
-		Site site = new Site(new Location(-0.171,-75.555));
-		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
-		hazCurveCalculator.getHazardCurve(hazCurve, site, ll08AttenRel,
-				erf);
-	}
-	
-	/**
-	 * Check LL_2008_AttenRel usage for computing hazard curves using GEM1ERF constructed
-	 * from simple fault source data for interface events.
-	 * @throws Exception 
-	 */
-	@Test
-	public final void ll2008WithGEM1ERFInterfaceSimpleFault() throws Exception{
-		ll08AttenRel.setIntensityMeasure(PGA_Param.NAME);
-		ArrayList<GEMSourceData> srcDataList = new ArrayList<GEMSourceData>();
-		srcDataList.
-		add(AttenRelTestHelper.getSubductionInterfaceSimpleFaultData());
-		double timeSpan = 50.0;
-		GEM1ERF erf = GEM1ERF.getGEM1ERF(srcDataList, timeSpan);
-		HazardCurveCalculator hazCurveCalculator = new HazardCurveCalculator();
-		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper.setUpHazardCurve();
-		Site site = new Site(new Location(-1.515,-81.456));
-		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
-		hazCurveCalculator.getHazardCurve(hazCurve, site, ll08AttenRel,
-				erf);
-	}
-	
-	/**
-	 * Check LL_2008_AttenRel usage for computing hazard curves using
-	 * GEM1ERF constructed from area source data for intraslab events. Ruptures
-	 * are treated as points.
-	 * 
-	 * @throws Exception
-	 */
-	@Test
-	public final void ll2008WithGEM1ERFPointRuptures() throws Exception{
-		ll08AttenRel.setIntensityMeasure(PGA_Param.NAME);
-		ArrayList<GEMSourceData> srcDataList = new ArrayList<GEMSourceData>();
-		srcDataList.
-		add(AttenRelTestHelper.getSubductionIntraSlabAreaSourceData());
-		double timeSpan = 50.0;
-		GEM1ERF erf = GEM1ERF.getGEM1ERF(srcDataList, timeSpan);
-		erf.setParameter(GEM1ERF.AREA_SRC_RUP_TYPE_NAME,
-				GEM1ERF.AREA_SRC_RUP_TYPE_POINT);
-		erf.updateForecast();
-		HazardCurveCalculator hazCurveCalculator = new HazardCurveCalculator();
-		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper.setUpHazardCurve();;
-		Site site = new Site(new Location(-0.171,-75.555));
-		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
-		hazCurveCalculator.getHazardCurve(hazCurve, site, ll08AttenRel,
-				erf);
 	}
 
 	@Override

@@ -14,6 +14,7 @@ import org.opensha.sha.earthquake.EqkRupture;
 import org.opensha.sha.faultSurface.EvenlyGriddedSurfaceAPI;
 import org.opensha.sha.imr.AttenuationRelationship;
 import org.opensha.sha.imr.ScalarIntensityMeasureRelationshipAPI;
+import org.opensha.sha.imr.attenRelImpl.constants.BommerEtAl2009Constants;
 import org.opensha.sha.imr.param.EqkRuptureParams.MagParam;
 import org.opensha.sha.imr.param.EqkRuptureParams.RupTopDepthParam;
 import org.opensha.sha.imr.param.IntensityMeasureParams.RelativeSignificantDuration_Param;

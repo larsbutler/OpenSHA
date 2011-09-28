@@ -1,4 +1,4 @@
-package org.opensha.sha.imr.attenRelImpl;
+package org.opensha.sha.imr.attenRelImpl.constants;
 
 import org.opensha.sha.util.TectonicRegionType;
 

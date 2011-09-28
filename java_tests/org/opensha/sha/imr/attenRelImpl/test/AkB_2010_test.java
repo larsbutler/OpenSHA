@@ -3,25 +3,15 @@ package org.opensha.sha.imr.attenRelImpl.test;
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.util.ArrayList;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.opensha.commons.data.Site;
-import org.opensha.commons.data.function.ArbitrarilyDiscretizedFunc;
-import org.opensha.commons.geo.Location;
-import org.opensha.commons.param.DoubleParameter;
 import org.opensha.commons.param.event.ParameterChangeWarningEvent;
 import org.opensha.commons.param.event.ParameterChangeWarningListener;
-import org.opensha.sha.calc.HazardCurveCalculator;
-import org.opensha.sha.earthquake.rupForecastImpl.GEM1.GEM1ERF;
-import org.opensha.sha.earthquake.rupForecastImpl.GEM1.SourceData.GEMSourceData;
-import org.opensha.sha.imr.attenRelImpl.AkB2010Constants;
 import org.opensha.sha.imr.attenRelImpl.AkB_2010_AttenRel;
-import org.opensha.sha.imr.param.IntensityMeasureParams.PGA_Param;
+import org.opensha.sha.imr.attenRelImpl.constants.AkB2010Constants;
 import org.opensha.sha.imr.param.OtherParams.StdDevTypeParam;
-import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
 
 /**
  * Class providing methods for testing {@link AkB_2010_AttenRel}. Tables
@@ -299,77 +289,6 @@ public class AkB_2010_test implements ParameterChangeWarningListener {
 		double vs30 = 400.0;
 		double rake = 0.0;
 		validateMedian(vs30, rake, medianStrikeSlipStiffSoilTable);
-	}
-	
-	/**
-	 * Check AkB_2010 usage for computing hazard curves using GEM1ERF constructed
-	 * from area source data. Ruptures are treated as
-	 * points.
-	 * @throws Exception 
-	 */
-	@Test
-	public final void GEM1ERFPointRuptures() throws Exception{
-		akb2010AttenRel.setIntensityMeasure(PGA_Param.NAME);
-		ArrayList<GEMSourceData> srcDataList = new ArrayList<GEMSourceData>();
-		srcDataList.
-		add(AttenRelTestHelper.getActiveCrustAreaSourceData());
-		double timeSpan = 50.0;
-		GEM1ERF erf = GEM1ERF.getGEM1ERF(srcDataList, timeSpan);
-		erf.setParameter(GEM1ERF.AREA_SRC_RUP_TYPE_NAME,
-				GEM1ERF.AREA_SRC_RUP_TYPE_POINT);
-		erf.updateForecast();
-		HazardCurveCalculator hazCurveCalculator = new HazardCurveCalculator();
-		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper.setUpHazardCurve();
-		Site site = new Site(new Location(-0.171,-75.555));
-		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
-		hazCurveCalculator.getHazardCurve(hazCurve, site, akb2010AttenRel,
-				erf);
-	}
-	
-	/**
-	 * Check AkB_2010 usage for computing hazard curves using GEM1ERF constructed
-	 * from area source data. Ruptures are treated as
-	 * extended.
-	 * @throws Exception 
-	 */
-	@Test
-	public final void GEM1ERFLineRuptures() throws Exception{
-		akb2010AttenRel.setIntensityMeasure(PGA_Param.NAME);
-		ArrayList<GEMSourceData> srcDataList = new ArrayList<GEMSourceData>();
-		srcDataList.
-		add(AttenRelTestHelper.getActiveCrustAreaSourceData());
-		double timeSpan = 50.0;
-		GEM1ERF erf = GEM1ERF.getGEM1ERF(srcDataList, timeSpan);
-		erf.setParameter(GEM1ERF.AREA_SRC_RUP_TYPE_NAME,
-				GEM1ERF.AREA_SRC_RUP_TYPE_LINE);
-		erf.updateForecast();
-		HazardCurveCalculator hazCurveCalculator = new HazardCurveCalculator();
-		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper.setUpHazardCurve();
-		Site site = new Site(new Location(-0.171,-75.555));
-		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
-		hazCurveCalculator.getHazardCurve(hazCurve, site, akb2010AttenRel,
-				erf);
-	}
-	
-	/**
-	 * Check AB2003 usage for computing hazard curves using GEM1ERF constructed
-	 * from simple fault source data.
-	 * @throws Exception 
-	 */
-	@Test
-	public final void GEM1ERFSimpleFault() throws Exception{
-		akb2010AttenRel.setIntensityMeasure(PGA_Param.NAME);
-		ArrayList<GEMSourceData> srcDataList = new ArrayList<GEMSourceData>();
-		srcDataList.
-		add(AttenRelTestHelper.getActiveCrustSimpleFaultSourceData());
-		double timeSpan = 50.0;
-		GEM1ERF erf = GEM1ERF.getGEM1ERF(srcDataList, timeSpan);
-		HazardCurveCalculator hazCurveCalculator = new HazardCurveCalculator();
-		ArbitrarilyDiscretizedFunc hazCurve = AttenRelTestHelper.setUpHazardCurve();
-		Site site = new Site(new Location(40.2317, 15.8577));
-		site.addParameter(new DoubleParameter(Vs30_Param.NAME, 800.0));
-		hazCurveCalculator.getHazardCurve(hazCurve, site, akb2010AttenRel,
-				erf);
 	}
 
 	private void validateMedian(double vs30, double rake, double[][] table) {

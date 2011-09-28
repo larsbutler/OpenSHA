@@ -1,4 +1,4 @@
-package org.opensha.sha.imr.attenRelImpl;
+package org.opensha.sha.imr.attenRelImpl.constants;
 
 public class ToroEtAl2002SHAREConstants {
 	

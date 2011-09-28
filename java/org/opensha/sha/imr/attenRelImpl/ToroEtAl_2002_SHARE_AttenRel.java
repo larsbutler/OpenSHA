@@ -3,6 +3,8 @@ package org.opensha.sha.imr.attenRelImpl;
 import org.opensha.commons.param.event.ParameterChangeEvent;
 import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.earthquake.EqkRupture;
+import org.opensha.sha.imr.attenRelImpl.constants.ToroEtAl2002Constants;
+import org.opensha.sha.imr.attenRelImpl.constants.ToroEtAl2002SHAREConstants;
 import org.opensha.sha.imr.param.EqkRuptureParams.RakeParam;
 
 /**
