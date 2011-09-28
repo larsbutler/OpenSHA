@@ -132,7 +132,7 @@ public class AB2003Constants {
 	/**
 	 * Maximum rupture distance.
 	 */
-	public static final Double DISTANCE_RUP_WARN_MAX = new Double(500.0);
+	public static final Double DISTANCE_RUP_WARN_MAX = new Double(550.0);
 	/**
 	 * Minimum hypocentral depth.
 	 */

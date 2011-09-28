@@ -480,14 +480,6 @@ public class CF2008Constants {
 		 * Maximum hypocenter distance.
 		 */
 		public static final Double DISTANCE_HYPO_WARN_MAX = new Double(150.0);
-		/**
-		 * Minimum hypocenter depth
-		 */
-		public static final Double DEPTH_HYPO_WARN_MIN = new Double(10.0);
-		/**
-		 * Maximum hypocenter depth
-		 */
-		public static final Double DEPTH_HYPO_WARN_MAX = new Double(60.0);
 
 		/**
 		 * SOIL CLASS ROCK Vs30 upper bound

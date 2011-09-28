@@ -61,10 +61,10 @@ public class YoungsEtAl1997Constants {
 	public static final double A7_SOIL = 0.3643;
 
 	public static final Double MAG_WARN_MIN = new Double(5.00);
-	public static final Double MAG_WARN_MAX = new Double(8.00);
+	public static final Double MAG_WARN_MAX = new Double(8.20);
 
 	public static final Double DISTANCE_RUP_WARN_MIN = new Double(8.5);
-	public static final Double DISTANCE_RUP_WARN_MAX = new Double(500.0);
+	public static final Double DISTANCE_RUP_WARN_MAX = new Double(551.0);
 	/**
 	 * Class (B+C) Vs30 >= 360 
 	 * Class (D+E) Vs30 < 360 

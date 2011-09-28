@@ -64,7 +64,7 @@ import org.opensha.sha.util.TectonicRegionType;
  * <p>
  * 
  * Verification - This model has been validated (see {@link LL_2008_test}) using
- * tables from ??
+ * tables from Elise Delavaud using mathSHA.
  * </p>
  * 
  ** 

@@ -710,9 +710,10 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 				return AB2003Constants.LOG10_2_LN
 						* AB2003Constants.INTER_INTRAEVENT_STD[iper];
 			} else {
-				return Double.NaN;
+				throw new RuntimeException("Standard deviation type not recognized");
 			}
-		} else {
+		} else if (tecRegType.equals(TectonicRegionType.SUBDUCTION_SLAB
+				.toString())) {
 			if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL)) {
 				return AB2003Constants.LOG10_2_LN
 						* AB2003Constants.INTRA_TOTAL_STD[iper];
@@ -725,9 +726,10 @@ public class AB_2003_AttenRel extends AttenuationRelationship implements
 				return AB2003Constants.LOG10_2_LN
 						* AB2003Constants.INTRA_INTRAEVENT_STD[iper];
 			} else {
-				return Double.NaN;
+				throw new RuntimeException("Standard deviation type not recognized");
 			}
 		}
+		throw new RuntimeException("Tectonic region type not recognized");
 	}
 
 	/**

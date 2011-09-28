@@ -11,7 +11,7 @@ import org.opensha.commons.param.event.ParameterChangeWarningEvent;
 import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.imr.attenRelImpl.ToroEtAl_2002_AttenRel;
 import org.opensha.sha.imr.attenRelImpl.ToroEtAl_2002_SHARE_AttenRel;
-import org.opensha.sha.imr.attenRelImpl.constants.ToroEtAl2002SHAREConstants;
+import org.opensha.sha.imr.attenRelImpl.constants.AdjustFactorsSHARE;
 import org.opensha.sha.imr.param.OtherParams.StdDevTypeParam;
 
 /**
@@ -111,7 +111,7 @@ public class ToroEtAl_2002_SHARE_test implements ParameterChangeWarningListener 
 				double computedMedian = Math.exp(toro2002SHARE.getMean(iper,
 						mag, rJB, rake));
 				computedMedian = computedMedian
-						/ (ToroEtAl2002SHAREConstants.AFrock[iper] * toro2002SHARE
+						/ (AdjustFactorsSHARE.AFrock_TORO2002[iper] * toro2002SHARE
 								.computeStyleOfFaultingTerm(iper, rake)[2]);
 				assertEquals(expectedMedian, computedMedian, TOLERANCE);
 			}
@@ -124,7 +124,7 @@ public class ToroEtAl_2002_SHARE_test implements ParameterChangeWarningListener 
 			double computedMedian = Math.exp(toro2002SHARE.getMean(0, mag, rJB,
 					rake));
 			computedMedian = computedMedian
-					/ (ToroEtAl2002SHAREConstants.AFrock[0] * toro2002SHARE
+					/ (AdjustFactorsSHARE.AFrock_TORO2002[0] * toro2002SHARE
 							.computeStyleOfFaultingTerm(0, rake)[2]);
 
 			assertEquals(expectedMedian, computedMedian, TOLERANCE);
@@ -140,7 +140,7 @@ public class ToroEtAl_2002_SHARE_test implements ParameterChangeWarningListener 
 				double rJB = table[j][1];
 				double expectedStd = table[j][i];
 				double computedStd = toro2002SHARE.getStdDev(i - 2, mag, rJB,
-						stdDevType) / ToroEtAl2002SHAREConstants.sig_AFrock[i - 2];
+						stdDevType) / AdjustFactorsSHARE.sig_AFrock_TORO2002[i - 2];
 				assertEquals(expectedStd, computedStd, TOLERANCE);
 			}
 		}
@@ -150,7 +150,7 @@ public class ToroEtAl_2002_SHARE_test implements ParameterChangeWarningListener 
 			double rJB = table[j][1];
 			double expectedStd = table[j][columnDescr.length - 1];
 			double computedStd = toro2002SHARE.getStdDev(0, mag, rJB,
-					stdDevType) / ToroEtAl2002SHAREConstants.sig_AFrock[0];
+					stdDevType) / AdjustFactorsSHARE.sig_AFrock_TORO2002[0];
 			assertEquals(expectedStd, computedStd, TOLERANCE);
 		}
 

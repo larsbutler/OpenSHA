@@ -62,7 +62,10 @@ import org.opensha.sha.util.TectonicRegionType;
  * <LI>rakeParam - rake angle. Used to establish reverse faulting for shallow
  * crust events (30 < rake < 150 -> reverse)
  * <LI>focalDepthParam - depth to the earthquake rupture hypocenter
- * <LI>componentParam - geometric mean of two horizontal components
+ * <LI>componentParam - geometric mean of two horizontal components, GMRoti50
+ * (original model assumes only average horizontal, GMRorti50 added assuming
+ * equivalence to average horizontal according to SHARE Report D4.2: Adjustment
+ * of GMPEs, S. Drouet, F. Cotton, C. Beauval)
  * <LI>stdDevTypeParam - total, inter-event, intra-event, none
  * </UL>
  * <p>
@@ -265,6 +268,7 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 
 		StringConstraint constraint = new StringConstraint();
 		constraint.addString(ComponentParam.COMPONENT_AVE_HORZ);
+		constraint.addString(ComponentParam.COMPONENT_GMRotI50);
 		constraint.setNonEditable();
 		componentParam = new ComponentParam(constraint,
 				ComponentParam.COMPONENT_AVE_HORZ);
@@ -596,7 +600,8 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 			else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTRA))
 				return ZhaoEtAl2006Constants.Tau_c[iper];
 			else
-				throw new RuntimeException("Standard deviation type: "+stdDevType+" not recognized");
+				throw new RuntimeException("Standard deviation type: "
+						+ stdDevType + " not recognized");
 		} else if (tecRegType.equals(TectonicRegionType.SUBDUCTION_INTERFACE
 				.toString())) {
 			if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL))
@@ -611,7 +616,8 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 			else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTRA))
 				return ZhaoEtAl2006Constants.Tau_i[iper];
 			else
-				throw new RuntimeException("Standard deviation type: "+stdDevType+" not recognized");
+				throw new RuntimeException("Standard deviation type: "
+						+ stdDevType + " not recognized");
 		} else if (tecRegType.equals(TectonicRegionType.SUBDUCTION_SLAB
 				.toString())) {
 			if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL))
@@ -626,10 +632,11 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 			else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_INTRA))
 				return ZhaoEtAl2006Constants.Tau_s[iper];
 			else
-				throw new RuntimeException("Standard deviation type: "+stdDevType+" not recognized");
-		}
-		else
-			throw new RuntimeException("Tectonic region type: "+tecRegType+" not recognized");
+				throw new RuntimeException("Standard deviation type: "
+						+ stdDevType + " not recognized");
+		} else
+			throw new RuntimeException("Tectonic region type: " + tecRegType
+					+ " not recognized");
 	}
 
 	/**

@@ -3,6 +3,7 @@ package org.opensha.sha.imr.attenRelImpl;
 import org.opensha.commons.param.event.ParameterChangeEvent;
 import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.earthquake.EqkRupture;
+import org.opensha.sha.imr.attenRelImpl.constants.AdjustFactorsSHARE;
 import org.opensha.sha.imr.attenRelImpl.constants.Campbell2003Constants;
 import org.opensha.sha.imr.param.EqkRuptureParams.RakeParam;
 
@@ -16,9 +17,9 @@ import org.opensha.sha.imr.param.EqkRuptureParams.RakeParam;
  * (June 2003, BSSA, vol 93, no 3, pp 1012-1033). Modifications of the equations
  * according to the ERRATUM (July 2004) are also included.
  * <p>
- * The GMPE is adjusted to account for style of faulting and a default rock
- * soil (Vs30 >=800m/sec). The adjustment coefficients were proposed by S.
- * Drouet [2010] - internal SHARE WP4 report;
+ * The GMPE is adjusted to account for style of faulting and a default rock soil
+ * (Vs30 >=800m/sec). The adjustment coefficients were proposed by S. Drouet
+ * [2010] - internal SHARE WP4 report;
  * <p>
  * <UL>
  * Supported Intensity-Measure Parameters:
@@ -42,12 +43,12 @@ import org.opensha.sha.imr.param.EqkRuptureParams.RakeParam;
  * @created October, 2010 - updated July 2011
  * @version 1.01
  */
-public class Campbell_2003_SHARE_AttenRel extends Campbell_2003_AttenRel{
-	
+public class Campbell_2003_SHARE_AttenRel extends Campbell_2003_AttenRel {
+
 	public final static String NAME = "Campbell 2003 (SHARE)";
 
 	public final static String SHORT_NAME = "Campbell2003(SHARE)";
-	
+
 	private static final long serialVersionUID = 1L;
 
 	private double rake;
@@ -56,7 +57,7 @@ public class Campbell_2003_SHARE_AttenRel extends Campbell_2003_AttenRel{
 			ParameterChangeWarningListener warningListener) {
 		super(warningListener);
 	}
-	
+
 	/**
 	 * Call superclass method and initialize rake parameter from earthquake
 	 * rupture.
@@ -89,7 +90,7 @@ public class Campbell_2003_SHARE_AttenRel extends Campbell_2003_AttenRel{
 		this.eqkRupture = eqkRupture;
 		setPropagationEffectParams();
 	}
-	
+
 	/**
 	 * Compute ground motion distribution mean value (in ln space).
 	 */
@@ -100,50 +101,58 @@ public class Campbell_2003_SHARE_AttenRel extends Campbell_2003_AttenRel{
 			return getMean(iper, mag, rRup, rake);
 		}
 	}
-	
+
 	/**
 	 * Compute adjusted ground motion distribution mean value (in ln space)
 	 */
-	public double getMean(int iper, double mag, double rRup, double rake){
+	public double getMean(int iper, double mag, double rRup, double rake) {
 		double meanOriginal = super.getMean(iper, mag, rRup);
 		double[] f = computeStyleOfFaultingTerm(iper, rake);
-		return Math.log(Math.exp(meanOriginal) * f[2]);
+		return Math.log(Math.exp(meanOriginal) * f[2]
+				* AdjustFactorsSHARE.AFrock_CAMPBELL2003[iper]);
 	}
-	
+
 	/**
 	 * Compute style-of-faulting adjustment
 	 **/
 	public double[] computeStyleOfFaultingTerm(final int iper, final double rake) {
 		double[] f = new double[3];
-		if (rake > Campbell2003Constants.FLT_TYPE_NORMAL_RAKE_LOWER
-				&& rake <= Campbell2003Constants.FLT_TYPE_NORMAL_RAKE_UPPER) {
+		if (rake > AdjustFactorsSHARE.FLT_TYPE_NORMAL_RAKE_LOWER
+				&& rake <= AdjustFactorsSHARE.FLT_TYPE_NORMAL_RAKE_UPPER) {
 			f[0] = 1.0;
 			f[1] = 0.0;
 			f[2] = f[0]
-					* Math.pow(Campbell2003Constants.Frss[iper],
-							(1 - Campbell2003Constants.pR))
-					* Math.pow(Campbell2003Constants.Fnss,
-							-Campbell2003Constants.pN);
-		} else if (rake > Campbell2003Constants.FLT_TYPE_REVERSE_RAKE_LOWER
-				&& rake <= Campbell2003Constants.FLT_TYPE_REVERSE_RAKE_UPPER) {
+					* Math.pow(AdjustFactorsSHARE.Frss[iper],
+							(1 - AdjustFactorsSHARE.pR))
+					* Math.pow(AdjustFactorsSHARE.Fnss, -AdjustFactorsSHARE.pN);
+		} else if (rake > AdjustFactorsSHARE.FLT_TYPE_REVERSE_RAKE_LOWER
+				&& rake <= AdjustFactorsSHARE.FLT_TYPE_REVERSE_RAKE_UPPER) {
 			f[0] = 0.0;
 			f[1] = 1.0;
 			f[2] = f[1]
-					* Math.pow(Campbell2003Constants.Frss[iper],
-							-Campbell2003Constants.pR)
-					* Math.pow(Campbell2003Constants.Fnss,
-							(1 - Campbell2003Constants.pN));
+					* Math.pow(AdjustFactorsSHARE.Frss[iper],
+							-AdjustFactorsSHARE.pR)
+					* Math.pow(AdjustFactorsSHARE.Fnss,
+							(1 - AdjustFactorsSHARE.pN));
 		} else {
 			f[0] = 0.0;
 			f[1] = 0.0;
-			f[2] = Math.pow(Campbell2003Constants.Frss[iper],
-					-Campbell2003Constants.pR)
-					* Math.pow(Campbell2003Constants.Fnss,
-							-Campbell2003Constants.pN);
+			f[2] = Math.pow(AdjustFactorsSHARE.Frss[iper],
+					-AdjustFactorsSHARE.pR)
+					* Math.pow(AdjustFactorsSHARE.Fnss, -AdjustFactorsSHARE.pN);
 		}
 		return f;
 	}
 	
+	public double getStdDev(){
+		return getStdDev(iper, rake, stdDevType);
+	}
+	
+	public double getStdDev(int iper, double rake, String stdDevType){
+		double std = super.getStdDev(iper, rake, stdDevType);
+		return std * AdjustFactorsSHARE.sig_AFrock_CAMBPELL2003[iper];
+	}
+
 	/**
 	 * Allows the user to set the default parameter values for the selected
 	 * Attenuation Relationship.

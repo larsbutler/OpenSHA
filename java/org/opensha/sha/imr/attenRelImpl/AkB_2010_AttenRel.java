@@ -59,7 +59,10 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  * <LI>vs30Param - shear wave velocity (m/s) averaged over the top 30 m of the
  * soil profile; The model assumes the following classification: vs30 < 360 m/s
  * -> soft soil, 360 <= vs30 <= 750 -> stiff soil, vs30 > 750 -> rock.
- * <LI>componentParam - average horizontal, GMRoti50
+ * <LI>componentParam - average horizontal (geometrical mean), GMRoti50
+ * (original model assumes only average horizontal, GMRorti50 added assuming
+ * equivalence to average horizontal according to SHARE Report D4.2: Adjustment
+ * of GMPEs, S. Drouet, F. Cotton, C. Beauval)
  * <LI>stdDevTypeParam - total, inter-event, intra-event, none
  * </UL>
  * <p>
@@ -192,7 +195,7 @@ public class AkB_2010_AttenRel extends AttenuationRelationship implements
 	 */
 	protected final void initEqkRuptureParams() {
 
-		// moment magnitude (default 5.5)
+		// moment magnitude
 		magParam = new MagParam(AkB2010Constants.MAG_WARN_MIN,
 				AkB2010Constants.MAG_WARN_MAX);
 		// rake angle (default 0.0 -> strike-slip)

@@ -10,11 +10,12 @@ import org.junit.Test;
 import org.opensha.commons.param.event.ParameterChangeWarningEvent;
 import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.imr.attenRelImpl.Campbell_2003_SHARE_AttenRel;
+import org.opensha.sha.imr.attenRelImpl.constants.AdjustFactorsSHARE;
 import org.opensha.sha.imr.param.OtherParams.StdDevTypeParam;
 
 /**
- * Class providing methods for testing {@link Campbell_2003_SHARE_AttenRel}. Tables
- * provided by the original author.
+ * Class providing methods for testing {@link Campbell_2003_SHARE_AttenRel}.
+ * Tables provided by the original author.
  */
 public class Campbell_2003_SHARE_test implements ParameterChangeWarningListener {
 
@@ -106,7 +107,8 @@ public class Campbell_2003_SHARE_test implements ParameterChangeWarningListener 
 				double expectedMedian = table[j][i];
 				double computedMedian = Math.exp(ca03AttenRel.getMean(iper,
 						mag, rJB, rake))
-						/ (ca03AttenRel.computeStyleOfFaultingTerm(iper, rake)[2]);
+						/ (AdjustFactorsSHARE.AFrock_CAMPBELL2003[i-2] * ca03AttenRel
+								.computeStyleOfFaultingTerm(iper, rake)[2]);
 				assertEquals(expectedMedian, computedMedian, TOLERANCE);
 			}
 		}
@@ -117,7 +119,8 @@ public class Campbell_2003_SHARE_test implements ParameterChangeWarningListener 
 			double expectedMedian = table[j][columnDescr.length - 1];
 			double computedMedian = Math.exp(ca03AttenRel.getMean(0, mag, rJB,
 					rake))
-					/ (ca03AttenRel.computeStyleOfFaultingTerm(0, rake)[2]);
+					/ (AdjustFactorsSHARE.AFrock_CAMPBELL2003[0] * ca03AttenRel
+							.computeStyleOfFaultingTerm(0, rake)[2]);
 			assertEquals(expectedMedian, computedMedian, TOLERANCE);
 		}
 	}
@@ -130,7 +133,7 @@ public class Campbell_2003_SHARE_test implements ParameterChangeWarningListener 
 				double mag = table[j][0];
 				double expectedStd = table[j][i];
 				double computedStd = ca03AttenRel.getStdDev(i - 2, mag,
-						stdDevType);
+						stdDevType) / AdjustFactorsSHARE.sig_AFrock_CAMBPELL2003[i - 2];
 				assertEquals(expectedStd, computedStd, TOLERANCE);
 			}
 		}
@@ -138,7 +141,8 @@ public class Campbell_2003_SHARE_test implements ParameterChangeWarningListener 
 		for (int j = 0; j < table.length; j++) {
 			double mag = table[j][0];
 			double expectedStd = table[j][columnDescr.length - 1];
-			double computedStd = ca03AttenRel.getStdDev(0, mag, stdDevType);
+			double computedStd = ca03AttenRel.getStdDev(0, mag, stdDevType)
+					/ AdjustFactorsSHARE.sig_AFrock_CAMBPELL2003[0];
 			assertEquals(expectedStd, computedStd, TOLERANCE);
 		}
 	}

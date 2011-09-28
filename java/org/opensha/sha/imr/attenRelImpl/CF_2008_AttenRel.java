@@ -55,17 +55,17 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  * <p>
  * 
  * <b>Description:</b> This implements the GMPE published by Cauzzi & Faccioli
- * (2008,"Broadband (0.05 to 20s) prediction of displacement response spectra based on worldwide digital records"
- * , journal of Seismology, Volume 12,pp. 453-475) This implements only
- * horizontal components and the equation (2) page 462.
+ * (2008, Broadband (0.05 to 20s) prediction of displacement response spectra
+ * based on worldwide digital records , journal of Seismology, Volume 12,pp.
+ * 453-475) This implements only horizontal components and the equation (2) page
+ * 462.
  * 
  * 
  * Supported Intensity-Measure Parameters:
  * <p>
  * <UL>
  * <LI>pgaParam - Peak Ground Acceleration
- * <LI>pgvParam - Peak Ground Velocity
- * <LI>sdParam - Default values are for Displacement Response Spectra
+ * <LI>pgvParam - Peak Ground Velocity (added according to personal communication)
  * <LI>saParam = ((2*pi/T)^2)*sdParam Convert to Acceleration Response Spectra
  * Other Independent Parameters:
  * <p>
@@ -82,12 +82,12 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
  * </UL>
  * </p>
  * 
- *<p>
+ * <p>
  * 
  * Verification - This model has been tested (see {@link CF_2008_test} using
  * tables from original authors)
  * 
- *</p>
+ * </p>
  * 
  * 
  * @author L. Danciu
@@ -110,9 +110,6 @@ public class CF_2008_AttenRel extends AttenuationRelationship implements
 
 	/** Moment magnitude. */
 	private double mag;
-
-	/** Tectonic region type. */
-	private String tecRegType;
 
 	/** rake angle. */
 	private double rake;
@@ -513,8 +510,7 @@ public class CF_2008_AttenRel extends AttenuationRelationship implements
 		logY *= CF2008Constants.LOG10_2_LN;
 
 		// tmp variable to convert to DRS to mean PSA(g);
-		double tmp1 = Math
-				.pow((2 * Math.PI) / CF2008Constants.PERIOD[iper], 2);
+		double tmp1 = Math.pow((2 * Math.PI) / CF2008Constants.PERIOD[iper], 2);
 
 		if (iper == 0) {
 			logY = Math.exp(logY);
@@ -555,7 +551,6 @@ public class CF_2008_AttenRel extends AttenuationRelationship implements
 	private double[] computeStyleOfFaultingTerm(final int iper,
 			final double rake) {
 		double[] f = new double[3];
-		double faultTerm = Double.NaN;
 		if (rake > CF2008Constants.FLT_TYPE_NORMAL_RAKE_LOWER
 				&& rake <= CF2008Constants.FLT_TYPE_NORMAL_RAKE_UPPER) {
 			f[0] = 1.00;
@@ -578,10 +573,9 @@ public class CF_2008_AttenRel extends AttenuationRelationship implements
 		if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE))
 			return 0;
 		else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL))
-			return CF2008Constants.LOG10_2_LN
-					* CF2008Constants.TOTAL_STD[iper];
+			return CF2008Constants.LOG10_2_LN * CF2008Constants.TOTAL_STD[iper];
 		else
-			return Double.NaN;
+			throw new RuntimeException("Standard deviation type: "+stdDevType+" not recognized");
 	}
 
 	/**

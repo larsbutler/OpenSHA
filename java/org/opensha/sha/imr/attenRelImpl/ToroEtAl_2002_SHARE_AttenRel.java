@@ -3,8 +3,9 @@ package org.opensha.sha.imr.attenRelImpl;
 import org.opensha.commons.param.event.ParameterChangeEvent;
 import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.earthquake.EqkRupture;
+import org.opensha.sha.imr.attenRelImpl.constants.AdjustFactorsSHARE;
+import org.opensha.sha.imr.attenRelImpl.constants.AdjustFactorsSHARE;
 import org.opensha.sha.imr.attenRelImpl.constants.ToroEtAl2002Constants;
-import org.opensha.sha.imr.attenRelImpl.constants.ToroEtAl2002SHAREConstants;
 import org.opensha.sha.imr.param.EqkRuptureParams.RakeParam;
 
 /**
@@ -116,29 +117,8 @@ public class ToroEtAl_2002_SHARE_AttenRel extends ToroEtAl_2002_AttenRel {
 		double meanOriginal = super.getMean(iper, mag, rJB);
 		double meanAdj = Double.NaN;
 		double[] f = computeStyleOfFaultingTerm(iper, rake);
-		/**
-		 * This extends the model to SA(3sec) by multiplying the SA(2sec) with
-		 * the ratio SA(3sec)/SA(2sec) obtained as an average from the following
-		 * GMPEs: CF2008 CY2008 ZH2006 Campbell2003 AkB2010
-		 * */
-		if (ToroEtAl2002Constants.PERIOD[iper] == 3.00) {
-			meanAdj = Math.exp(meanOriginal)
-					* ToroEtAl2002Constants.T2sec_TO_T3sec_factor * f[2]
-					* ToroEtAl2002SHAREConstants.AFrock[iper];
-			/**
-			 * This extends the model to SA(4sec) by multiplying the SA(3sec)
-			 * with the ratio SA(4sec)/SA(3sec) obtained as an average from the
-			 * following GMPEs: CF2008 CY2008 ZH2006 Campbell2003
-			 * 
-			 * */
-		} else if (ToroEtAl2002Constants.PERIOD[iper] == 4.00) {
-			meanAdj = Math.exp(meanOriginal)
-					* ToroEtAl2002Constants.T3sec_TO_T4sec_factor * f[2]
-					* ToroEtAl2002SHAREConstants.AFrock[iper];
-		} else {
-			meanAdj = Math.exp(meanOriginal) * f[2]
-					* ToroEtAl2002SHAREConstants.AFrock[iper];
-		}
+		meanAdj = Math.exp(meanOriginal) * f[2]
+				* AdjustFactorsSHARE.AFrock_TORO2002[iper];
 		return Math.log(meanAdj);
 	}
 
@@ -152,26 +132,26 @@ public class ToroEtAl_2002_SHARE_AttenRel extends ToroEtAl_2002_AttenRel {
 			f[0] = 1.0;
 			f[1] = 0.0;
 			f[2] = f[0]
-					* Math.pow(ToroEtAl2002Constants.Frss[iper],
-							(1 - ToroEtAl2002Constants.pR))
-					* Math.pow(ToroEtAl2002Constants.Fnss,
-							-ToroEtAl2002Constants.pN);
+					* Math.pow(AdjustFactorsSHARE.Frss[iper],
+							(1 - AdjustFactorsSHARE.pR))
+					* Math.pow(AdjustFactorsSHARE.Fnss,
+							-AdjustFactorsSHARE.pN);
 		} else if (rake > ToroEtAl2002Constants.FLT_TYPE_REVERSE_RAKE_LOWER
 				&& rake <= ToroEtAl2002Constants.FLT_TYPE_REVERSE_RAKE_UPPER) {
 			f[0] = 0.0;
 			f[1] = 1.0;
 			f[2] = f[1]
-					* Math.pow(ToroEtAl2002Constants.Frss[iper],
-							-ToroEtAl2002Constants.pR)
-					* Math.pow(ToroEtAl2002Constants.Fnss,
-							(1 - ToroEtAl2002Constants.pN));
+					* Math.pow(AdjustFactorsSHARE.Frss[iper],
+							-AdjustFactorsSHARE.pR)
+					* Math.pow(AdjustFactorsSHARE.Fnss,
+							(1 - AdjustFactorsSHARE.pN));
 		} else {
 			f[0] = 0.0;
 			f[1] = 0.0;
-			f[2] = Math.pow(ToroEtAl2002Constants.Frss[iper],
-					-ToroEtAl2002Constants.pR)
-					* Math.pow(ToroEtAl2002Constants.Fnss,
-							-ToroEtAl2002Constants.pN);
+			f[2] = Math.pow(AdjustFactorsSHARE.Frss[iper],
+					-AdjustFactorsSHARE.pR)
+					* Math.pow(AdjustFactorsSHARE.Fnss,
+							-AdjustFactorsSHARE.pN);
 		}
 		return f;
 	}
@@ -179,10 +159,10 @@ public class ToroEtAl_2002_SHARE_AttenRel extends ToroEtAl_2002_AttenRel {
 	public double getStdDev() {
 		return getStdDev(iper, mag, rJB, stdDevType);
 	}
-	
-	public double getStdDev(int iper, double mag, double rJB, String stdDevType){
+
+	public double getStdDev(int iper, double mag, double rJB, String stdDevType) {
 		return super.getStdDev(iper, mag, rJB, stdDevType)
-		* ToroEtAl2002SHAREConstants.sig_AFrock[iper];
+				* AdjustFactorsSHARE.sig_AFrock_TORO2002[iper];
 	}
 
 	/**
