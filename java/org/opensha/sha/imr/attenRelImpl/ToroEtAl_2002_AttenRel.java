@@ -319,9 +319,7 @@ public class ToroEtAl_2002_AttenRel extends AttenuationRelationship implements
 	}
 
 	public double getStdDev() {
-		if (intensityMeasureChanged) {
-			setPeriodIndex();
-		}
+		setPeriodIndex();
 		return getStdDev(iper, mag, rJB, stdDevType);
 	}
 
@@ -443,7 +441,7 @@ public class ToroEtAl_2002_AttenRel extends AttenuationRelationship implements
 
 		if (pName.equals(MagParam.NAME)) {
 			mag = ((Double) val).doubleValue();
-		} else if (pName.equals(DistanceRupParameter.NAME)) {
+		} else if (pName.equals(DistanceJBParameter.NAME)) {
 			rJB = ((Double) val).doubleValue();
 		} else if (pName.equals(StdDevTypeParam.NAME)) {
 			stdDevType = (String) val;
