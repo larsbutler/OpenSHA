@@ -324,9 +324,7 @@ public class Campbell_2003_AttenRel extends AttenuationRelationship implements
 	}
 
 	public double getStdDev() {
-		if (intensityMeasureChanged) {
-			setPeriodIndex();
-		}
+		setPeriodIndex();
 		return getStdDev(iper, mag, stdDevType);
 	}
 
