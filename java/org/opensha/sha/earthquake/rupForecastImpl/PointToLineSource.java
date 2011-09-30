@@ -266,6 +266,7 @@ public class PointToLineSource extends ProbEqkSource implements
                 	for(int i=0;i<aveRupTopVersusMag.getNum()-1;i++){
                 		if(mag >= aveRupTopVersusMag.getX(i) && mag < aveRupTopVersusMag.getX(i+1)){
                 			depth = aveRupTopVersusMag.getY(i);
+                			break;
                 		}
                 	}
                 }
