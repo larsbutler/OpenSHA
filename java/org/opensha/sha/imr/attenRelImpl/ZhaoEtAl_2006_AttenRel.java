@@ -471,6 +471,11 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 	 */
 	public double getMean(int iper, double mag, double rRup, double hypodepth,
 			double rake, double vs30, String tectonicRegiontType) {
+		
+		// to avoid zero distances
+		if(rRup==0){
+			rRup = 0.1;
+		}
 
 		// This is unity for reverse crustal events - Otherwise 0
 		double flag_Fr = 0.0;
@@ -561,9 +566,9 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 		
 		// According to Zhao's paper: The modification factor for slab events
 		// applies only to a source distance of about 40 km or larger
-		if(rRup>=40){
+		//if(rRup>=40){
 			lnGm = lnGm + flag_Ssl * ZhaoEtAl2006Constants.Ssl[iper] * Math.log(rRup);
-		}
+		//}
 
 		// Return the computed mean value
 		lnGm += m2CorrFact;
