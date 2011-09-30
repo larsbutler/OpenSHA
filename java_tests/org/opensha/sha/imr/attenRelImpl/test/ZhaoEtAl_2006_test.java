@@ -29,8 +29,6 @@ public class ZhaoEtAl_2006_test implements ParameterChangeWarningListener {
 	
 	private static final String M65Dist223Depth20InterfaceSoftSoilTableFile = "zhao_r22.3_m6.5_dep20.0_interf_site4.dat";
 	
-	private static final String M65Dist223Depth20IntraSlabRockTableFile = "zhao_r22.3_m6.5_dep20.0_slab_site1.dat";
-	
 	private static final String M5Dist30Depth30InterfaceRockTableFile = "zhao_r30.0_m5.0_dep30_interf_site1.dat";
 
 	/** Number of columns in test tables. */
@@ -56,8 +54,6 @@ public class ZhaoEtAl_2006_test implements ParameterChangeWarningListener {
 	private static double[][] M65Dist223Depth20InterfaceMediumSoilTable = null;
 	
 	private static double[][] M65Dist223Depth20InterfaceSoftSoilTable = null;
-	
-	private static double[][] M65Dist223Depth20IntraSlabRockTable = null;
 	
 	private static double[][] M5Dist30Depth30InterfaceRockTable = null;
 
@@ -103,11 +99,6 @@ public class ZhaoEtAl_2006_test implements ParameterChangeWarningListener {
 				new File(ClassLoader.getSystemResource(
 						M65Dist223Depth20InterfaceSoftSoilTableFile).toURI()),
 						M65Dist223Depth20InterfaceSoftSoilTable);
-		M65Dist223Depth20IntraSlabRockTable = new double[TABLE_NUM_ROWS][TABLE_NUM_COL];
-		AttenRelTestHelper.readNumericTable(
-				new File(ClassLoader.getSystemResource(
-						M65Dist223Depth20IntraSlabRockTableFile).toURI()),
-						M65Dist223Depth20IntraSlabRockTable);
 		M5Dist30Depth30InterfaceRockTable = new double[TABLE_NUM_ROWS][TABLE_NUM_COL];
 		AttenRelTestHelper.readNumericTable(
 				new File(ClassLoader.getSystemResource(
@@ -127,7 +118,6 @@ public class ZhaoEtAl_2006_test implements ParameterChangeWarningListener {
 		M65Dist223Depth20InterfaceHardSoilTable = null;
 		M65Dist223Depth20InterfaceMediumSoilTable = null;
 		M65Dist223Depth20InterfaceSoftSoilTable = null;
-		M65Dist223Depth20IntraSlabRockTable = null;
 		M5Dist30Depth30InterfaceRockTable = null;
 	}
 
@@ -205,19 +195,6 @@ public class ZhaoEtAl_2006_test implements ParameterChangeWarningListener {
 		double vs30 = 100.0;
 		String tectRegType = TectonicRegionType.SUBDUCTION_INTERFACE.toString();
 		double[][] verificationTable = M65Dist223Depth20InterfaceSoftSoilTable;
-		compareMeanAndStd(mag, rRup, hypodepth, rake, vs30, tectRegType,
-				verificationTable);
-	}
-	
-	@Test
-	public void m65Dist223Depth20IntraSlabRock() {
-		double mag = 6.5;
-		double rRup = 22.3;
-		double hypodepth = 20.0;
-		double rake = +90.0;
-		double vs30 = 760.0;
-		String tectRegType = TectonicRegionType.SUBDUCTION_SLAB.toString();
-		double[][] verificationTable = M65Dist223Depth20IntraSlabRockTable;
 		compareMeanAndStd(mag, rRup, hypodepth, rake, vs30, tectRegType,
 				verificationTable);
 	}

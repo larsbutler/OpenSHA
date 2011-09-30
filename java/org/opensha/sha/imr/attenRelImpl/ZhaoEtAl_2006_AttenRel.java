@@ -556,8 +556,14 @@ public class ZhaoEtAl_2006_AttenRel extends AttenuationRelationship implements
 				+ ZhaoEtAl2006Constants.E[iper] * hypodepth * delta_h + flag_Fr
 				* ZhaoEtAl2006Constants.Sr[iper] + flag_Si
 				* ZhaoEtAl2006Constants.Si[iper] + flag_Ss
-				* ZhaoEtAl2006Constants.Ss[iper] + flag_Ssl
-				* ZhaoEtAl2006Constants.Ssl[iper] * Math.log(rRup) + soilCoeff;
+				* ZhaoEtAl2006Constants.Ss[iper] 
+				+ soilCoeff;
+		
+		// According to Zhao's paper: The modification factor for slab events
+		// applies only to a source distance of about 40 km or larger
+		if(rRup>=40){
+			lnGm = lnGm + flag_Ssl * ZhaoEtAl2006Constants.Ssl[iper] * Math.log(rRup);
+		}
 
 		// Return the computed mean value
 		lnGm += m2CorrFact;
