@@ -1,4 +1,4 @@
-package org.opensha.sha.imr.attenRelImpl;
+package org.opensha.sha.imr.attenRelImpl.test;
 
 import junit.framework.TestCase;
 
@@ -11,6 +11,7 @@ import org.opensha.commons.geo.LocationUtils;
 import org.opensha.commons.param.event.ParameterChangeWarningEvent;
 import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.earthquake.EqkRupture;
+import org.opensha.sha.imr.attenRelImpl.BW_1997_AttenRel;
 
 public class BW_1997_AttenRelTest extends TestCase {
     private BW_1997_AttenRel bw_1997_AttenRel;
@@ -121,7 +122,7 @@ public class BW_1997_AttenRelTest extends TestCase {
         Location hypo = new Location(0.0, 0.0, 5.0);
         Location location = new Location(0.0, 0.1, 0.0);
         EqkRupture eqkRupture =
-                PredictionEquationTestHelper.getPointEqkRupture(mag, hypo,
+                AttenRelTestHelper.getPointEqkRupture(mag, hypo,
                         aveRake);
         double epicentralDistance = LocationUtils.horzDistance(hypo, location);
         /*
