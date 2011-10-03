@@ -163,9 +163,9 @@ public class Site extends ParameterList implements NamedObjectAPI,
      */
     public boolean equalsSite(Site site) {
 
-        if (site == null)
+        if ((name == null || site.name == null) && name != site.name)
             return false;
-        if (name == null || site.name == null || !name.equals(site.name))
+        if (name != null && !name.equals(site.name))
             return false;
         if (!location.equals(site.location))
             return false;
