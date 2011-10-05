@@ -141,6 +141,84 @@ public class GutenbergRichterMagFreqDist extends IncrementalMagFreqDist {
     }
 
     /**
+     * Add provided value to magUpper keeping total moment rate the same.
+     *
+     * @param magUpperIncrement
+     *           : value to add to magUpper
+     */
+    public void incrementMagUpper(double magUpperIncrement) {
+        // calculate new magUpper value:
+        // add uncertainty value (delta/2 is added because magUpper
+        // refers to bin center)
+        double newMagUpper = magUpper + delta / 2 + magUpperIncrement;
+        // round new magUpper with respect to delta
+        newMagUpper = Math.round(newMagUpper / delta) * delta;
+        // move back to bin center
+        newMagUpper = newMagUpper - delta / 2;
+
+        // setting new computed value
+        setMagUpper(newMagUpper);
+    }
+
+    /**
+     * Replace magUpper with a provided value keeping total moment rate
+     * the same.
+     *
+     * @param newMagUpper
+     *           : value to replace magUpper with
+     */
+    public void setMagUpper(double newMagUpper) {
+        // total moment rate
+        double totMoRate = getTotalMomentRate();
+
+        // calculate number of magnitude values
+        int numVal = (int) Math.round((magLower - newMagUpper) / delta + 1);
+
+        // changing the bins array
+        set(magLower, newMagUpper, numVal);
+
+        // preserving the same total moment rate
+        setAllButTotCumRate(magLower, newMagUpper, totMoRate, bValue);
+    }
+
+    /**
+     * Replace values of a and b with provided numbers keeping the total moment
+     * rate the same.
+     *
+     * @param newA
+     *           : new value for a
+     * @param newB
+     *           : new value for b
+     */
+    public void setAB(double newA, double newB) {
+        // compute total cumulative rate between minimum and maximum magnitude
+        double totCumRate = Double.NaN;
+        if (magLower != magUpper) {
+            totCumRate =
+                    Math.pow(10, newA - newB * (magLower - delta/2))
+                            - Math.pow(10, newA - newB * (magUpper + delta/2));
+        } else {
+            // compute incremental a value and calculate rate corresponding to
+            // minimum magnitude
+            double aIncr = newA + Math.log10(newB * Math.log(10));
+            totCumRate = Math.pow(10, aIncr - newB * magLower);
+        }
+        setAllButTotMoRate(magLower, magUpper, totCumRate, newB);
+    }
+
+    /**
+     * Increment b value by provided number keeping the total moment rate
+     * the same.
+     *
+     * @param bValueIncrement
+     *           : increment value for b
+     */
+    public void incrementB(double bValueIncrement) {
+        double newBValue = bValue + bValueIncrement;
+        setAllButTotCumRate(magLower, magUpper, totMoRate, newBValue);
+    }
+
+    /**
      * Set all values except Cumulative Rate
      * 
      * @param magLower
