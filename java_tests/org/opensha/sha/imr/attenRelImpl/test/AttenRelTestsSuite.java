@@ -20,8 +20,8 @@ package org.opensha.sha.imr.attenRelImpl.test;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+
 import org.opensha.sha.imr.AttenuationRelationshipTest;
-import org.opensha.sha.imr.attenRelImpl.BW_1997_AttenRelTest;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({ Spudich_1999_test.class, Abrahamson_2000_test.class,

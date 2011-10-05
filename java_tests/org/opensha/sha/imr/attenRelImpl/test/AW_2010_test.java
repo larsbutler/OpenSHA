@@ -231,44 +231,12 @@ public class AW_2010_test implements ParameterChangeWarningListener {
         aw_2010_AttenRel.setEqkRupture(rup);
     }
 
-    /**
-     * This test checks that the AW_2010_AttenRel object throws a warning
-     * exception when a hypocentral distance > 300 km is passed. The point
-     * source is defined with magnitude 5 (acceptable value). The average rake
-     * is not needed by the IPE but is used to define the EqkRupture object.
-     * Hypocenter coordinates are lat, lon, depth in km. The Site is defined on
-     * the same latitude as the hypocenter but shifted 4 degrees East.
-     */
-    @Test(expected = org.opensha.commons.exceptions.WarningException.class)
-    public void hypocentralDistanceTooLarge() {
-        Site site = new Site(new Location(0.0, 4., 0.0));
-        EqkRupture rup = getEqkRuptureFromPointSource();
-        aw_2010_AttenRel.setSite(site);
-        aw_2010_AttenRel.setEqkRupture(rup);
-    }
-
     private EqkRupture getEqkRuptureFromPointSource() {
         double mag = 5.0;
         double aveRake = 0.0;
         Location hypo = new Location(0.0, 0.0, 5.0);
         EqkRupture rup = getPointEqkRupture(mag, hypo, aveRake);
         return rup;
-    }
-
-    /**
-     * This test checks that the AW_2010_AttenRel object throws a warning
-     * exception when a closest distance to rupture > 300 km is passed. For this
-     * test, the defined finite rupture is data taken from the Elsinore fault
-     * (USGS California model: aFault_aPriori_D2.1.in). The Site is defined at
-     * the intersection of the equator and Greenwich meridian (should be enough
-     * far from California).
-     */
-    @Test(expected = org.opensha.commons.exceptions.WarningException.class)
-    public void closestDistanceToRuptureTooLarge() {
-        Site site = new Site(new Location(0.0, 0.0, 0.0));
-        EqkRupture rup = getEqkRuptureFromFiniteFault();
-        aw_2010_AttenRel.setSite(site);
-        aw_2010_AttenRel.setEqkRupture(rup);
     }
 
     private EqkRupture getEqkRuptureFromFiniteFault() {

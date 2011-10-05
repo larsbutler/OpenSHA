@@ -195,7 +195,7 @@ public class PoissonianAreaSourceTestHelper {
 		return gmpe;
 	}
 
-	private static GutenbergRichterMagFreqDist getPeerTestSet1Case10AreaSourceMagFreqDist() {
+	public static GutenbergRichterMagFreqDist getPeerTestSet1Case10AreaSourceMagFreqDist() {
 		double Mmin = 5.0;
 		double Mmax = 6.5;
 		double bValue = 0.9;
@@ -212,7 +212,7 @@ public class PoissonianAreaSourceTestHelper {
 				numVal);
 	}
 
-	private static Region getPeerTestSet1Case10AreaSourceRegion() {
+	public static Region getPeerTestSet1Case10AreaSourceRegion() {
 		LocationList regionBorder = new LocationList();
 		regionBorder.add(new Location(38.901, -122.000));
 		regionBorder.add(new Location(38.899, -121.920));
