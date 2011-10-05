@@ -2,13 +2,13 @@
  * Copyright 2009 OpenSHA.org in partnership with the Southern California
  * Earthquake Center (SCEC, http://www.scec.org) at the University of Southern
  * California and the UnitedStates Geological Survey (USGS; http://www.usgs.gov)
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -32,7 +32,7 @@ import org.opensha.commons.exceptions.MagFreqDistException;
  * Note that magLower and magUpper must exactly equal one of the descrete x-axis
  * values.
  * </p>
- *
+ * 
  * @author Nitin Gupta & Vipin Gupta Date: Aug 8, 2002
  * @version 1.0
  */
@@ -52,7 +52,7 @@ public class GutenbergRichterMagFreqDist extends IncrementalMagFreqDist {
 
     /**
      * constructor : this is same as parent class constructor
-     *
+     * 
      * @param min
      * @param num
      * @param delta
@@ -68,7 +68,7 @@ public class GutenbergRichterMagFreqDist extends IncrementalMagFreqDist {
 
     /**
      * constructor: this is sameas parent class constructor
-     *
+     * 
      * @param min
      * @param max
      * @param num
@@ -83,7 +83,7 @@ public class GutenbergRichterMagFreqDist extends IncrementalMagFreqDist {
 
     /**
      * constructor: this is sameas parent class constructor
-     *
+     * 
      * @param min
      * @param max
      * @param num
@@ -100,7 +100,7 @@ public class GutenbergRichterMagFreqDist extends IncrementalMagFreqDist {
     /**
      * constructor: this constructor assumes magLower is minX and magUpper to be
      * maxX
-     *
+     * 
      * @param min
      * @param num
      * @param delta
@@ -119,7 +119,7 @@ public class GutenbergRichterMagFreqDist extends IncrementalMagFreqDist {
 
     /**
      * constructor:
-     *
+     * 
      * @param min
      * @param num
      * @param delta
@@ -221,7 +221,7 @@ public class GutenbergRichterMagFreqDist extends IncrementalMagFreqDist {
 
     /**
      * Set all values except Cumulative Rate
-     *
+     * 
      * @param magLower
      *            : lowest magnitude that has non zero rate
      * @param magUpper
@@ -243,7 +243,7 @@ public class GutenbergRichterMagFreqDist extends IncrementalMagFreqDist {
 
     /**
      * Set all values except total moment rate
-     *
+     * 
      * @param magLower
      *            : lowest magnitude that has non zero rate
      * @param magUpper
@@ -266,7 +266,7 @@ public class GutenbergRichterMagFreqDist extends IncrementalMagFreqDist {
 
     /**
      * Set All but magUpper
-     *
+     * 
      * @param magLower
      *            : lowest magnitude that has non zero rate
      * @param totMoRate
@@ -364,7 +364,7 @@ public class GutenbergRichterMagFreqDist extends IncrementalMagFreqDist {
      * the EvenlyDiscretizedFunc class by making a objects of the
      * GutenbergRitcherMagFreqDist class and calling the set functions of this
      * from outside
-     *
+     * 
      * @param point
      * @throws MagFreqDistException
      */
@@ -381,7 +381,7 @@ public class GutenbergRichterMagFreqDist extends IncrementalMagFreqDist {
      * the EvenlyDiscretizedFunc class by making a objects of the
      * GutenbergRitcherMagFreqDist class and calling the set functions of this
      * from outside
-     *
+     * 
      * @param x
      * @param y
      * @throws MagFreqDistException
@@ -399,7 +399,7 @@ public class GutenbergRichterMagFreqDist extends IncrementalMagFreqDist {
      * the EvenlyDiscretizedFunc class by making a objects of the
      * GutenbergRitcherMagFreqDist class and calling the set functions of this
      * from outside.
-     *
+     * 
      * @param index
      * @param y
      * @throws MagFreqDistException
@@ -445,7 +445,7 @@ public class GutenbergRichterMagFreqDist extends IncrementalMagFreqDist {
     }
 
     /**
-     *
+     * 
      * @returns the cumulative rate at magLower
      */
 
@@ -462,7 +462,7 @@ public class GutenbergRichterMagFreqDist extends IncrementalMagFreqDist {
     }
 
     /**
-     *
+     * 
      * @returns the magLower : lowest magnitude that has non zero rate
      */
     public double getMagLower() {
@@ -470,7 +470,7 @@ public class GutenbergRichterMagFreqDist extends IncrementalMagFreqDist {
     }
 
     /**
-     *
+     * 
      * @returns the magUpper : highest magnitude that has non zero rate
      */
     public double getMagUpper() {
@@ -479,7 +479,7 @@ public class GutenbergRichterMagFreqDist extends IncrementalMagFreqDist {
 
     /**
      * returns the name of this class
-     *
+     * 
      * @return
      */
 
@@ -489,7 +489,7 @@ public class GutenbergRichterMagFreqDist extends IncrementalMagFreqDist {
 
     /**
      * this function returns String for drawing Legen in JFreechart
-     *
+     * 
      * @return : returns the String which is needed for Legend in graph
      */
     public String getDefaultInfo() throws DataPoint2DException {
@@ -502,7 +502,7 @@ public class GutenbergRichterMagFreqDist extends IncrementalMagFreqDist {
     /** Returns a rcopy of this and all points in this GutenbergRichter */
     /*
      * public DiscretizedFuncAPI deepClone() throws DataPoint2DException {
-     *
+     * 
      * GutenbergRichterMagFreqDist f = new GutenbergRichterMagFreqDist(minX,
      * num, delta); f.setAllButTotMoRate(this.magLower, this.magUpper,
      * this.getTotCumRate(), this.bValue); f.tolerance = tolerance; return f; }
@@ -510,20 +510,20 @@ public class GutenbergRichterMagFreqDist extends IncrementalMagFreqDist {
 
     /**
      * this method (defined in parent) is deactivated here (name is finalized)
-     *
+     * 
      * public void setName(String name) throws UnsupportedOperationException{
      * throw new
      * UnsupportedOperationException("setName not allowed for MagFreqDist.");
-     *
+     * 
      * }
-     *
-     *
+     * 
+     * 
      * this method (defined in parent) is deactivated here (name is finalized)
-     *
+     * 
      * public void setInfo(String info)throws UnsupportedOperationException{
      * throw new
      * UnsupportedOperationException("setInfo not allowed for MagFreqDist.");
-     *
+     * 
      * }
      */
 
