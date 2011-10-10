@@ -147,32 +147,15 @@ public class GutenbergRichterMagFreqDist extends IncrementalMagFreqDist {
      *           : value to add to magUpper
      */
     public void incrementMagUpper(double magUpperIncrement) {
-        // calculate new magUpper value:
-        // add uncertainty value (delta/2 is added because magUpper
-        // refers to bin center)
-        double newMagUpper = magUpper + delta / 2 + magUpperIncrement;
-        // round new magUpper with respect to delta
-        newMagUpper = Math.round(newMagUpper / delta) * delta;
-        // move back to bin center
-        newMagUpper = newMagUpper - delta / 2;
-
-        // setting new computed value
-        setMagUpper(newMagUpper);
-    }
-
-    /**
-     * Replace magUpper with a provided value keeping total moment rate
-     * the same.
-     *
-     * @param newMagUpper
-     *           : value to replace magUpper with
-     */
-    public void setMagUpper(double newMagUpper) {
-        // total moment rate
+        // get old total moment rate
         double totMoRate = getTotalMomentRate();
 
-        // calculate number of magnitude values
-        int numVal = (int) Math.round((magLower - newMagUpper) / delta + 1);
+        // calculate new magUpper with respect to existing delta
+        double newMagUpper = magUpper + magUpperIncrement;
+        newMagUpper = Math.round((newMagUpper - magLower) / delta) * delta + magLower;
+
+        // calculate new number of magnitude values
+        int numVal = (int) ((newMagUpper - magLower) / delta + 1);
 
         // changing the bins array
         set(magLower, newMagUpper, numVal);
@@ -182,8 +165,32 @@ public class GutenbergRichterMagFreqDist extends IncrementalMagFreqDist {
     }
 
     /**
-     * Replace values of a and b with provided numbers keeping the total moment
-     * rate the same.
+     * Replace magUpper with a provided value.
+     *
+     * @param newMagUpper
+     *           : value to replace magUpper with, not shifted to a bin center.
+     */
+    public void setMagUpper(double newMagUpper) {
+    	double oldA = get_aValue(); 
+    	
+    	double totCumRate = Math.pow(10, oldA - bValue * (magLower - delta/2))
+    						- Math.pow(10, oldA - bValue * newMagUpper);
+    	
+    	newMagUpper -= delta / 2;
+    	// rounding with respect to delta
+    	newMagUpper = Math.round((newMagUpper - magLower) / delta) * delta + magLower;
+
+    	// calculate new number of magnitude values
+        int numVal = (int) ((newMagUpper - magLower) / delta + 1);
+
+        // changing the bins array
+        set(magLower, newMagUpper, numVal);    	
+        
+    	setAllButTotMoRate(magLower, newMagUpper, totCumRate, bValue);
+    }
+
+    /**
+     * Replace values of a and b with provided numbers.
      *
      * @param newA
      *           : new value for a
@@ -192,7 +199,7 @@ public class GutenbergRichterMagFreqDist extends IncrementalMagFreqDist {
      */
     public void setAB(double newA, double newB) {
         // compute total cumulative rate between minimum and maximum magnitude
-        double totCumRate = Double.NaN;
+        double totCumRate;
         if (magLower != magUpper) {
             totCumRate =
                     Math.pow(10, newA - newB * (magLower - delta/2))
@@ -454,13 +461,28 @@ public class GutenbergRichterMagFreqDist extends IncrementalMagFreqDist {
     }
 
     /**
-     * @returns th bValue for this distribution
+     * @returns the bValue for this distribution
      */
 
     public double get_bValue() {
         return bValue;
     }
 
+    /**
+     * @returns the computed aValue for this distribution
+     */
+    public double get_aValue() {
+    	double TMR = getTotalMomentRate();
+    	double mMax = magUpper + delta/2;
+    	double mMin = magLower - delta/2;
+    	
+    	double mb = 1.5 - bValue;
+    	
+    	return Math.log10(TMR * mb / (Math.pow(10, mb * mMax) - Math.pow(10, mb * mMin)))
+    		   - 9.05
+    		   - Math.log10(bValue);
+    }
+    
     /**
      * 
      * @returns the magLower : lowest magnitude that has non zero rate
