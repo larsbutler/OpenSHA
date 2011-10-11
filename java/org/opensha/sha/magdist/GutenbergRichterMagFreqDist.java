@@ -63,7 +63,8 @@ public class GutenbergRichterMagFreqDist extends IncrementalMagFreqDist {
     public GutenbergRichterMagFreqDist(double min, int num, double delta)
             throws InvalidRangeException {
         super(min, num, delta);
-        this.magLower = min;
+        this.magLower = this.minX;
+        this.magUpper = this.maxX;
     }
 
     /**
