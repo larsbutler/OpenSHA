@@ -9,7 +9,7 @@ import org.opensha.sha.magdist.GutenbergRichterMagFreqDist;
 public class GutenbergRichterMagFreqDistTest {
 
     @Test
-    public void CheckIncrementMagUpper() {
+    public void checkIncrementMagUpper() {
     	double TCR = 123;
     	double bValue = 2;
     	double min = 10;
@@ -51,7 +51,7 @@ public class GutenbergRichterMagFreqDistTest {
     }
     
     @Test
-    public void CheckSetMagUpper() {
+    public void checkSetMagUpper() {
     	double TCR = 3;
     	double b = 4;
     	double min = 2;
@@ -89,7 +89,7 @@ public class GutenbergRichterMagFreqDistTest {
     }
     
     @Test
-    public void CheckGetAValue() {
+    public void checkGetAValue() {
     	double a = 14.4;
     	double b = 4.5;
     	double min = 3;
@@ -109,7 +109,7 @@ public class GutenbergRichterMagFreqDistTest {
     }
     
     @Test
-    public void CheckSetAB() {
+    public void checkSetAB() {
     	double TCR = 12;
     	double bValue = 7.3;
     	double min = 5;
@@ -129,7 +129,7 @@ public class GutenbergRichterMagFreqDistTest {
     }
 
     @Test
-    public void CheckIncrementB() {
+    public void checkIncrementB() {
     	double TCR = 5;
     	double bValue = 2.2;
     	double min = 1;
