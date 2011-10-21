@@ -12,38 +12,39 @@ public class GutenbergRichterMagFreqDistTest {
     public void checkIncrementMagUpper() {
     	double TCR = 123;
     	double bValue = 2;
-    	double min = 10;
-    	double max = 20;
-    	int numValues = 11;
+    	double min = 10.3;
+    	double max = 15.7;
+    	double delta = 0.6;
+    	int numValues = 10;
     	double TMR, a;
 
     	GutenbergRichterMagFreqDist mfd = new GutenbergRichterMagFreqDist(bValue, TCR, min, max, numValues);
-    	assertEquals(20, mfd.getMagUpper(), 1e-5);
-    	assertEquals(10, mfd.getMagLower(), 1e-5);
-    	assertEquals(11, mfd.getNum());
-    	assertEquals(1, mfd.getDelta(), 1e-5);
+    	assertEquals(max, mfd.getMagUpper(), 1e-5);
+    	assertEquals(min, mfd.getMagLower(), 1e-5);
+    	assertEquals(numValues, mfd.getNum());
+    	assertEquals(delta, mfd.getDelta(), 1e-6);
     	assertEquals(TCR, mfd.getTotCumRate(), 1e-5);
     	TMR = mfd.getTotalMomentRate();
     	a = mfd.get_aValue();
 
-    	mfd.incrementMagUpper(2.4);
+    	mfd.incrementMagUpper(2.3);
     	
-    	assertEquals(22, mfd.getMagUpper(), 1e-5);
-    	assertEquals(10, mfd.getMagLower(), 1e-5);
-    	assertEquals(13, mfd.getNum());
-    	assertEquals(1, mfd.getDelta(), 1e-5);
+    	assertEquals(18.1, mfd.getMagUpper(), 1e-5);
+    	assertEquals(min, mfd.getMagLower(), 1e-5);
+    	assertEquals(numValues + 4, mfd.getNum());
+    	assertEquals(delta, mfd.getDelta(), 1e-6);
     	
     	// b and TMR should not change
     	assertEquals(2, mfd.get_bValue(), 1e-5);
     	assertEquals(TMR, mfd.getTotalMomentRate(), 1e15);
 
     	// bringing mMax to the same value of 20
-    	mfd.incrementMagUpper(-1.55);
+    	mfd.incrementMagUpper(-2.65);
     	
-    	assertEquals(20, mfd.getMagUpper(), 1e-5);
-    	assertEquals(10, mfd.getMagLower(), 1e-5);
-    	assertEquals(11, mfd.getNum());
-    	assertEquals(1, mfd.getDelta(), 1e-5);
+    	assertEquals(max, mfd.getMagUpper(), 1e-5);
+    	assertEquals(min, mfd.getMagLower(), 1e-5);
+    	assertEquals(numValues, mfd.getNum());
+    	assertEquals(delta, mfd.getDelta(), 1e-6);
     	assertEquals(2, mfd.get_bValue(), 1e-5);
     	assertEquals(TMR, mfd.getTotalMomentRate(), 1e15);
     	assertEquals(TCR, mfd.getTotCumRate(), 1e-5);
@@ -54,21 +55,23 @@ public class GutenbergRichterMagFreqDistTest {
     public void checkSetMagUpper() {
     	double TCR = 3;
     	double b = 4;
-    	double min = 2;
-    	double max = 5;
-    	int numValues = 81;
+    	double min = 2 + 0.0125;
+    	double max = 4 - 0.0125;
+    	int numValues = 80;
     	double TMR, a;
-    	double delta = (max - min) / (numValues - 1);
+    	double delta = 0.025;
 
     	GutenbergRichterMagFreqDist mfd = new GutenbergRichterMagFreqDist(b, TCR, min, max, numValues);
+    	assertEquals(delta, mfd.getDelta(), 1e-6);
+    	assertEquals(numValues, mfd.getNum());
     	TMR = mfd.getTotalMomentRate();
     	a = mfd.get_aValue();
 
     	mfd.setMagUpper(3.7);
-    	assertEquals(2, mfd.getMagLower(), 0);
+    	assertEquals(min, mfd.getMagLower(), 0);
+    	assertEquals(delta, mfd.getDelta(), 1e-6);
     	assertEquals(3.6875, mfd.getMagUpper(), 0);
-    	assertEquals(delta, mfd.getDelta(), 0);
-    	assertEquals(46, mfd.getNum());
+    	assertEquals(68, mfd.getNum());
 
     	// checks that rates in the mfd object are consistent with the
     	// original data
@@ -80,12 +83,14 @@ public class GutenbergRichterMagFreqDistTest {
     	}
 
     	// return to the same value
-    	mfd.setMagUpper(max);
-    	assertEquals(5, mfd.getMagUpper(), 0);
-    	assertEquals(4, mfd.get_bValue(), 1e-5);
+    	mfd.setMagUpper(4);
+    	assertEquals(min, mfd.getMagLower(), 0);
+    	assertEquals(max, mfd.getMagUpper(), 0);
+    	assertEquals(b, mfd.get_bValue(), 1e-5);
     	assertEquals(TMR, mfd.getTotalMomentRate(), 1e15);
     	assertEquals(a, mfd.get_aValue(), 1e-2);
     	assertEquals(TCR, mfd.getTotCumRate(), 1e-1);
+    	assertEquals(delta, mfd.getDelta(), 1e-6);
     }
     
     @Test
@@ -122,10 +127,11 @@ public class GutenbergRichterMagFreqDistTest {
     	assertEquals(22, mfd.get_aValue(), 1e-2);
     	assertEquals(15, mfd.get_bValue(), 0);
     	
-    	// mMax, mMin and delta should stay the same
+    	// mMax, mMin, delta and num should stay the same
     	assertEquals(5, mfd.getMagLower(), 0);
     	assertEquals(7, mfd.getMagUpper(), 0);
     	assertEquals(0.02, mfd.getDelta(), 1e-3);
+    	assertEquals(numValues, mfd.getNum());
     }
 
     @Test
