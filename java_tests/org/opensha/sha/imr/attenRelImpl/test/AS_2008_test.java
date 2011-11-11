@@ -50,6 +50,7 @@ import org.opensha.sha.imr.param.PropagationEffectParams.HangingWallFlagParam;
 import org.opensha.sha.imr.param.SiteParams.DepthTo1pt0kmPerSecParam;
 import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
 import org.opensha.sha.imr.param.SiteParams.Vs30_TypeParam;
+import org.opensha.sha.imr.param.SiteParams.Vs30_TypeParam.Vs30Type;
 
 public class AS_2008_test extends NGATest {
 
@@ -212,10 +213,10 @@ public class AS_2008_test extends NGATest {
 
         if (fileName.contains("SIGEST"))
             as_2008.getParameter(Vs30_TypeParam.NAME).setValue(
-                    Vs30_TypeParam.VS30_TYPE_INFERRED);
+                    Vs30Type.Inferred.toString());
         else
             as_2008.getParameter(Vs30_TypeParam.NAME).setValue(
-                    Vs30_TypeParam.VS30_TYPE_MEASURED);
+                    Vs30Type.Measured.toString());
 
         try {
             testDataLines = FileUtils.loadFile(file.getAbsolutePath());

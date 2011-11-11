@@ -50,6 +50,7 @@ import org.opensha.sha.imr.param.SiteParams.DepthTo1pt0kmPerSecParam;
 import org.opensha.sha.imr.param.SiteParams.DepthTo2pt5kmPerSecParam;
 import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
 import org.opensha.sha.imr.param.SiteParams.Vs30_TypeParam;
+import org.opensha.sha.imr.param.SiteParams.Vs30_TypeParam.Vs30Type;
 
 /**
  * This tests whether the 2008 NGA attenuation relationships get their Site-,
@@ -69,7 +70,7 @@ public class NGA08_Site_EqkRup_Tests {
     // hard-coded test values (just make sure they aren't equal to defaults in
     // atten relationships)
     double mag = 6.345, vs30 = 551.2, depth2pt5 = 8.134, depth1pt0 = 1111.1;
-    String vs30_type = Vs30_TypeParam.VS30_TYPE_INFERRED;
+    String vs30_type = Vs30Type.Inferred.toString();
     Boolean aftershock = new Boolean(false);
 
     double[] distX;
