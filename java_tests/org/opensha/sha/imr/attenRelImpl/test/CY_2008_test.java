@@ -50,6 +50,7 @@ import org.opensha.sha.imr.param.PropagationEffectParams.HangingWallFlagParam;
 import org.opensha.sha.imr.param.SiteParams.DepthTo1pt0kmPerSecParam;
 import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
 import org.opensha.sha.imr.param.SiteParams.Vs30_TypeParam;
+import org.opensha.sha.imr.param.SiteParams.Vs30_TypeParam.Vs30Type;
 
 public class CY_2008_test extends NGATest {
 
@@ -155,10 +156,10 @@ public class CY_2008_test extends NGATest {
 
         if (fileName.contains("SIGMEAS"))
             cy_08.getParameter(Vs30_TypeParam.NAME).setValue(
-                    Vs30_TypeParam.VS30_TYPE_MEASURED);
+                    Vs30Type.Measured.toString());
         else
             cy_08.getParameter(Vs30_TypeParam.NAME).setValue(
-                    Vs30_TypeParam.VS30_TYPE_INFERRED);
+                    Vs30Type.Inferred.toString());
 
         try {
             ArrayList<String> testDataLines =
