@@ -302,8 +302,7 @@ public class DisaggregationCalculator extends UnicastRemoteObject implements
             // set the IMR according to the tectonic region of the source (if
             // there is more than one)
             TectonicRegionType trt = source.getTectonicRegionType();
-            ScalarIntensityMeasureRelationshipAPI imr =
-                    TRTUtils.getIMRForTRT(imrMap, trt);
+            ScalarIntensityMeasureRelationshipAPI imr = imrMap.get(trt);
 
             // if (numSourcesToShow > 0)
             // sourceDissaggMap.put(sourceName, new ArrayList());
