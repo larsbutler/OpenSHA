@@ -521,7 +521,7 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
 
         for (int i = 0; i < numEventSets; i++) {
             ArrayList<EqkRupture> events = eqkRupForecast.drawRandomEventSet();
-            getEventSetHazardCurve(hazCurve, site, imr, events, false);
+            getEventSetHazardCurve(hazCurve, site, imr, events);
             for (int x = 0; x < numPts; x++)
                 hazFunction.set(x, hazFunction.getY(x) + hazCurve.getY(x));
         }
@@ -549,15 +549,12 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
      *            : selected IMR object
      * @param eqkRupForecast
      *            : selected Earthquake rup forecast
-     * @param updateCurrRuptures
-     *            : tells whether to update current ruptures (for the
-     *            getCurrRuptures() method used for progress bars)
      * @return
      */
     public DiscretizedFuncAPI getEventSetHazardCurve(
             DiscretizedFuncAPI hazFunction, Site site,
             ScalarIntensityMeasureRelationshipAPI imr,
-            ArrayList<EqkRupture> eqkRupList, boolean updateCurrRuptures)
+            ArrayList<EqkRupture> eqkRupList)
             throws java.rmi.RemoteException {
 
         ArbitrarilyDiscretizedFunc condProbFunc =

@@ -243,15 +243,12 @@ public interface HazardCurveCalculatorAPI extends Remote {
      *            : selected IMR object
      * @param eqkRupForecast
      *            : selected Earthquake rup forecast
-     * @param updateCurrRuptures
-     *            : tells whether to update current ruptures (for the
-     *            getCurrRuptures() method used for progress bars)
      * @return
      */
     public DiscretizedFuncAPI getEventSetHazardCurve(
             DiscretizedFuncAPI hazFunction, Site site,
             ScalarIntensityMeasureRelationshipAPI imr,
-            ArrayList<EqkRupture> eqkRupList, boolean updateCurrRuptures)
+            ArrayList<EqkRupture> eqkRupList)
             throws java.rmi.RemoteException;
 
 }
