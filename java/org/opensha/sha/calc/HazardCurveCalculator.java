@@ -18,7 +18,6 @@
 
 package org.opensha.sha.calc;
 
-import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.ListIterator;
@@ -27,16 +26,13 @@ import java.util.Map;
 import org.opensha.commons.data.Site;
 import org.opensha.commons.data.function.ArbitrarilyDiscretizedFunc;
 import org.opensha.commons.data.function.DiscretizedFuncAPI;
-import org.opensha.commons.geo.Location;
 import org.opensha.commons.param.ArbitrarilyDiscretizedFuncParameter;
 import org.opensha.commons.param.BooleanParameter;
 import org.opensha.commons.param.DoubleParameter;
 import org.opensha.commons.param.IntegerParameter;
-import org.opensha.commons.param.ParameterAPI;
 import org.opensha.commons.param.ParameterList;
 import org.opensha.commons.param.event.ParameterChangeWarningEvent;
 import org.opensha.commons.param.event.ParameterChangeWarningListener;
-import org.opensha.sha.earthquake.EqkRupForecast;
 import org.opensha.sha.earthquake.EqkRupForecastAPI;
 import org.opensha.sha.earthquake.EqkRupture;
 import org.opensha.sha.earthquake.ProbEqkRupture;
@@ -113,8 +109,7 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
             "Number of stochastic event sets for those types of calculations";
     public final int NUM_STOCH_EVENT_SETS_PARAM_MIN = 1;
     public final int NUM_STOCH_EVENT_SETS_PARAM_MAX = Integer.MAX_VALUE;
-    public final static Integer NUM_STOCH_EVENT_SETS_PARAM_DEFAULT =
-            new Integer(1);
+    public final static Integer NUM_STOCH_EVENT_SETS_PARAM_DEFAULT = 1;
 
     private ParameterList adjustableParams;
 
@@ -364,7 +359,6 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
 
         // init the current rupture number (also for progress bar)
         currRuptures = 0;
-        int numRupRejected = 0;
 
         // initialize the hazard function to 1.0
         initDiscretizeValues(hazFunction, 1.0);
@@ -429,7 +423,6 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
 
                 // apply magThreshold if we're to use the mag-dist cutoff filter
                 if (includeMagDistFilter && rupture.getMag() < magThresh) {
-                    numRupRejected += 1;
                     continue;
                 }
 
@@ -601,8 +594,7 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
         // parameter changes.
         ((AttenuationRelationship) imr).resetParameterEventListeners();
 
-        // declare some varibles used in the calculation
-        double distance;
+        // declare some variables used in the calculation
         int k;
 
         // get the number of points
@@ -610,7 +602,6 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
 
         // define distance filtering stuff
         double maxDistance = maxDistanceParam.getValue();
-        boolean includeMagDistFilter = includeMagDistFilterParam.getValue();
 
         // set the maximum distance in the attenuation relationship
         imr.setUserMaxDistance(maxDistance);
@@ -620,8 +611,6 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
         if (updateCurrRuptures) {
             currRuptures = 0;
         }
-
-        int numRupRejected = 0;
 
         // initialize the hazard function to 1.0 (initial total non-exceedance
         // probability)
@@ -810,107 +799,8 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
         return adjustableParams.getParametersIterator();
     }
 
-    // /**
-    // * This tests whether the average over many curves from getEventSetCurve
-    // * equals what is given by getHazardCurve.
-    // */
-    // public void testEventSetHazardCurve(int numIterations) {
-    // // set distance filter large since these are handled slightly differently
-    // in each calc
-    // maxDistanceParam.setValue(300);
-    // // do not apply mag-dist fileter
-    // includeMagDistFilterParam.setValue(false);
-    // numStochEventSetRealizationsParam.setValue(numIterations);
-    //
-    // ScalarIntensityMeasureRelationshipAPI imr = new BJF_1997_AttenRel(this);
-    // imr.setParamDefaults();
-    // imr.setIntensityMeasure("PGA");
-    //
-    // Site site = new Site();
-    // ListIterator it = imr.getSiteParamsIterator();
-    // while(it.hasNext())
-    // site.addParameter((ParameterAPI)it.next());
-    // site.setLocation(new Location(34,-118));
-    //
-    // EqkRupForecast eqkRupForecast = new Frankel96_EqkRupForecast();
-    // eqkRupForecast.updateForecast();
-    //
-    // ArbitrarilyDiscretizedFunc hazCurve = new ArbitrarilyDiscretizedFunc();
-    // hazCurve.set(-3.,1); // log(0.001)
-    // hazCurve.set(-2.,1);
-    // hazCurve.set(-1.,1);
-    // hazCurve.set(1.,1);
-    // hazCurve.set(2.,1); // log(10)
-    //
-    // hazCurve.setName("Hazard Curve");
-    //
-    // try {
-    // this.getHazardCurve(hazCurve, site, imr, eqkRupForecast);
-    // } catch (RemoteException e) {
-    // // TODO Auto-generated catch block
-    // e.printStackTrace();
-    // }
-    //
-    // System.out.println(hazCurve.toString());
-    //
-    // ArbitrarilyDiscretizedFunc aveCurve = hazCurve.deepClone();
-    // try {
-    // getAverageEventSetHazardCurve(aveCurve,site, imr,eqkRupForecast);
-    // } catch (RemoteException e1) {
-    // // TODO Auto-generated catch block
-    // e1.printStackTrace();
-    // }
-    //
-    // /*
-    // this.initDiscretizeValues(aveCurve, 0.0);
-    // ArbitrarilyDiscretizedFunc curve = hazCurve.deepClone();
-    // for(int i=0; i<numIterations;i++) {
-    // try {
-    // getEventSetHazardCurve(curve, site, imr,
-    // eqkRupForecast.drawRandomEventSet());
-    // for(int x=0; x<curve.getNum();x++) aveCurve.set(x,
-    // aveCurve.getY(x)+curve.getY(x));
-    // } catch (RemoteException e) {
-    // // TODO Auto-generated catch block
-    // e.printStackTrace();
-    // }
-    // }
-    // for(int x=0; x<curve.getNum();x++) aveCurve.set(x,
-    // aveCurve.getY(x)/numIterations);
-    // */
-    //
-    // aveCurve.setName("Ave from "+numIterations+" event sets");
-    // System.out.println(aveCurve.toString());
-    //
-    // }
-
     // added this and the associated API implementation to instantiate
     // BJF_1997_AttenRel in the above
     public void parameterChangeWarning(ParameterChangeWarningEvent event) {
     };
-
-    // // this is temporary for testing purposes
-    // public static void main(String[] args) {
-    // HazardCurveCalculator calc;
-    // try {
-    // calc = new HazardCurveCalculator();
-    // calc.testEventSetHazardCurve(1000);
-    // } catch (RemoteException e) {
-    // // TODO Auto-generated catch block
-    // e.printStackTrace();
-    // }
-    //
-    // /*
-    // double temp1, temp2, temp3, temp4;
-    // boolean OK;
-    // for(double n=1; n<2;n += 0.02) {
-    // temp1 = Math.pow(10,n);
-    // temp2 = 1.0-Math.exp(-temp1);
-    // temp3 = Math.log(1.0-temp2);
-    // temp4 = (temp3+temp1)/temp1;
-    // OK = temp1<=30;
-    // System.out.println((float)n+"\t"+temp1+"\t"+temp2+"\t"+temp3+"\t"+temp4+"\t"+OK);
-    // }
-    // */
-    // }
 }
