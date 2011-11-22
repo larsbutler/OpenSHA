@@ -37,11 +37,8 @@ import org.opensha.sha.earthquake.EqkRupForecastAPI;
 import org.opensha.sha.earthquake.EqkRupture;
 import org.opensha.sha.earthquake.ProbEqkRupture;
 import org.opensha.sha.earthquake.ProbEqkSource;
-// import
-// org.opensha.sha.earthquake.rupForecastImpl.Frankel96.Frankel96_EqkRupForecast;
 import org.opensha.sha.imr.AttenuationRelationship;
 import org.opensha.sha.imr.ScalarIntensityMeasureRelationshipAPI;
-// import org.opensha.sha.imr.attenRelImpl.BJF_1997_AttenRel;
 import org.opensha.sha.util.TRTUtils;
 import org.opensha.sha.util.TectonicRegionType;
 
@@ -309,9 +306,6 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
                     EqkRupForecastAPI eqkRupForecast)
                     throws java.rmi.RemoteException {
 
-        // System.out.println("Haz Curv Calc: maxDistanceParam.getValue()="+maxDistanceParam.getValue().toString());
-        // System.out.println("Haz Curv Calc: numStochEventSetRealizationsParam.getValue()="+numStochEventSetRealizationsParam.getValue().toString());
-        // System.out.println("Haz Curv Calc: includeMagDistFilterParam.getValue()="+includeMagDistFilterParam.getValue().toString());
         if (includeMagDistFilterParam.getValue())
             System.out.println("Haz Curv Calc: magDistCutoffParam.getValue()="
                     + magDistCutoffParam.getValue().toString());
@@ -319,7 +313,7 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
         this.currRuptures = -1;
 
         /*
-         * this determines how the calucations are done (doing it the way it's
+         * this determines how the calculations are done (doing it the way it's
          * outlined in our original SRL paper gives probs greater than 1 if the
          * total rate of events for the source exceeds 1.0, even if the rates of
          * individual ruptures are << 1).
@@ -331,7 +325,7 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
         ArbitrarilyDiscretizedFunc sourceHazFunc =
                 (ArbitrarilyDiscretizedFunc) hazFunction.deepClone();
 
-        // declare some varibles used in the calculation
+        // declare some variables used in the calculation
         double qkProb, distance;
         int k;
 
@@ -353,9 +347,6 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
 
         // get total number of sources
         numSources = eqkRupForecast.getNumSources();
-        // System.out.println("Number of Sources: "+numSources);
-        // System.out.println("ERF info: "+
-        // eqkRupForecast.getClass().getName());
 
         // init the current rupture number (also for progress bar)
         currRuptures = 0;
@@ -393,7 +384,6 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
                                                          // for skipped ruptures
                 continue;
             }
-            // System.out.println(" dist: " + distance);
 
             // get magThreshold if we're to use the mag-dist cutoff filter
             if (includeMagDistFilter) {
@@ -487,8 +477,6 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
         if (D)
             System.out.println(C + "hazFunction.toString"
                     + hazFunction.toString());
-
-        // System.out.println("numRupRejected="+numRupRejected);
 
         return hazFunction;
     }
@@ -622,8 +610,6 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
         if (D)
             System.out.println(C + ": starting hazard curve calculation");
 
-        // System.out.println("totRuptures="+totRuptures);
-
         // loop over ruptures
         for (int n = 0; n < totRups; n++) {
 
@@ -631,14 +617,6 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
                 ++currRuptures;
 
             EqkRupture rupture = eqkRupList.get(n);
-
-            /*
-             * // apply mag-dist cutoff filter if(includeMagDistFilter) {
-             * //distance=??; // NEED TO COMPUTE THIS DISTANCE
-             * if(rupture.getMag() <
-             * magDistCutoffParam.getValue().getInterpolatedY(distance) {
-             * numRupRejected += 1; continue; }
-             */
 
             // set the EqkRup in the IMR
             imr.setEqkRupture(rupture);
@@ -656,15 +634,9 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
 
         }
 
-        // System.out.println(C+"hazFunction.toString"+hazFunction.toString());
-
         // now convert from total non-exceed prob to total exceed prob
         for (int i = 0; i < numPoints; ++i)
             hazFunction.set(i, 1.0 - hazFunction.getY(i));
-
-        // System.out.println(C+"hazFunction.toString"+hazFunction.toString());
-
-        // System.out.println("numRupRejected="+numRupRejected);
 
         return hazFunction;
     }
