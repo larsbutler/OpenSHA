@@ -190,9 +190,6 @@ public interface HazardCurveCalculatorAPI extends Remote {
             Site site, ScalarIntensityMeasureRelationshipAPI imr,
             EqkRupture rupture) throws java.rmi.RemoteException;
 
-    // gets the current rupture that is being processed
-    public int getCurrRuptures() throws java.rmi.RemoteException;
-
     /**
      * stops the Hazard Curve calculations.
      * 

@@ -111,7 +111,6 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
     private ParameterList adjustableParams;
 
     // misc counting and index variables
-    protected int currRuptures = -1;
     protected int sourceIndex;
     protected int numSources;
 
@@ -310,8 +309,6 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
             System.out.println("Haz Curv Calc: magDistCutoffParam.getValue()="
                     + magDistCutoffParam.getValue().toString());
 
-        this.currRuptures = -1;
-
         /*
          * this determines how the calculations are done (doing it the way it's
          * outlined in our original SRL paper gives probs greater than 1 if the
@@ -348,9 +345,6 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
         // get total number of sources
         numSources = eqkRupForecast.getNumSources();
 
-        // init the current rupture number (also for progress bar)
-        currRuptures = 0;
-
         // initialize the hazard function to 1.0
         initDiscretizeValues(hazFunction, 1.0);
 
@@ -380,8 +374,6 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
 
             // apply distance cutoff to source
             if (distance > maxDistance) {
-                currRuptures += source.getNumRuptures(); // update progress bar
-                                                         // for skipped ruptures
                 continue;
             }
 
@@ -404,7 +396,7 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
             int numRuptures = source.getNumRuptures();
 
             // loop over these ruptures
-            for (int n = 0; n < numRuptures; n++, ++currRuptures) {
+            for (int n = 0; n < numRuptures; n++) {
 
                 EqkRupture rupture = source.getRupture(n);
 
@@ -526,13 +518,9 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
         hazCurve = hazFunction.deepClone();
         initDiscretizeValues(hazFunction, 0);
         int numPts = hazCurve.getNum();
-        // for progress bar
-        currRuptures = 0;
-        // totRuptures=numEventSets;
 
         for (int i = 0; i < numEventSets; i++) {
             ArrayList<EqkRupture> events = eqkRupForecast.drawRandomEventSet();
-            currRuptures += events.size();
             getEventSetHazardCurve(hazCurve, site, imr, events, false);
             for (int x = 0; x < numPts; x++)
                 hazFunction.set(x, hazFunction.getY(x) + hazCurve.getY(x));
@@ -595,10 +583,6 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
         imr.setUserMaxDistance(maxDistance);
 
         int totRups = eqkRupList.size();
-        // progress bar stuff
-        if (updateCurrRuptures) {
-            currRuptures = 0;
-        }
 
         // initialize the hazard function to 1.0 (initial total non-exceedance
         // probability)
@@ -612,9 +596,6 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
 
         // loop over ruptures
         for (int n = 0; n < totRups; n++) {
-
-            if (updateCurrRuptures)
-                ++currRuptures;
 
             EqkRupture rupture = eqkRupList.get(n);
 
@@ -700,15 +681,6 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
                     + hazFunction.toString());
 
         return hazFunction;
-    }
-
-    /**
-     * 
-     * @returns the current rupture being traversed
-     * @throws java.rmi.RemoteException
-     */
-    public int getCurrRuptures() throws java.rmi.RemoteException {
-        return this.currRuptures;
     }
 
     /**
