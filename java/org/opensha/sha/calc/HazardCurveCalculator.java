@@ -120,7 +120,6 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
 
     // misc counting and index variables
     protected int currRuptures = -1;
-    protected int totRuptures = 0;
     protected int sourceIndex;
     protected int numSources;
 
@@ -363,14 +362,6 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
         // System.out.println("ERF info: "+
         // eqkRupForecast.getClass().getName());
 
-        // compute the total number of ruptures for updating the progress bar
-        totRuptures = 0;
-        sourceIndex = 0;
-        for (sourceIndex = 0; sourceIndex < numSources; ++sourceIndex)
-            totRuptures +=
-                    eqkRupForecast.getSource(sourceIndex).getNumRuptures();
-        // System.out.println("Total number of ruptures:"+ totRuptures);
-
         // init the current rupture number (also for progress bar)
         currRuptures = 0;
         int numRupRejected = 0;
@@ -560,10 +551,6 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
 
         for (int i = 0; i < numEventSets; i++) {
             ArrayList<EqkRupture> events = eqkRupForecast.drawRandomEventSet();
-            if (i == 0)
-                totRuptures = events.size() * numEventSets; // this is an
-                                                            // approximate total
-                                                            // number of events
             currRuptures += events.size();
             getEventSetHazardCurve(hazCurve, site, imr, events, false);
             for (int x = 0; x < numPts; x++)
@@ -631,7 +618,6 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
         int totRups = eqkRupList.size();
         // progress bar stuff
         if (updateCurrRuptures) {
-            totRuptures = totRups;
             currRuptures = 0;
         }
 
@@ -762,16 +748,6 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
      */
     public int getCurrRuptures() throws java.rmi.RemoteException {
         return this.currRuptures;
-    }
-
-    /**
-     * 
-     * @returns the total number of ruptures in the earthquake rupture forecast
-     *          model
-     * @throws java.rmi.RemoteException
-     */
-    public int getTotRuptures() throws java.rmi.RemoteException {
-        return this.totRuptures;
     }
 
     /**

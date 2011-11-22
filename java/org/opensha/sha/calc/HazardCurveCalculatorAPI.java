@@ -193,9 +193,6 @@ public interface HazardCurveCalculatorAPI extends Remote {
     // gets the current rupture that is being processed
     public int getCurrRuptures() throws java.rmi.RemoteException;
 
-    // gets the total number of ruptures.
-    public int getTotRuptures() throws java.rmi.RemoteException;
-
     /**
      * stops the Hazard Curve calculations.
      * 
