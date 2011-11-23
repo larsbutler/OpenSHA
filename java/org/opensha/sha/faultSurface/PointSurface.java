@@ -70,7 +70,7 @@ public class PointSurface implements EvenlyGriddedSurfaceAPI {
     /**
      * The average strike of this surface on the Earth. Even though this is a
      * point source, an average strike can be assigned to it to assist with
-     * particular scientific caculations. Initially set to NaN.
+     * particular scientific calculations. Initially set to NaN.
      */
     protected double aveStrike = Double.NaN;
 
