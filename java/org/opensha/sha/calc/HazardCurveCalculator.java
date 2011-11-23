@@ -365,8 +365,7 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
             // set the IMR according to the tectonic region of the source (if
             // there is more than one)
             TectonicRegionType trt = source.getTectonicRegionType();
-            ScalarIntensityMeasureRelationshipAPI imr =
-                    TRTUtils.getIMRForTRT(imrMap, trt);
+            ScalarIntensityMeasureRelationshipAPI imr = imrMap.get(trt);
 
             // compute the source's distance from the site and skip if it's too
             // far away
