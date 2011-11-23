@@ -77,7 +77,7 @@ public class PointSurface implements EvenlyGriddedSurfaceAPI {
     /**
      * The average dip of this surface into the Earth. Even though this is a
      * point source, an average dip can be assigned to it to assist with
-     * particular scientific caculations. Initially set to NaN.
+     * particular scientific calculations. Initially set to NaN.
      */
     protected double aveDip = Double.NaN;
 
