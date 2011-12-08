@@ -239,4 +239,28 @@ public class FloatingPoissonFaultSourceTest {
 
 		return expectedResults;
 	}
+
+	/**
+	 * This test was introduced as a results of this bug report:
+	 * https://bugs.launchpad.net/openquake/+bug/901092
+	 * 
+	 * FloatingPoissonFaultSource overrides the setTectonicRegionType
+	 * method from the base class (ProbEqkSource).
+	 * 
+	 * However, the override fails to do what the base implementation
+	 * does: set the tectonic region type.
+	 * 
+	 * I wonder how long this bug has been here, and why we found
+	 * it just now.
+	 */
+	@Test
+	public void testSetTectonicRegionTypeActuallySetsTectonicRegionType() {
+	    FloatingPoissonFaultSource src =
+	            FloatingPoissonFaultSourceTestHelper.getPeerTestSet1Case5FaultSource();
+	    // We assume the default is ACTIVE_SHALLOW
+	    assertEquals(TectonicRegionType.ACTIVE_SHALLOW, src.getTectonicRegionType());
+
+	    src.setTectonicRegionType(TectonicRegionType.SUBDUCTION_INTERFACE);
+	    assertEquals(TectonicRegionType.SUBDUCTION_INTERFACE, src.getTectonicRegionType());
+	}
 }
