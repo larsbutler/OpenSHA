@@ -239,4 +239,15 @@ public class FloatingPoissonFaultSourceTest {
 
 		return expectedResults;
 	}
+
+	@Test
+	public void testSetTectonicRegionTypeActuallySetsTectonicRegionType() {
+	    FloatingPoissonFaultSource src =
+	            FloatingPoissonFaultSourceTestHelper.getPeerTestSet1Case5FaultSource();
+	    // We assume the default is ACTIVE_SHALLOW
+	    assertEquals(TectonicRegionType.ACTIVE_SHALLOW, src.getTectonicRegionType());
+
+	    src.setTectonicRegionType(TectonicRegionType.SUBDUCTION_INTERFACE);
+	    assertEquals(TectonicRegionType.SUBDUCTION_INTERFACE, src.getTectonicRegionType());
+	}
 }
