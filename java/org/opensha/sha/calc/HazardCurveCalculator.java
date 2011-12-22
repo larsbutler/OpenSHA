@@ -305,10 +305,6 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
                     EqkRupForecastAPI eqkRupForecast)
                     throws java.rmi.RemoteException {
 
-        if (includeMagDistFilterParam.getValue())
-            System.out.println("Haz Curv Calc: magDistCutoffParam.getValue()="
-                    + magDistCutoffParam.getValue().toString());
-
         /*
          * this determines how the calculations are done (doing it the way it's
          * outlined in our original SRL paper gives probs greater than 1 if the
@@ -499,19 +495,6 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
             ScalarIntensityMeasureRelationshipAPI imr,
             EqkRupForecastAPI eqkRupForecast) throws java.rmi.RemoteException {
 
-        System.out.println("Haz Curv Calc: maxDistanceParam.getValue()="
-                + maxDistanceParam.getValue().toString());
-        System.out
-                .println("Haz Curv Calc: numStochEventSetRealizationsParam.getValue()="
-                        + numStochEventSetRealizationsParam.getValue()
-                                .toString());
-        System.out
-                .println("Haz Curv Calc: includeMagDistFilterParam.getValue()="
-                        + includeMagDistFilterParam.getValue().toString());
-        if (includeMagDistFilterParam.getValue())
-            System.out.println("Haz Curv Calc: magDistCutoffParam.getValue()="
-                    + magDistCutoffParam.getValue().toString());
-
         int numEventSets = numStochEventSetRealizationsParam.getValue();
         DiscretizedFuncAPI hazCurve;
         hazCurve = hazFunction.deepClone();
@@ -638,19 +621,6 @@ public class HazardCurveCalculator extends UnicastRemoteObject implements
     public DiscretizedFuncAPI getHazardCurve(DiscretizedFuncAPI hazFunction,
             Site site, ScalarIntensityMeasureRelationshipAPI imr,
             EqkRupture rupture) throws java.rmi.RemoteException {
-
-        System.out.println("Haz Curv Calc: maxDistanceParam.getValue()="
-                + maxDistanceParam.getValue().toString());
-        System.out
-                .println("Haz Curv Calc: numStochEventSetRealizationsParam.getValue()="
-                        + numStochEventSetRealizationsParam.getValue()
-                                .toString());
-        System.out
-                .println("Haz Curv Calc: includeMagDistFilterParam.getValue()="
-                        + includeMagDistFilterParam.getValue().toString());
-        if (includeMagDistFilterParam.getValue())
-            System.out.println("Haz Curv Calc: magDistCutoffParam.getValue()="
-                    + magDistCutoffParam.getValue().toString());
 
         // resetting the Parameter change Listeners on the
         // AttenuationRelationship parameters,

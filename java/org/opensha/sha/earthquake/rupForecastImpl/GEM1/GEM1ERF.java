@@ -1,7 +1,7 @@
 package org.opensha.sha.earthquake.rupForecastImpl.GEM1;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
 
 import org.opensha.commons.calc.magScalingRelations.MagAreaRelationship;
@@ -56,10 +56,10 @@ import org.opensha.sha.util.TectonicRegionType;
 public class GEM1ERF extends EqkRupForecast {
 
     // name of this ERF
-    public final static String NAME = new String("GEM1 Eqk Rup Forecast");
+    public final static String NAME = "GEM1 Eqk Rup Forecast";
 
     // for Debug purposes
-    private static String C = new String("GEM1ERF");
+    private static String C = "GEM1ERF";
     private boolean D = false;
 
     protected ArrayList<GEMSourceData> gemSourceDataList;
@@ -107,9 +107,9 @@ public class GEM1ERF extends EqkRupForecast {
     // minimum magnitude
     public final static String MIN_MAG_NAME =
             "minimum magnitude in the forecast";
-    public final static Double MIN_MAG_MIN = new Double(0.0);
-    public final static Double MIN_MAG_MAX = new Double(10.0);
-    public final static Double MIN_MAG_DEFAULT = new Double(0.0);
+    public final static Double MIN_MAG_MIN = 0.0;
+    public final static Double MIN_MAG_MAX = 10.0;
+    public final static Double MIN_MAG_DEFAULT = 0.0;
     public final static String MIN_MAG_UNITS = "Mw";
     public final static String MIN_MAG_INFO =
             "minimum magnitude in the forecast (overriding that implied in the source data)";
@@ -127,43 +127,32 @@ public class GEM1ERF extends EqkRupForecast {
     private BooleanParameter includeAreaSourceParam;
 
     // Treat background seismogenic as point of finite ruptures parameter
-    public final static String AREA_SRC_RUP_TYPE_NAME = new String(
-            "Treat Area Sources As");
-    public final static String AREA_SRC_RUP_TYPE_POINT = new String(
-            "Point Sources");
-    public final static String AREA_SRC_RUP_TYPE_LINE = new String(
-            "Line Sources (random or given strike)");
-    public final static String AREA_SRC_RUP_TYPE_CROSS_HAIR = new String(
-            "Cross Hair Line Sources");
-    public final static String AREA_SRC_RUP_TYPE_SPOKED = new String(
-            "16 Spoked Line Sources");
-    public final static String AREA_SRC_RUP_TYPE_FINITE_SURF = new String(
-            "Finite Dipping Sources");
+    public final static String AREA_SRC_RUP_TYPE_NAME = "Treat Area Sources As";
+    public final static String AREA_SRC_RUP_TYPE_POINT = "Point Sources";
+    public final static String AREA_SRC_RUP_TYPE_LINE = "Line Sources (random or given strike)";
+    public final static String AREA_SRC_RUP_TYPE_CROSS_HAIR = "Cross Hair Line Sources";
+    public final static String AREA_SRC_RUP_TYPE_SPOKED = "16 Spoked Line Sources";
+    public final static String AREA_SRC_RUP_TYPE_FINITE_SURF = "Finite Dipping Sources";
     StringParameter areaSrcRupTypeParam;
 
     // Default lower seismogenic depth of area sources
     public final static String AREA_SRC_LOWER_SEIS_DEPTH_PARAM_NAME =
             "Area Source Lower Seis Depth";
-    public final static Double AREA_SRC_LOWER_SEIS_DEPTH_PARAM_MIN =
-            new Double(5.0);
-    public final static Double AREA_SRC_LOWER_SEIS_DEPTH_PARAM_MAX =
-            new Double(50);
-    public final static Double AREA_SRC_LOWER_SEIS_DEPTH_PARAM_DEFAULT =
-            new Double(14);
+    public final static Double AREA_SRC_LOWER_SEIS_DEPTH_PARAM_MIN = 5.0;
+    public final static Double AREA_SRC_LOWER_SEIS_DEPTH_PARAM_MAX = 50.0;
+    public final static Double AREA_SRC_LOWER_SEIS_DEPTH_PARAM_DEFAULT = 14.0;
     public final static String AREA_SRC_LOWER_SEIS_DEPTH_PARAM_UNITS = "km";
-    private final static String AREA_SRC_LOWER_SEIS_DEPTH_PARAM_INFO =
-            "The default lower-seimogenic " + "depth for area sources";
     private DoubleParameter areaSrcLowerSeisDepthParam;
 
     // For area discretization
     public final static String AREA_SRC_DISCR_PARAM_NAME =
             "Area Source Discretization";
-    private final static Double AREA_SRC_DISCR_PARAM_DEFAULT = new Double(0.1);
+    private final static Double AREA_SRC_DISCR_PARAM_DEFAULT = 0.1;
     private final static String AREA_SRC_DISCR_PARAM_UNITS = "deg";
     private final static String AREA_SRC_DISCR_PARAM_INFO =
             "The discretization of area sources";
-    public final static double AREA_SRC_DISCR_PARAM_MIN = new Double(0.01);
-    public final static double AREA_SRC_DISCR_PARAM_MAX = new Double(1.0);
+    public final static double AREA_SRC_DISCR_PARAM_MIN = 0.01;
+    public final static double AREA_SRC_DISCR_PARAM_MAX = 1.0;
     DoubleParameter areaSrcDiscrParam;
 
     // Mag-scaling relationship for turning grip points into finite ruptures
@@ -183,29 +172,20 @@ public class GEM1ERF extends EqkRupForecast {
     private BooleanParameter includeGriddedSeisParam;
 
     // Treat background seis as point of finite ruptures parameter
-    public final static String GRIDDED_SEIS_RUP_TYPE_NAME = new String(
-            "Treat Gridded Seis As");
-    public final static String GRIDDED_SEIS_RUP_TYPE_POINT = new String(
-            "Point Sources");
-    public final static String GRIDDED_SEIS_RUP_TYPE_LINE = new String(
-            "Line Sources (random or given strike)");
-    public final static String GRIDDED_SEIS_RUP_TYPE_CROSS_HAIR = new String(
-            "Cross Hair Line Sources");
-    public final static String GRIDDED_SEIS_RUP_TYPE_SPOKED = new String(
-            "16 Spoked Line Sources");
-    public final static String GRIDDED_SEIS_RUP_TYPE_FINITE_SURF = new String(
-            "Finite Dipping Sources");
+    public final static String GRIDDED_SEIS_RUP_TYPE_NAME = "Treat Gridded Seis As";
+    public final static String GRIDDED_SEIS_RUP_TYPE_POINT = "Point Sources";
+    public final static String GRIDDED_SEIS_RUP_TYPE_LINE = "Line Sources (random or given strike)";
+    public final static String GRIDDED_SEIS_RUP_TYPE_CROSS_HAIR = "Cross Hair Line Sources";
+    public final static String GRIDDED_SEIS_RUP_TYPE_SPOKED = "16 Spoked Line Sources";
+    public final static String GRIDDED_SEIS_RUP_TYPE_FINITE_SURF = "Finite Dipping Sources";
     StringParameter griddedSeisRupTypeParam;
 
     // default lower seis depth of gridded/background source
     public final static String GRIDDED_SEIS_LOWER_SEIS_DEPTH_PARAM_NAME =
             "Gridded Seis Lower Seis Depth";
-    public final static Double GRIDDED_SEIS_LOWER_SEIS_DEPTH_PARAM_MIN =
-            new Double(5.0);
-    public final static Double GRIDDED_SEIS_LOWER_SEIS_DEPTH_PARAM_MAX =
-            new Double(50);
-    public final static Double GRIDDED_SEIS_LOWER_SEIS_DEPTH_PARAM_DEFAULT =
-            new Double(14);
+    public final static Double GRIDDED_SEIS_LOWER_SEIS_DEPTH_PARAM_MIN = 5.0;
+    public final static Double GRIDDED_SEIS_LOWER_SEIS_DEPTH_PARAM_MAX = 50.0;
+    public final static Double GRIDDED_SEIS_LOWER_SEIS_DEPTH_PARAM_DEFAULT = 14.0;
     public final static String GRIDDED_SEIS_LOWER_SEIS_DEPTH_PARAM_UNITS = "km";
     private final static String GRIDDED_SEIS_LOWER_SEIS_DEPTH_PARAM_INFO =
             "The default lower-seimogenic depth for gridded seismicity=";
@@ -229,7 +209,7 @@ public class GEM1ERF extends EqkRupForecast {
     // For rupture offset length along fault parameter
     public final static String FAULT_RUP_OFFSET_PARAM_NAME =
             "Fault Rupture Offset";
-    private final static Double RUP_OFFSET_DEFAULT = new Double(5);
+    private final static Double RUP_OFFSET_DEFAULT = 5.0;
     private final static String FAULT_RUP_OFFSET_PARAM_UNITS = "km";
     private final static String FAULT_RUP_OFFSET_PARAM_INFO =
             "The amount floating ruptures are offset along the fault";
@@ -239,7 +219,7 @@ public class GEM1ERF extends EqkRupForecast {
 
     // For fault discretization
     public final static String FAULT_DISCR_PARAM_NAME = "Fault Discretization";
-    private final static Double FAULT_DISCR_PARAM_DEFAULT = new Double(1.0);
+    private final static Double FAULT_DISCR_PARAM_DEFAULT = 1.0;
     private final static String FAULT_DISCR_PARAM_UNITS = "km";
     private final static String FAULT_DISCR_PARAM_INFO =
             "The discretization of faults";
@@ -259,9 +239,9 @@ public class GEM1ERF extends EqkRupForecast {
             "Fault Scaling Sigma";
     private final static String FAULT_SCALING_SIGMA_PARAM_INFO =
             "The standard deviation of the Area(mag) or Length(M) relationship";
-    private Double FAULT_SCALING_SIGMA_PARAM_MIN = new Double(0);
-    private Double FAULT_SCALING_SIGMA_PARAM_MAX = new Double(1);
-    private Double FAULT_SCALING_SIGMA_PARAM_DEFAULT = new Double(0.0);
+    private Double FAULT_SCALING_SIGMA_PARAM_MIN = 0.0;
+    private Double FAULT_SCALING_SIGMA_PARAM_MAX = 1.0;
+    private Double FAULT_SCALING_SIGMA_PARAM_DEFAULT = 0.0;
     DoubleParameter faultScalingSigmaParam;
 
     // rupture aspect ratio parameter stuff
@@ -269,11 +249,9 @@ public class GEM1ERF extends EqkRupForecast {
             "Fault Rupture Aspect Ratio";
     private final static String FAULT_RUP_ASPECT_RATIO_PARAM_INFO =
             "The ratio of rupture length to rupture width for floaters";
-    private Double FAULT_RUP_ASPECT_RATIO_PARAM_MIN = new Double(
-            Double.MIN_VALUE);
-    private Double FAULT_RUP_ASPECT_RATIO_PARAM_MAX = new Double(
-            Double.MAX_VALUE);
-    private Double FAULT_RUP_ASPECT_RATIO_PARAM_DEFAULT = new Double(1.0);
+    private Double FAULT_RUP_ASPECT_RATIO_PARAM_MIN = Double.MIN_VALUE;
+    private Double FAULT_RUP_ASPECT_RATIO_PARAM_MAX = Double.MAX_VALUE;
+    private Double FAULT_RUP_ASPECT_RATIO_PARAM_DEFAULT = 1.0;
     DoubleParameter faultRupAspectRatioParam;
 
     // Floater Type
@@ -301,7 +279,7 @@ public class GEM1ERF extends EqkRupForecast {
     // For rupture offset length along fault parameter
     public final static String SUB_RUP_OFFSET_PARAM_NAME =
             "Subduction Zone Rupture Offset";
-    private final static Double SUB_RUP_OFFSET_DEFAULT = new Double(10);
+    private final static Double SUB_RUP_OFFSET_DEFAULT = 10.0;
     private final static String SUB_RUP_OFFSET_PARAM_UNITS = "km";
     private final static String SUB_RUP_OFFSET_PARAM_INFO =
             "The amount floating ruptures are offset along the subduction zones";
@@ -312,7 +290,7 @@ public class GEM1ERF extends EqkRupForecast {
     // For fault discretization
     public final static String SUB_DISCR_PARAM_NAME =
             "Subduction Fault Discretization";
-    private final static Double SUB_DISCR_PARAM_DEFAULT = new Double(10);
+    private final static Double SUB_DISCR_PARAM_DEFAULT = 10.0;
     private final static String SUB_DISCR_PARAM_UNITS = "km";
     private final static String SUB_DISCR_PARAM_INFO =
             "The discretization of subduction zones";
@@ -332,9 +310,9 @@ public class GEM1ERF extends EqkRupForecast {
             "Subduction Zone Scaling Sigma";
     private final static String SUB_SCALING_SIGMA_PARAM_INFO =
             "The standard deviation of the Area(mag) or Length(M) relationship";
-    private Double SUB_SCALING_SIGMA_PARAM_MIN = new Double(0);
-    private Double SUB_SCALING_SIGMA_PARAM_MAX = new Double(1);
-    private Double SUB_SCALING_SIGMA_PARAM_DEFAULT = new Double(0.0);
+    private Double SUB_SCALING_SIGMA_PARAM_MIN = 0.0;
+    private Double SUB_SCALING_SIGMA_PARAM_MAX = 1.0;
+    private Double SUB_SCALING_SIGMA_PARAM_DEFAULT = 0.0;
     DoubleParameter subductionScalingSigmaParam;
 
     // rupture aspect ratio parameter stuff
@@ -346,7 +324,7 @@ public class GEM1ERF extends EqkRupForecast {
             new Double(Double.MIN_VALUE);
     private Double SUB_RUP_ASPECT_RATIO_PARAM_MAX =
             new Double(Double.MAX_VALUE);
-    private Double SUB_RUP_ASPECT_RATIO_PARAM_DEFAULT = new Double(1.0);
+    private Double SUB_RUP_ASPECT_RATIO_PARAM_DEFAULT = 1.0;
     DoubleParameter subductionRupAspectRatioParam;
 
     // Floater Type
@@ -371,9 +349,7 @@ public class GEM1ERF extends EqkRupForecast {
     public final static Boolean SOURCE_CACHE_PARAM_DEFAULT = false;
     private BooleanParameter sourceCacheParam;
 
-    private HashMap<Integer, ProbEqkSource> sourceCache = null;
-
-    private ArrayList<TectonicRegionType> tectonicRegionTypes;
+    private List<ProbEqkSource> sourceCache = null;
 
     /**
      * No arg constructor.
@@ -479,49 +455,6 @@ public class GEM1ERF extends EqkRupForecast {
 
         // Create adjustable parameter list
         createParamList();
-
-        // Determine which tectonic region types are included
-        int numActiveShallow = 0;
-        int numStableShallow = 0;
-        int numSubSlab = 0;
-        int numSubInterface = 0;
-        ArrayList<GEMSourceData> tempAllData = new ArrayList<GEMSourceData>();
-        if (areaSourceDataList != null)
-            tempAllData.addAll(areaSourceDataList);
-        if (griddedSeisSourceDataList != null)
-            tempAllData.addAll(griddedSeisSourceDataList);
-        if (faultSourceDataList != null)
-            tempAllData.addAll(faultSourceDataList);
-        if (subductionSourceDataList != null)
-            tempAllData.addAll(subductionSourceDataList);
-        for (int i = 0; i < tempAllData.size(); i++) {
-            TectonicRegionType tectReg = tempAllData.get(i).getTectReg();
-            if (tectReg == TectonicRegionType.ACTIVE_SHALLOW)
-                numActiveShallow += 1;
-            else if (tectReg == TectonicRegionType.STABLE_SHALLOW)
-                numStableShallow += 1;
-            else if (tectReg == TectonicRegionType.SUBDUCTION_SLAB)
-                numSubSlab += 1;
-            else if (tectReg == TectonicRegionType.SUBDUCTION_INTERFACE)
-                numSubInterface += 1;
-            else
-                throw new RuntimeException("tectonic region type not supported");
-        }
-        tectonicRegionTypes = new ArrayList<TectonicRegionType>();
-        if (numActiveShallow > 0)
-            tectonicRegionTypes.add(TectonicRegionType.ACTIVE_SHALLOW);
-        if (numStableShallow > 0)
-            tectonicRegionTypes.add(TectonicRegionType.STABLE_SHALLOW);
-        if (numSubSlab > 0)
-            tectonicRegionTypes.add(TectonicRegionType.SUBDUCTION_SLAB);
-        if (numSubInterface > 0)
-            tectonicRegionTypes.add(TectonicRegionType.SUBDUCTION_INTERFACE);
-        if (D) {
-            System.out.println("numActiveShallow=" + numActiveShallow);
-            System.out.println("numStableShallow=" + numStableShallow);
-            System.out.println("numSubSlab=" + numSubSlab);
-            System.out.println("numSubInterface=" + numSubInterface);
-        }
     }
 
     // Make the adjustable parameters & the list
@@ -741,7 +674,7 @@ public class GEM1ERF extends EqkRupForecast {
                         SOURCE_CACHE_PARAM_DEFAULT);
         sourceCacheParam.setInfo(SOURCE_CACHE_PARAM_INFO);
         if (sourceCacheParam.getValue())
-            sourceCache = new HashMap<Integer, ProbEqkSource>();
+            sourceCache = new ArrayList<ProbEqkSource>();
 
         // Add the change listener to parameters
         minMagParam.addParameterChangeListener(this);
@@ -1132,7 +1065,7 @@ public class GEM1ERF extends EqkRupForecast {
     public ProbEqkSource getSource(int iSource) {
         ProbEqkSource source = null;
         if (sourceCache != null) {
-            source = sourceCache.get(new Integer(iSource));
+            source = sourceCache.get(iSource);
         }
         if (source == null) {
             GEMSourceData srcData = gemSourceDataList.get(iSource);
@@ -1149,8 +1082,7 @@ public class GEM1ERF extends EqkRupForecast {
                 throw new RuntimeException(NAME + ": " + srcData.getClass()
                         + " not yet supported");
             if (sourceCache != null) {
-                System.out.println("Caching source " + iSource);
-                sourceCache.put(new Integer(iSource), source);
+                sourceCache.add(source);
             }
         }
         return source;
@@ -1262,8 +1194,8 @@ public class GEM1ERF extends EqkRupForecast {
 
             // clear cache (if used) and garbage collect
             if (sourceCache != null) {
+                sourceCache.clear();
                 sourceCache = null;
-                System.gc();
             }
 
             // make the list of sources
@@ -1302,10 +1234,10 @@ public class GEM1ERF extends EqkRupForecast {
         if (paramName.equals(SOURCE_CACHE_PARAM_NAME)) {
             if ((Boolean) event.getParameter().getValue()) {
                 if (sourceCache == null)
-                    sourceCache = new HashMap<Integer, ProbEqkSource>();
+                    sourceCache = new ArrayList<ProbEqkSource>();
             } else {
+                sourceCache.clear();
                 sourceCache = null;
-                System.gc(); // garbage collection
             }
         } else
             parameterChangeFlag = true;
@@ -1315,11 +1247,6 @@ public class GEM1ERF extends EqkRupForecast {
     // this is temporary for testing purposes
     public static void main(String[] args) {
 
-    }
-
-    @Override
-    public ArrayList<TectonicRegionType> getIncludedTectonicRegionTypes() {
-        return tectonicRegionTypes;
     }
 
 }

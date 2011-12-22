@@ -125,12 +125,4 @@ public interface EqkRupForecastBaseAPI extends NamedObjectAPI {
      *         forecast
      */
     public Region getApplicableRegion();
-
-    /**
-     * This specifies what types of Tectonic Regions are included in the ERF
-     * 
-     * @return : ArrayList<TectonicRegionType>
-     */
-    public ArrayList<TectonicRegionType> getIncludedTectonicRegionTypes();
-
 }

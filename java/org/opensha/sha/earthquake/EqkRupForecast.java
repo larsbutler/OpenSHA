@@ -350,19 +350,4 @@ public abstract class EqkRupForecast implements EqkRupForecastAPI,
             rupList.addAll(getSource(s).drawRandomEqkRuptures());
         return rupList;
     }
-
-    /**
-     * This specifies what types of Tectonic Regions are included in the ERF.
-     * This default implementation includes only ACTIVE_SHALLOW, so it should be
-     * overridden in subclasses if other types are used
-     * 
-     * @return : ArrayList<TectonicRegionType>
-     */
-    public ArrayList<TectonicRegionType> getIncludedTectonicRegionTypes() {
-        ArrayList<TectonicRegionType> list =
-                new ArrayList<TectonicRegionType>();
-        list.add(TectonicRegionType.ACTIVE_SHALLOW);
-        return list;
-    }
-
 }

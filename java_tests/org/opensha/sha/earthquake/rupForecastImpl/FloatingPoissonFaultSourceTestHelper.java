@@ -112,12 +112,6 @@ public class FloatingPoissonFaultSourceTestHelper {
 			}
 
 			@Override
-			public ArrayList<TectonicRegionType> getIncludedTectonicRegionTypes() {
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
 			public Region getApplicableRegion() {
 				// TODO Auto-generated method stub
 				return null;
