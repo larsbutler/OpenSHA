@@ -449,6 +449,7 @@ public class Campbell_2003_AttenRel extends AttenuationRelationship implements
 	 * Allows to reset the change listeners on the parameters
 	 */
 	public void resetParameterEventListeners() {
+	    saPeriodParam.removeParameterChangeListener(this);
 		magParam.removeParameterChangeListener(this);
 		distanceRupParam.removeParameterChangeListener(this);
 		stdDevTypeParam.removeParameterChangeListener(this);
@@ -460,6 +461,7 @@ public class Campbell_2003_AttenRel extends AttenuationRelationship implements
 	 * the parameter is changed.
 	 */
 	protected void initParameterEventListeners() {
+	    saPeriodParam.addParameterChangeListener(this);
 		magParam.addParameterChangeListener(this);
 		distanceRupParam.addParameterChangeListener(this);
 		stdDevTypeParam.addParameterChangeListener(this);

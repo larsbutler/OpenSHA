@@ -18,6 +18,8 @@
 
 package org.opensha.commons.param;
 
+import java.util.List;
+
 import org.dom4j.Element;
 import org.opensha.commons.data.NamedObjectAPI;
 import org.opensha.commons.exceptions.ConstraintException;
@@ -25,6 +27,7 @@ import org.opensha.commons.exceptions.ParameterException;
 import org.opensha.commons.metadata.XMLSaveable;
 import org.opensha.commons.param.editor.ParameterEditor;
 import org.opensha.commons.param.event.ParameterChangeEvent;
+import org.opensha.commons.param.event.ParameterChangeListener;
 
 /**
  * <b>Title:</b> ParameterAPI Interface
@@ -181,6 +184,8 @@ public interface ParameterAPI<E> extends NamedObjectAPI, Comparable,
      * constraint problems.
      */
     public void unableToSetValue(E value) throws ConstraintException;
+
+    public List<ParameterChangeListener> getChangeListeners();
 
     /**
      * Adds a feature to the ParameterChangeFailListener attribute
