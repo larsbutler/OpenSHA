@@ -3,14 +3,18 @@ package org.opensha.sha.imr.attenRelImpl.test;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.opensha.commons.param.ParameterAPI;
 import org.opensha.commons.param.event.ParameterChangeWarningEvent;
 import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.imr.attenRelImpl.Campbell_2003_AttenRel;
+import org.opensha.sha.imr.param.IntensityMeasureParams.PeriodParam;
 import org.opensha.sha.imr.param.OtherParams.StdDevTypeParam;
+import org.opensha.commons.param.event.ParameterChangeListener;
 
 /**
  * Class providing methods for testing {@link Campbell_2003_AttenRel}. Tables
@@ -143,5 +147,19 @@ public class Campbell_2003_test implements ParameterChangeWarningListener {
 
 	@Override
 	public void parameterChangeWarning(ParameterChangeWarningEvent event) {
+	}
+
+	/**
+	 * See https://bugs.launchpad.net/openquake/+bug/931453.
+	 * 
+	 * Tests that the SA Period Parameter's change listener is set properly.
+	 */
+	@Test
+	public void testResetSaPeriodParamEventListener() {
+	    ca03AttenRel.resetParameterEventListeners();
+	    ParameterAPI param = ca03AttenRel.getParameter(PeriodParam.NAME);
+	    List<ParameterChangeListener> listeners = param.getChangeListeners();
+	    assertEquals(1, listeners.size());
+	    assertEquals(ca03AttenRel, listeners.get(0));
 	}
 }
