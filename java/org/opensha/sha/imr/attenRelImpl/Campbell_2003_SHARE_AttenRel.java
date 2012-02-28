@@ -4,7 +4,6 @@ import org.opensha.commons.param.event.ParameterChangeEvent;
 import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.earthquake.EqkRupture;
 import org.opensha.sha.imr.attenRelImpl.constants.AdjustFactorsSHARE;
-import org.opensha.sha.imr.attenRelImpl.constants.Campbell2003Constants;
 import org.opensha.sha.imr.param.EqkRuptureParams.RakeParam;
 
 /**
@@ -52,6 +51,10 @@ public class Campbell_2003_SHARE_AttenRel extends Campbell_2003_AttenRel {
 	private static final long serialVersionUID = 1L;
 
 	private double rake;
+
+	public void setIper(int iper) {
+	    this.iper = iper;
+	}
 
 	public Campbell_2003_SHARE_AttenRel(
 			ParameterChangeWarningListener warningListener) {
@@ -143,13 +146,13 @@ public class Campbell_2003_SHARE_AttenRel extends Campbell_2003_AttenRel {
 		}
 		return f;
 	}
-	
+
 	public double getStdDev(){
-		return getStdDev(iper, rake, stdDevType);
+	    return getStdDev(iper, mag, stdDevType);
 	}
-	
-	public double getStdDev(int iper, double rake, String stdDevType){
-		double std = super.getStdDev(iper, rake, stdDevType);
+
+	public double getStdDev(int iper, double mag, String stdDevType){
+		double std = super.getStdDev(iper, mag, stdDevType);
 		return std * AdjustFactorsSHARE.sig_AFrock_CAMBPELL2003[iper];
 	}
 

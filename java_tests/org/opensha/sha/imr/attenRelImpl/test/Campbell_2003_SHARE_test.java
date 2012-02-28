@@ -7,10 +7,14 @@ import java.io.File;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.opensha.commons.param.ParameterAPI;
+import org.opensha.commons.param.event.ParameterChangeEvent;
 import org.opensha.commons.param.event.ParameterChangeWarningEvent;
 import org.opensha.commons.param.event.ParameterChangeWarningListener;
+import org.opensha.sha.earthquake.EqkRupture;
 import org.opensha.sha.imr.attenRelImpl.Campbell_2003_SHARE_AttenRel;
 import org.opensha.sha.imr.attenRelImpl.constants.AdjustFactorsSHARE;
+import org.opensha.sha.imr.param.EqkRuptureParams.MagParam;
 import org.opensha.sha.imr.param.OtherParams.StdDevTypeParam;
 
 /**
@@ -150,4 +154,43 @@ public class Campbell_2003_SHARE_test implements ParameterChangeWarningListener 
 	@Override
 	public void parameterChangeWarning(ParameterChangeWarningEvent event) {
 	}
+
+    /**
+     * This test was added to address
+     * https://bugs.launchpad.net/openquake/+bug/942484.
+     *
+     * The wrong variable was being passed to getStdDev(int, double, String).
+     * The 'rake' was being passed instead of 'mag'.
+     */
+    @Test
+    public void testGetStdDev() {
+
+        // Test data was sampled from test_data/Ca03_SIGMcorr.txt
+        double mag = 5.0;
+        final double [] expectedStdevs = {
+                0.6, 0.6, 0.6, 0.623,
+                0.633, 0.64, 0.649, 0.658,
+                0.662, 0.686, 0.702, 0.7135,
+                0.7135, 0.714, 0.7215, 0.731};
+
+        // First, set the stddev type and mag values:
+        ParameterAPI magParam = ca03AttenRel.getParameter(MagParam.NAME);
+        ParameterChangeEvent magParamChange = new ParameterChangeEvent(
+                magParam, MagParam.NAME, null, mag);
+
+        ParameterAPI stddevParam = ca03AttenRel.getParameter(StdDevTypeParam.NAME);
+        ParameterChangeEvent stddevParamChange = new ParameterChangeEvent(
+                stddevParam, StdDevTypeParam.NAME, null, StdDevTypeParam.STD_DEV_TYPE_TOTAL);
+        ca03AttenRel.parameterChange(magParamChange);
+        ca03AttenRel.parameterChange(stddevParamChange);
+
+        // Sanity check: make sure
+        // expecteStddevs and AFrock_CAMPBELL2003 (periods) have the same length.
+        assertEquals(expectedStdevs.length, AdjustFactorsSHARE.sig_AFrock_CAMBPELL2003.length);
+
+       for (int iper = 0; iper < AdjustFactorsSHARE.sig_AFrock_CAMBPELL2003.length; iper++) {
+            ca03AttenRel.setIper(iper);
+            assertEquals(expectedStdevs[iper], ca03AttenRel.getStdDev() / AdjustFactorsSHARE.sig_AFrock_CAMBPELL2003[iper], 0.0009);
+        }
+    }
 }
