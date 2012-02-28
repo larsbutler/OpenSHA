@@ -4,7 +4,6 @@ import org.opensha.commons.param.event.ParameterChangeEvent;
 import org.opensha.commons.param.event.ParameterChangeWarningListener;
 import org.opensha.sha.earthquake.EqkRupture;
 import org.opensha.sha.imr.attenRelImpl.constants.AdjustFactorsSHARE;
-import org.opensha.sha.imr.attenRelImpl.constants.Campbell2003Constants;
 import org.opensha.sha.imr.param.EqkRuptureParams.RakeParam;
 
 /**
