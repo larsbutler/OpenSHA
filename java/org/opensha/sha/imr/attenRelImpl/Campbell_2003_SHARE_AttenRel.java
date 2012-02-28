@@ -53,6 +53,10 @@ public class Campbell_2003_SHARE_AttenRel extends Campbell_2003_AttenRel {
 
 	private double rake;
 
+	public void setIper(int iper) {
+	    this.iper = iper;
+	}
+
 	public Campbell_2003_SHARE_AttenRel(
 			ParameterChangeWarningListener warningListener) {
 		super(warningListener);
@@ -143,11 +147,11 @@ public class Campbell_2003_SHARE_AttenRel extends Campbell_2003_AttenRel {
 		}
 		return f;
 	}
-	
+
 	public double getStdDev(){
-		return getStdDev(iper, rake, stdDevType);
+	    return getStdDev(iper, mag, stdDevType);
 	}
-	
+
 	public double getStdDev(int iper, double mag, String stdDevType){
 		double std = super.getStdDev(iper, mag, stdDevType);
 		return std * AdjustFactorsSHARE.sig_AFrock_CAMBPELL2003[iper];
