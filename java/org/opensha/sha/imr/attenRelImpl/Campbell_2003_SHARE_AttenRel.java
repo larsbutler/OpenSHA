@@ -148,8 +148,8 @@ public class Campbell_2003_SHARE_AttenRel extends Campbell_2003_AttenRel {
 		return getStdDev(iper, rake, stdDevType);
 	}
 	
-	public double getStdDev(int iper, double rake, String stdDevType){
-		double std = super.getStdDev(iper, rake, stdDevType);
+	public double getStdDev(int iper, double mag, String stdDevType){
+		double std = super.getStdDev(iper, mag, stdDevType);
 		return std * AdjustFactorsSHARE.sig_AFrock_CAMBPELL2003[iper];
 	}
 
