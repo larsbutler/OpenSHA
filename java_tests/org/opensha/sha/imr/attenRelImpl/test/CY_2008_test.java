@@ -18,18 +18,24 @@
 
 package org.opensha.sha.imr.attenRelImpl.test;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
 
 import org.junit.Before;
+import org.junit.Test;
 import org.opensha.commons.exceptions.ConstraintException;
 import org.opensha.commons.exceptions.ParameterException;
 import org.opensha.commons.param.BooleanParameter;
 import org.opensha.commons.param.DoubleParameter;
+import org.opensha.commons.param.ParameterAPI;
 import org.opensha.commons.param.WarningDoubleParameter;
+import org.opensha.commons.param.event.ParameterChangeListener;
 import org.opensha.commons.util.DataUtils;
 import org.opensha.commons.util.FileUtils;
 import org.opensha.sha.imr.AttenuationRelationship;
@@ -538,4 +544,17 @@ public class CY_2008_test extends NGATest {
         return failMetadata;
     }
 
+    /**
+     * See https://bugs.launchpad.net/openquake/+bug/984838.
+     * 
+     * Tests that the SA Parameter's change listener is set properly.
+     */
+    @Test
+    public void testResetSaParamEventListener() {
+        cy_08.resetParameterEventListeners();
+        ParameterAPI param = cy_08.getParameter(SA_Param.NAME);
+        List<ParameterChangeListener> listeners = param.getChangeListeners();
+        assertEquals(1, listeners.size());
+        assertEquals(cy_08, listeners.get(0));
+    }
 }

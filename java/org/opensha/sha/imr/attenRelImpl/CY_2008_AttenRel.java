@@ -1041,6 +1041,7 @@ public class CY_2008_AttenRel extends AttenuationRelationship implements
 		hangingWallFlagParam.removeParameterChangeListener(this);
 		stdDevTypeParam.removeParameterChangeListener(this);
 		saPeriodParam.removeParameterChangeListener(this);
+		saParam.removeParameterChangeListener(this);
 		this.initParameterEventListeners();
 	}
 
@@ -1064,6 +1065,7 @@ public class CY_2008_AttenRel extends AttenuationRelationship implements
 		hangingWallFlagParam.addParameterChangeListener(this);
 		stdDevTypeParam.addParameterChangeListener(this);
 		saPeriodParam.addParameterChangeListener(this);
+		saParam.addParameterChangeListener(this);
 	}
 
 	/**
