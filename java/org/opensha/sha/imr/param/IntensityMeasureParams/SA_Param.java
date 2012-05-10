@@ -36,11 +36,10 @@ public class SA_Param extends WarningDoubleParameter {
     public final static String NAME = "SA";
     public final static String UNITS = "g";
     public final static String INFO = "Response Spectral Acceleration";
-    protected final static Double MIN = new Double(Math.log(Double.MIN_VALUE));
-    protected final static Double MAX = new Double(Double.MAX_VALUE);
-    protected final static Double DEFAULT_WARN_MIN = new Double(
-            Math.log(Double.MIN_VALUE));
-    protected final static Double DEFAULT_WARN_MAX = new Double(Math.log(10.0));
+    protected final static Double MIN = Math.log(Double.MIN_VALUE);
+    protected final static Double MAX = Double.MAX_VALUE;
+    protected final static Double DEFAULT_WARN_MIN = Math.log(Double.MIN_VALUE);
+    protected final static Double DEFAULT_WARN_MAX = Math.log(Double.MAX_VALUE);
 
     /**
      * This uses the DEFAULT_WARN_MIN and DEFAULT_WARN_MAX fields to set the
