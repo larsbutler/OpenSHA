@@ -30,6 +30,10 @@ public abstract class GEMSourceData {
     public String getID() {
         return this.id;
     }
+    
+    public void setID(String id){
+    	this.id = id;
+    }
 
     /**
      * 
