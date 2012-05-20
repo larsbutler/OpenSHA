@@ -19,6 +19,7 @@
 package org.opensha.commons.param;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.ListIterator;
 
 import org.dom4j.Element;
@@ -27,6 +28,7 @@ import org.opensha.commons.exceptions.EditableException;
 import org.opensha.commons.exceptions.ParameterException;
 import org.opensha.commons.metadata.XMLSaveable;
 import org.opensha.commons.param.event.ParameterChangeEvent;
+import org.opensha.commons.param.event.ParameterChangeListener;
 
 /**
  * <b>Title: </b> Parameter
@@ -109,7 +111,7 @@ public abstract class Parameter<E> implements ParameterAPI<E>,
      * ArrayList of all the objects who want to listen on change of this
      * paramter
      */
-    private transient ArrayList changeListeners;
+    private transient ArrayList<ParameterChangeListener> changeListeners;
 
     /**
      * ArrayList of all the objects who want to listen if the value for this
@@ -119,6 +121,10 @@ public abstract class Parameter<E> implements ParameterAPI<E>,
 
     /** Empty no-arg constructor. Does nothing but initialize object. */
     public Parameter() {
+    }
+
+    public List<ParameterChangeListener> getChangeListeners() {
+        return changeListeners;
     }
 
     /**
@@ -374,8 +380,7 @@ public abstract class Parameter<E> implements ParameterAPI<E>,
      * 
      */
 
-    public synchronized void addParameterChangeListener(
-            org.opensha.commons.param.event.ParameterChangeListener listener) {
+    public synchronized void addParameterChangeListener(ParameterChangeListener listener) {
         if (changeListeners == null)
             changeListeners = new ArrayList();
         if (!changeListeners.contains(listener))
