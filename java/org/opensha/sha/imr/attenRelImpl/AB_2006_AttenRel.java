@@ -49,9 +49,6 @@ import org.opensha.sha.imr.param.SiteParams.Vs30_Param;
 public class AB_2006_AttenRel extends AttenuationRelationship implements
 		ScalarIntensityMeasureRelationshipAPI, NamedObjectAPI,
 		ParameterChangeListener {
-	
-	private static Log logger = LogFactory
-	.getLog(AB_2006_AttenRel.class);
 
 	public final static String SHORT_NAME = "AB06";
 
@@ -461,6 +458,8 @@ public class AB_2006_AttenRel extends AttenuationRelationship implements
 	public void setEqkRupture(EqkRupture eqkRup) {
 
 		magParam.setValueIgnoreWarning(new Double(eqkRup.getMag()));
+		// stress drop is set to 140 bar. The earthquake rupture does not
+		// provide this parameter
 		stressDropParam.setValueIgnoreWarning(STRESS_DROP);
 		this.eqkRupture = eqkRup;
 
@@ -532,8 +531,6 @@ public class AB_2006_AttenRel extends AttenuationRelationship implements
 		if (intensityMeasureChanged) {
 			setCoeffIndex();
 		}
-		;
-		logger.debug("Inside getMean, stressDrop: "+stressDrop);
 		return getMean(iper, vs30, rrup, mag, stressDrop);
 	}
 
@@ -549,11 +546,6 @@ public class AB_2006_AttenRel extends AttenuationRelationship implements
 	public double getMean(int iper, double vs30, double rrup, double mag,
 			double stressDrop) {
 
-		logger.debug("iper: "+iper);
-		logger.debug("vs30: "+vs30);
-		logger.debug("rrup: "+rrup);
-		logger.debug("mag: "+mag);
-		logger.debug("stressDrop: "+stressDrop);
 		double logGm;
 		double tmp;
 		double f0, f1, f2;
@@ -580,7 +572,6 @@ public class AB_2006_AttenRel extends AttenuationRelationship implements
 		tmp = 0.0;
 		if (tmp > f2)
 			f2 = tmp;
-		logger.debug("correction factors: "+f0+" "+f1+" "+f2);
 
 		// Initialize the site term correction factor
 		double SiteFactor = 0;
@@ -601,8 +592,6 @@ public class AB_2006_AttenRel extends AttenuationRelationship implements
 			StressDropFactor = scalingFactor
 					* (Math.log10(stressDrop / 140.0) / Math.log10(2.0));
 		}
-		
-		logger.debug("Stress drop factor: "+StressDropFactor);
 
 		if (vs30 >= 2000) {
 
@@ -613,12 +602,8 @@ public class AB_2006_AttenRel extends AttenuationRelationship implements
 					+ (c6[iper] + c7[iper] * mag) * f2
 					+ (c8[iper] + c9[iper] * mag) * f0 + c10[iper] * rrup;
 			logGm += StressDropFactor;
-			
-			logger.debug("vs30 >=2000");
-			logger.debug("logGM"+logGm);
 
 		} else {
-			logger.debug("vs30 < 2000");
 
 			double vref = 760;
 			double v1 = 180;
@@ -633,7 +618,6 @@ public class AB_2006_AttenRel extends AttenuationRelationship implements
 					+ (c6s[iper] + c7s[iper] * mag) * f2
 					+ (c8s[iper] + c9s[iper] * mag) * f0 + c10s[iper] * rrup;
 			logGm += StressDropFactor;
-			logger.debug("logGM "+logGm);
 
 			// This is the log10(PGA) [cm/s2] on a reference site with Vs30 =
 			// 760 m/s - This is
@@ -644,7 +628,6 @@ public class AB_2006_AttenRel extends AttenuationRelationship implements
 					+ (c8s[ipga] + c9s[ipga] * mag) * f0 + c10s[ipga] * rrup;
 			logPgaBC += StressDropFactor;
 			pgaBC = Math.pow(10, logPgaBC);
-			logger.debug("pgaBC "+pgaBC);
 
 			// Compute the bnl coefficient
 			double[] coef = getSoilParameters(period[iper]);
@@ -659,7 +642,6 @@ public class AB_2006_AttenRel extends AttenuationRelationship implements
 			} else {
 				bnl = 0.0;
 			}
-			logger.debug("bnl "+bnl);
 
 			// Compute the amplification factor
 			if (pgaBC <= 60) {
@@ -671,13 +653,11 @@ public class AB_2006_AttenRel extends AttenuationRelationship implements
 						.log10(Math.exp(coef[0] * Math.log(vs30 / vref) + bnl
 								* Math.log(pgaBC / 100.0)));
 			}
-			logger.debug("SiteFactor "+SiteFactor);
+
 		}
 
 		// Compute the final value of ground motion
 		logGm += SiteFactor;
-		
-		logger.debug("Final logGm "+logGm);
 
 		return Math.log(Math.exp(logGm * log2ln) / 981);
 	}
@@ -727,7 +707,7 @@ public class AB_2006_AttenRel extends AttenuationRelationship implements
 		// Stress Drop Parameter
 		stressDropParam.setValueAsDefault();
 		// GM component
-		// componentParam.setValueAsDefault();
+		componentParam.setValueAsDefault();
 
 		// Set parameters
 		vs30 = ((Double) vs30Param.getValue()).doubleValue();
