@@ -273,7 +273,7 @@ public class AB_2006_AttenRel extends AttenuationRelationship implements
 		for (int i = 2; i < period.length; i++) {
 			indexFromPer.put(new Double(period[i]), new Integer(i));
 		}
-		
+
 		// Create an Hash map that links the period with its index (soil)
 		this.indexFromPerSoil = new HashMap<Double, Integer>();
 		for (int i = 2; i < periodSoil.length; i++) {
@@ -293,7 +293,7 @@ public class AB_2006_AttenRel extends AttenuationRelationship implements
 		initPropagationEffectParams();
 		// Initialize site parameters (e.g. vs30)
 		initSiteParams();
-		// Initialize other parameters (e.g. stress drop)
+		// Initialize other parameters
 		initOtherParams();
 		// Initialize the independent parameters list
 		initIndependentParamList();
@@ -346,18 +346,12 @@ public class AB_2006_AttenRel extends AttenuationRelationship implements
 		propEffect.setParamValue(distanceRupParam);
 	}
 
-	/**
-	 * 
-	 */
 	protected void initSiteParams() {
 		vs30Param = new Vs30_Param(VS30_WARN_MIN, VS30_WARN_MAX);
 		siteParams.clear();
 		siteParams.addParameter(vs30Param);
 	}
 
-	/**
-	 * 
-	 */
 	protected void initOtherParams() {
 
 		super.initOtherParams();
@@ -382,9 +376,6 @@ public class AB_2006_AttenRel extends AttenuationRelationship implements
 		otherParams.addParameter(stdDevTypeParam);
 	}
 
-	/**
-	 * 
-	 */
 	protected void initIndependentParamList() {
 		// Parameters that the mean depends upon
 		meanIndependentParams.clear();
@@ -458,8 +449,6 @@ public class AB_2006_AttenRel extends AttenuationRelationship implements
 	public void setEqkRupture(EqkRupture eqkRup) {
 
 		magParam.setValueIgnoreWarning(new Double(eqkRup.getMag()));
-		// stress drop is set to 140 bar. The earthquake rupture does not
-		// provide this parameter
 		stressDropParam.setValueIgnoreWarning(STRESS_DROP);
 		this.eqkRupture = eqkRup;
 
@@ -545,7 +534,7 @@ public class AB_2006_AttenRel extends AttenuationRelationship implements
 	 */
 	public double getMean(int iper, double vs30, double rrup, double mag,
 			double stressDrop) {
-
+		
 		double logGm;
 		double tmp;
 		double f0, f1, f2;
@@ -653,7 +642,6 @@ public class AB_2006_AttenRel extends AttenuationRelationship implements
 						.log10(Math.exp(coef[0] * Math.log(vs30 / vref) + bnl
 								* Math.log(pgaBC / 100.0)));
 			}
-
 		}
 
 		// Compute the final value of ground motion
@@ -662,9 +650,6 @@ public class AB_2006_AttenRel extends AttenuationRelationship implements
 		return Math.log(Math.exp(logGm * log2ln) / 981);
 	}
 
-	/**
-	 * 
-	 */
 	public double getStdDev() {
 		if (intensityMeasureChanged) {
 			setCoeffIndex();
@@ -672,16 +657,14 @@ public class AB_2006_AttenRel extends AttenuationRelationship implements
 		return getStdDev(iper);
 	}
 
-	/**
-	 * 
-	 * @param iper
-	 * @return
-	 */
 	public double getStdDev(double iper) {
 		if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_TOTAL)) {
 			return 0.30 * log2ln;
+		} else if (stdDevType.equals(StdDevTypeParam.STD_DEV_TYPE_NONE)) {
+			return 0.0;
 		} else {
-			return Double.NaN;
+			throw new RuntimeException("Standard deviation type: " + stdDevType
+					+ "not recognized");
 		}
 	}
 
@@ -707,7 +690,7 @@ public class AB_2006_AttenRel extends AttenuationRelationship implements
 		// Stress Drop Parameter
 		stressDropParam.setValueAsDefault();
 		// GM component
-		componentParam.setValueAsDefault();
+		// componentParam.setValueAsDefault();
 
 		// Set parameters
 		vs30 = ((Double) vs30Param.getValue()).doubleValue();
@@ -803,11 +786,6 @@ public class AB_2006_AttenRel extends AttenuationRelationship implements
 		return coef;
 	}
 
-	/**
-	 * 
-	 * @param period
-	 * @return
-	 */
 	protected double[] getStressDropParameters(Double T) {
 		double[] coef = new double[3];
 		if (indexFromPerStressDrop.containsKey(T)) {
