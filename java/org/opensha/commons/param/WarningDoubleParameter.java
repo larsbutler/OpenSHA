@@ -19,6 +19,7 @@
 package org.opensha.commons.param;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.ListIterator;
 
 import org.dom4j.Element;
@@ -87,7 +88,7 @@ public class WarningDoubleParameter extends DoubleParameter implements
      * A list of listeners to receive warning events. Only created if needed,
      * else kept null. This is known as "lazy instantiation".
      */
-    protected transient ArrayList warningListeners = null;
+    protected transient List<ParameterChangeWarningListener> warningListeners = null;
 
     /**
      * Set to true to turn off warnings, i.e. bypass the warning constraint.
@@ -382,6 +383,10 @@ public class WarningDoubleParameter extends DoubleParameter implements
         // constraint.setName( name );
     }
 
+    public List<ParameterChangeWarningListener> getWarningListeners() {
+        return warningListeners;
+    }
+
     /**
      * Adds a ParameterChangeFailListener to the list of listeners. This is the
      * interface all listeners must implement in order to fit into this
@@ -395,11 +400,16 @@ public class WarningDoubleParameter extends DoubleParameter implements
     public synchronized void addParameterChangeWarningListener(
             ParameterChangeWarningListener listener) throws EditableException {
 
+        if (listener == null) {
+            // If the input listener is null, there's no need
+            // to do anything.
+            return;
+        }
         String S = C + ": addParameterChangeWarningListener(): ";
         // checkEditable(S);
 
         if (warningListeners == null)
-            warningListeners = new ArrayList();
+            warningListeners = new ArrayList<ParameterChangeWarningListener>();
         if (!warningListeners.contains(listener)) {
             if (D)
                 System.out.println(S + "Adding listener: "
@@ -595,30 +605,30 @@ public class WarningDoubleParameter extends DoubleParameter implements
      *            The event encapsulating the attempted values passed to each
      *            listener.
      */
-    public void fireParameterChangeWarning(ParameterChangeWarningEvent event) {
-
+    public void fireParameterChangeWarning(ParameterChangeWarningEvent event)
+    {
         String S = C + ": firePropertyChange(): ";
         if (D)
+        {
             System.out.println(S + "Starting: " + this.getName());
-
-        ArrayList vector;
-        synchronized (this) {
-            if (warningListeners == null)
-                return;
-            vector = (ArrayList) warningListeners.clone();
         }
-        for (int i = 0; i < vector.size(); i++) {
-            ParameterChangeWarningListener listener =
-                    (ParameterChangeWarningListener) vector.get(i);
-            if (D)
-                System.out.println(S + "Firing warning to (" + i + ") "
-                        + listener.getClass().getName());
-            listener.parameterChangeWarning(event);
+
+        if (this.warningListeners != null)
+        {
+            for (ParameterChangeWarningListener pcwl : warningListeners)
+            {
+                if (D)
+                {
+                    System.out.println(S + "Firing warning to " + pcwl.getClass().getName());
+                }
+                pcwl.parameterChangeWarning(event);
+            }
         }
 
         if (D)
+        {
             System.out.println(S + "Ending: " + this.getName());
-
+        }
     }
 
     /**
@@ -746,10 +756,7 @@ public class WarningDoubleParameter extends DoubleParameter implements
         // so should be interested in the clone
 
         if (this.warningListeners != null) {
-            it = this.warningListeners.listIterator();
-            while (it.hasNext()) {
-                ParameterChangeWarningListener listener =
-                        (ParameterChangeWarningListener) it.next();
+            for (ParameterChangeWarningListener listener : this.warningListeners) {
                 param.addParameterChangeWarningListener(listener);
             }
         }

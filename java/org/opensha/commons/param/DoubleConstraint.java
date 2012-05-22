@@ -49,9 +49,9 @@ public class DoubleConstraint extends ParameterConstraint<Double> {
     protected final static boolean D = false;
 
     /** The minimum value allowed in this constraint, inclusive */
-    protected Double min = null;
+    protected double min;
     /** The maximum value allowed in this constraint, inclusive */
-    protected Double max = null;
+    protected double max;
 
     /** No-Arg Constructor, constraints are null so all values allowed */
     public DoubleConstraint() {
@@ -61,7 +61,7 @@ public class DoubleConstraint extends ParameterConstraint<Double> {
     /**
      * Constructor for the DoubleConstraint object. Sets the min and max values
      * allowed in this constraint. No checks are performed that min and max are
-     * consistant with each other.
+     * consistent with each other.
      * 
      * @param min
      *            The min value allowed
@@ -69,21 +69,6 @@ public class DoubleConstraint extends ParameterConstraint<Double> {
      *            The max value allowed
      */
     public DoubleConstraint(double min, double max) {
-        this.min = new Double(min);
-        this.max = new Double(max);
-    }
-
-    /**
-     * Constructor for the DoubleConstraint object. Sets the min and max values
-     * allowed in this constraint. No checks are performed that min and max are
-     * consistant with each other.
-     * 
-     * @param min
-     *            The min value allowed
-     * @param max
-     *            The max value allowed
-     */
-    public DoubleConstraint(Double min, Double max) {
         this.min = min;
         this.max = max;
     }
@@ -102,25 +87,6 @@ public class DoubleConstraint extends ParameterConstraint<Double> {
      */
     public void setMinMax(double min, double max) throws EditableException {
         String S = C + ": setMinMax(double, double): ";
-        checkEditable(S);
-        this.min = new Double(min);
-        this.max = new Double(max);
-    }
-
-    /**
-     * Sets the min and max values allowed in this constraint. No checks are
-     * performed that min and max are consistant with each other.
-     * 
-     * @param min
-     *            The new min value
-     * @param max
-     *            The new max value
-     * @throws EditableException
-     *             Thrown when the constraint or parameter containing this
-     *             constraint has been made non-editable.
-     */
-    public void setMinMax(Double min, Double max) throws EditableException {
-        String S = C + ": setMinMax(Double, Double): ";
         checkEditable(S);
         this.min = min;
         this.max = max;
@@ -150,12 +116,13 @@ public class DoubleConstraint extends ParameterConstraint<Double> {
      */
     public boolean isAllowed(Double d) {
         if (d == null)
+        {
             return nullAllowed;
-        if ((min == null) || (max == null))
-            return true;
-        else if ((d.compareTo(min) >= 0) && (d.compareTo(max) <= 0))
-            return true;
-        return false;
+        }
+        else
+        {
+            return isAllowed((double)d);
+        }
     }
 
     /**
@@ -170,7 +137,7 @@ public class DoubleConstraint extends ParameterConstraint<Double> {
      * @return True if this is one of the allowed values.
      */
     public boolean isAllowed(double d) {
-        return isAllowed(new Double(d));
+        return d >= min && d <= max;
     }
 
     /**
@@ -182,10 +149,8 @@ public class DoubleConstraint extends ParameterConstraint<Double> {
         StringBuffer b = new StringBuffer();
         if (name != null)
             b.append(TAB + "Name = " + name + '\n');
-        if (min != null)
-            b.append(TAB + "Min = " + min.toString() + '\n');
-        if (max != null)
-            b.append(TAB + "Max = " + max.toString() + '\n');
+        b.append(TAB + "Min = " + String.valueOf(min) + '\n');
+        b.append(TAB + "Max = " + String.valueOf(max) + '\n');
         b.append(TAB + "Null Allowed = " + this.nullAllowed + '\n');
         return b.toString();
     }

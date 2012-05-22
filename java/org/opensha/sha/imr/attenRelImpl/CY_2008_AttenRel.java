@@ -269,7 +269,6 @@ public class CY_2008_AttenRel extends AttenuationRelationship implements
 			depthTop;
 	private double distRupMinusDistX_OverRup, aftershock, f_meas, f_hw;
 	private String stdDevType;
-	private boolean parameterChange;
 	private double depthTo1pt0kmPerSec; // defined this way to support null
 										// values
 	private double lnYref;
@@ -460,7 +459,6 @@ public class CY_2008_AttenRel extends AttenuationRelationship implements
 		else
 			iper = 23; // PGV
 
-		parameterChange = true;
 		intensityMeasureChanged = false;
 
 	}
@@ -963,11 +961,10 @@ public class CY_2008_AttenRel extends AttenuationRelationship implements
 
 		String pName = e.getParameterName();
 		Object val = e.getNewValue();
-		parameterChange = true;
 		lnYref_is_not_fresh = true; // this could be placed below, only where
 									// really needed.
 
-		if (pName.equals(magParam.NAME)) {
+		if (pName.equals(MagParam.NAME)) {
 			mag = ((Double) val).doubleValue();
 		} else if (pName.equals(FaultTypeParam.NAME)) {
 			String fltType = (String) fltTypeParam.getValue();
@@ -1041,6 +1038,7 @@ public class CY_2008_AttenRel extends AttenuationRelationship implements
 		hangingWallFlagParam.removeParameterChangeListener(this);
 		stdDevTypeParam.removeParameterChangeListener(this);
 		saPeriodParam.removeParameterChangeListener(this);
+		saParam.removeParameterChangeListener(this);
 		this.initParameterEventListeners();
 	}
 
@@ -1064,6 +1062,7 @@ public class CY_2008_AttenRel extends AttenuationRelationship implements
 		hangingWallFlagParam.addParameterChangeListener(this);
 		stdDevTypeParam.addParameterChangeListener(this);
 		saPeriodParam.addParameterChangeListener(this);
+		saParam.addParameterChangeListener(this);
 	}
 
 	/**
